@@ -1,4 +1,6 @@
 import {
+  type DashboardCreateInput,
+  type DashboardDto,
   MESSAGES,
   type QueryResultDto,
   type SidebarDto,
@@ -66,5 +68,19 @@ export function useSaveSidebar() {
       toast.error(MESSAGES.sidebarSaveFailed)
     },
     onSuccess: (saved) => queryClient.setQueryData(SIDEBAR_QUERY_KEY, saved),
+  })
+}
+
+/** Cria o dashboard (dono = usuário, uma aba "Aba 1") e atualiza a sidebar. */
+export function useCreateDashboard() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (values: DashboardCreateInput) =>
+      apiFetch<DashboardDto>('/api/dashboards', {
+        method: 'POST',
+        body: values,
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: SIDEBAR_QUERY_KEY }),
   })
 }

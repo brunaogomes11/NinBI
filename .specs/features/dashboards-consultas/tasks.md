@@ -496,8 +496,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes com gesto: `DASH-05 Novo dashboard cria o dashboard e abre a URL de edição` (preencher "Vendas", escolher a conexão e criar envia `{ name, connectionId }`; a URL vira `/dashboards/<id>?editar=1`; a sidebar é buscada de novo), `DASH-06 nome inválido mostra a mensagem no campo Nome sem enviar` (vazio e 81 caracteres), `DASH-07 sem conexões mostra o aviso e mantém Criar desabilitado`, `DASH-16 dois cliques em Criar enviam um único pedido` (com a resposta pendente, "Criar" está desabilitado e o handler foi chamado uma vez)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto: `DASH-05 Novo dashboard cria o dashboard e abre a URL de edição` (preencher "Vendas", escolher a conexão e criar envia `{ name, connectionId }`; a URL vira `/dashboards/<id>?editar=1`; a sidebar é buscada de novo), `DASH-06 nome inválido mostra a mensagem no campo Nome sem enviar` (vazio e 81 caracteres), `DASH-07 sem conexões mostra o aviso e mantém Criar desabilitado`, `DASH-16 dois cliques em Criar enviam um único pedido` (com a resposta pendente, "Criar" está desabilitado e o handler foi chamado uma vez)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build

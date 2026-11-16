@@ -23,6 +23,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSession } from '@/features/auth/useSession'
 import { useSaveSidebar, useSidebar } from '@/features/dashboards/api'
+import { NewDashboardDialog } from '@/features/dashboards/NewDashboardDialog'
 import { sidebarItemClass } from '@/features/shell/Sidebar'
 import { GroupNameDialog } from './GroupDialogs'
 import {
@@ -165,6 +166,7 @@ export function SidebarDashboards() {
   const sidebar = useSidebar()
   const save = useSaveSidebar()
   const [collapsed, setCollapsed] = useState<string[]>(readCollapsed)
+  const [newDashboardOpen, setNewDashboardOpen] = useState(false)
   const dragged = useRef<string | null>(null)
   const [groupDialog, setGroupDialog] = useState<
     { mode: 'new' } | { mode: 'rename'; group: SidebarGroupNode } | null
@@ -204,6 +206,9 @@ export function SidebarDashboards() {
 
   return (
     <div className="flex min-h-full flex-col gap-1">
+      {newDashboardOpen && (
+        <NewDashboardDialog open onOpenChange={setNewDashboardOpen} />
+      )}
       {groupDialog && (
         <GroupNameDialog
           title={groupDialog.mode === 'new' ? 'Novo grupo' : 'Renomear grupo'}
@@ -223,7 +228,12 @@ export function SidebarDashboards() {
       )}
       <div className="flex flex-col gap-1 pb-2">
         {canCreate && (
-          <Button type="button" variant="ghost" className="justify-start">
+          <Button
+            type="button"
+            variant="ghost"
+            className="justify-start"
+            onClick={() => setNewDashboardOpen(true)}
+          >
             <Plus aria-hidden="true" />
             Novo dashboard
           </Button>
