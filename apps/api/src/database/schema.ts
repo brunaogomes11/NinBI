@@ -1,4 +1,4 @@
-import type { SidebarLayoutInput } from '@ninbi/contracts'
+import type { DashboardFilter, SidebarLayoutInput } from '@ninbi/contracts'
 import { sql } from 'drizzle-orm'
 import {
   boolean,
@@ -158,6 +158,8 @@ export const dashboards = pgTable(
       .notNull()
       .references(() => connections.id, { onDelete: 'restrict' }),
     version: integer('version').notNull().default(1),
+    filters: jsonb('filters').$type<DashboardFilter[]>().notNull().default([]),
+    refreshIntervalSec: integer('refresh_interval_sec').notNull().default(0),
     createdAt: timestamptz('created_at').notNull().defaultNow(),
     updatedAt: timestamptz('updated_at').notNull().defaultNow(),
   },

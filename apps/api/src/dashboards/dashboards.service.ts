@@ -2,8 +2,10 @@ import { randomUUID } from 'node:crypto'
 import { Inject, Injectable } from '@nestjs/common'
 import {
   type DashboardDto,
+  type DashboardFilter,
   type DashboardSaveInput,
   type DashboardSummaryDto,
+  extractParameterNames,
   MESSAGES,
 } from '@ninbi/contracts'
 import { and, asc, eq, inArray, ne } from 'drizzle-orm'
@@ -88,6 +90,8 @@ export class DashboardsService {
           name: input.name,
           connectionId: input.connectionId,
           version: input.version + 1,
+          filters: (input.filters ?? []) as DashboardFilter[],
+          refreshIntervalSec: input.refreshIntervalSec ?? 0,
           updatedAt: this.clock.now(),
         })
         .where(
@@ -224,6 +228,8 @@ export class DashboardsService {
         ownerName: users.name,
         connectionId: dashboards.connectionId,
         connectionName: connections.name,
+        filters: dashboards.filters,
+        refreshIntervalSec: dashboards.refreshIntervalSec,
       })
       .from(dashboards)
       .innerJoin(users, eq(users.id, dashboards.ownerId))
@@ -269,8 +275,17 @@ export class DashboardsService {
             visualization: widget.visualization,
             config: widget.config,
             layout: { x: widget.x, y: widget.y, w: widget.w, h: widget.h },
+            parameters: widget.cypher
+              ? extractParameterNames(widget.cypher)
+              : [],
           })),
       })),
+      filters: row.filters.map((filter) =>
+        !permissions.canEdit && filter.options?.source === 'QUERY'
+          ? { ...filter, options: { source: 'QUERY', cypher: null } }
+          : filter,
+      ),
+      refreshIntervalSec: row.refreshIntervalSec,
     }
   }
 }
