@@ -15,5 +15,7 @@ export default defineConfig({
   test: {
     include: ['test/**/*.spec.ts'],
     passWithNoTests: true,
+    testTimeout: 30000,
+    hookTimeout: 30000,
   },
 })

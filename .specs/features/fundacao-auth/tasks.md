@@ -460,8 +460,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes de rota: AUTH-01 (200, cookie, `me` devolve o usuário), AUTH-02 (e-mail inexistente e senha errada dão o mesmo 401 e a mesma mensagem), AUTH-04 (6ª tentativa, mesmo com a senha certa, dá 429 com "Muitas tentativas. Tente novamente em 15 minutos."), AUTH-06 (logout apaga a sessão: o mesmo cookie dá 401 em `me`), AUTH-10 (a coluna `password_hash` não contém a senha), AUTH-11 (`Set-Cookie` tem `HttpOnly`), AUTH-12 (desativado recebe 401 "E-mail ou senha incorretos")
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes de rota: AUTH-01 (200, cookie, `me` devolve o usuário), AUTH-02 (e-mail inexistente e senha errada dão o mesmo 401 e a mesma mensagem), AUTH-04 (6ª tentativa, mesmo com a senha certa, dá 429 com "Muitas tentativas. Tente novamente em 15 minutos."), AUTH-06 (logout apaga a sessão: o mesmo cookie dá 401 em `me`), AUTH-10 (a coluna `password_hash` não contém a senha), AUTH-11 (`Set-Cookie` tem `HttpOnly`), AUTH-12 (desativado recebe 401 "E-mail ou senha incorretos")
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
