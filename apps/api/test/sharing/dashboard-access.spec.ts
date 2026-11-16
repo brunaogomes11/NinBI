@@ -71,6 +71,38 @@ describe('permissão por dashboard', () => {
     expect(row?.name).toBe('Painel')
   })
 
+  it('ACL-02 Visualizador com compartilhamento de edição só vê: dono Visualizador só vê', async () => {
+    const t = await setup()
+    const viewer = await signInAs(t.app, t.db, 'VIEWER', 'viz@x.com')
+    const own = await createDashboard(t.db, {
+      ownerId: viewer.user.id,
+      connectionId: t.connection.id,
+      name: 'Do Visualizador',
+    })
+    const url = `/api/dashboards/${own.id}`
+
+    const res = await viewer.agent.get(url)
+    expect(res.status).toBe(200)
+    expect((res.body as DashboardDto).permissions).toEqual({
+      edit: false,
+      delete: false,
+      share: false,
+    })
+
+    const put = await viewer.agent.put(url).send({
+      version: 1,
+      name: 'Hackeado',
+      connectionId: t.connection.id,
+      tabs: TABS,
+    })
+    expect(put.status).toBe(403)
+    const [row] = await t.db
+      .select()
+      .from(dashboards)
+      .where(eq(dashboards.id, own.id))
+    expect(row?.name).toBe('Do Visualizador')
+  })
+
   it('SHARE-01 só o dono e os Admins têm permissão de compartilhar', async () => {
     const t = await setup()
     const admin = await signInAs(t.app, t.db, 'ADMIN', 'admin@x.com')

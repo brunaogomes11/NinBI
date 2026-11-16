@@ -60,6 +60,10 @@ export class DashboardAccessService {
       canView: true as const,
     }
     if (row.ownerId === user.id || can(user.role, 'dashboards.all')) {
+      // ACL-02: a permissão efetiva do Visualizador é sempre "pode ver".
+      if (user.role === 'VIEWER') {
+        return { ...base, canEdit: false, canDelete: false, canShare: false }
+      }
       return { ...base, canEdit: true, canDelete: true, canShare: true }
     }
     const shared = await this.shares.accessFor(user.id, row.id)
