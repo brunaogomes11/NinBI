@@ -182,8 +182,8 @@ T16
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/sharing/db-share-resolver.spec.ts` (linhas inseridas direto no banco; o resolver vem do app sem a opção `shares`): `ACL-01 permissão é a mais alta entre direto, equipes e todos` (só direto `view` dá `view`; só pela equipe `edit` dá `edit`; só `EVERYONE` `view` dá `view`; nenhuma linha dá `null`; compartilhamento com equipe de que o usuário não é membro dá `null`), `ACL-14 Pode ver direto e Pode editar pela equipe dá editar`, `ACL-15 usuário criado depois do compartilhamento com todos tem acesso`, `sharedDashboardIds` devolve os compartilhados por qualquer caminho, sem repetição, sem os próprios, em ordem de criação
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/sharing/db-share-resolver.spec.ts` (linhas inseridas direto no banco; o resolver vem do app sem a opção `shares`): `ACL-01 permissão é a mais alta entre direto, equipes e todos` (só direto `view` dá `view`; só pela equipe `edit` dá `edit`; só `EVERYONE` `view` dá `view`; nenhuma linha dá `null`; compartilhamento com equipe de que o usuário não é membro dá `null`), `ACL-14 Pode ver direto e Pode editar pela equipe dá editar`, `ACL-15 usuário criado depois do compartilhamento com todos tem acesso`, `sharedDashboardIds` devolve os compartilhados por qualquer caminho, sem repetição, sem os próprios, em ordem de criação
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

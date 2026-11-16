@@ -30,6 +30,8 @@ export interface TestAppOptions {
   db?: AppDatabase
   /** Compartilhamentos de teste; sem a opção, ninguém compartilha nada. */
   shares?: FakeShareResolver
+  /** Usa o `DbShareResolver` real em vez do fake (testes de `compartilhamento`). */
+  realShares?: boolean
   /** Controllers só de teste (rotas de sonda) somados ao AppModule. */
   controllers?: Type[]
   /** Troca providers do app, por exemplo os prazos injetáveis, por valores curtos de teste. */
@@ -51,11 +53,16 @@ export async function createTestApp(options: TestAppOptions = {}) {
     .useValue(clock)
     .overrideProvider(NEO4J_GATEWAY)
     .useValue(neo4j)
-    .overrideProvider(DASHBOARD_SHARE_RESOLVER)
-    .useValue(shares)
     // No módulo de teste o adaptador HTTP só existe depois do compile: sem isto o serve-static cai no loader nulo.
     .overrideProvider(AbstractLoader)
     .useClass(ExpressLoader)
+  // SPEC_DEVIATION: o design diz "sem `shares`, o app usa o resolver real"; os testes de
+  // dashboards-consultas dependem do fake como padrão, então o resolver real vem por `realShares`.
+  if (!options.realShares) {
+    builder = builder
+      .overrideProvider(DASHBOARD_SHARE_RESOLVER)
+      .useValue(shares)
+  }
   for (const { provide, useValue } of options.overrides ?? []) {
     builder = builder.overrideProvider(provide).useValue(useValue)
   }

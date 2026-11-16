@@ -2,7 +2,14 @@ import type { Role } from '@ninbi/contracts'
 import { PasswordHasher } from '../src/auth/password-hasher'
 import type { CryptoService } from '../src/crypto/crypto.service'
 import type { AppDatabase } from '../src/database/database.module'
-import { connections, dashboards, users } from '../src/database/schema'
+import {
+  connections,
+  dashboardShares,
+  dashboards,
+  teamMembers,
+  teams,
+  users,
+} from '../src/database/schema'
 
 export interface TestUserInput {
   name?: string
@@ -83,5 +90,60 @@ export async function createDashboard(
     })
     .returning()
   if (!row) throw new Error('dashboard não inserido')
+  return row
+}
+
+/** Insere uma equipe direto no banco com os membros dados. */
+export async function createTeam(
+  db: AppDatabase,
+  input: { name?: string; memberIds?: string[] } = {},
+) {
+  const [row] = await db
+    .insert(teams)
+    .values({ name: input.name ?? 'Comercial' })
+    .returning()
+  if (!row) throw new Error('equipe não inserida')
+  if (input.memberIds?.length) {
+    await db
+      .insert(teamMembers)
+      .values(input.memberIds.map((userId) => ({ teamId: row.id, userId })))
+  }
+  return row
+}
+
+export type TestShareRecipient =
+  | { type: 'USER'; userId: string }
+  | { type: 'TEAM'; teamId: string }
+  | { type: 'EVERYONE' }
+
+/** Insere um compartilhamento direto no banco, sem passar pela rota. */
+export async function createShare(
+  db: AppDatabase,
+  input: {
+    dashboardId: string
+    recipient: TestShareRecipient
+    permission: 'view' | 'edit'
+    createdBy: string
+  },
+) {
+  const { recipient } = input
+  const [row] = await db
+    .insert(dashboardShares)
+    .values({
+      dashboardId: input.dashboardId,
+      recipientType: recipient.type,
+      userId: recipient.type === 'USER' ? recipient.userId : null,
+      teamId: recipient.type === 'TEAM' ? recipient.teamId : null,
+      recipientKey:
+        recipient.type === 'USER'
+          ? `user:${recipient.userId}`
+          : recipient.type === 'TEAM'
+            ? `team:${recipient.teamId}`
+            : 'everyone',
+      permission: input.permission,
+      createdBy: input.createdBy,
+    })
+    .returning()
+  if (!row) throw new Error('compartilhamento não inserido')
   return row
 }
