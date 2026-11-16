@@ -2,7 +2,7 @@ import type { Role } from '@ninbi/contracts'
 import { PasswordHasher } from '../src/auth/password-hasher'
 import type { CryptoService } from '../src/crypto/crypto.service'
 import type { AppDatabase } from '../src/database/database.module'
-import { connections, users } from '../src/database/schema'
+import { connections, dashboards, users } from '../src/database/schema'
 
 export interface TestUserInput {
   name?: string
@@ -58,5 +58,30 @@ export async function createConnection(
     })
     .returning()
   if (!row) throw new Error('conexão não inserida')
+  return row
+}
+
+export interface TestDashboardInput {
+  ownerId: string
+  connectionId: string
+  name?: string
+  createdAt?: Date
+}
+
+/** Insere um dashboard direto no banco, sem abas nem widgets. */
+export async function createDashboard(
+  db: AppDatabase,
+  input: TestDashboardInput,
+) {
+  const [row] = await db
+    .insert(dashboards)
+    .values({
+      name: input.name ?? 'Painel',
+      ownerId: input.ownerId,
+      connectionId: input.connectionId,
+      ...(input.createdAt ? { createdAt: input.createdAt } : {}),
+    })
+    .returning()
+  if (!row) throw new Error('dashboard não inserido')
   return row
 }

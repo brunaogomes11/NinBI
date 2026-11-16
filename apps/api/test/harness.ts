@@ -5,10 +5,12 @@ import request from 'supertest'
 import { configureApp } from '../src/app.factory'
 import { AppModule } from '../src/app.module'
 import { Clock } from '../src/common/clock'
+import { DASHBOARD_SHARE_RESOLVER } from '../src/dashboard-access/dashboard-share-resolver'
 import { type AppDatabase, DB } from '../src/database/database.module'
 import { NEO4J_GATEWAY } from '../src/neo4j/neo4j.gateway'
 import { createTestDb } from './db'
 import { FakeNeo4jGateway } from './fakes/fake-neo4j.gateway'
+import { FakeShareResolver } from './fakes/fake-share-resolver'
 
 /** Relógio controlável: começa em 2026-01-01T12:00:00Z e só anda quando o teste manda. */
 export class FakeClock extends Clock {
@@ -26,6 +28,8 @@ export class FakeClock extends Clock {
 export interface TestAppOptions {
   /** Substitui o banco, por exemplo para simular o PostgreSQL fora do ar. */
   db?: AppDatabase
+  /** Compartilhamentos de teste; sem a opção, ninguém compartilha nada. */
+  shares?: FakeShareResolver
   /** Controllers só de teste (rotas de sonda) somados ao AppModule. */
   controllers?: Type[]
   /** Troca providers do app, por exemplo os prazos injetáveis, por valores curtos de teste. */
@@ -36,6 +40,7 @@ export async function createTestApp(options: TestAppOptions = {}) {
   const { db, client } = await createTestDb()
   const clock = new FakeClock()
   const neo4j = new FakeNeo4jGateway()
+  const shares = options.shares ?? new FakeShareResolver()
   let builder = Test.createTestingModule({
     imports: [AppModule],
     controllers: options.controllers,
@@ -46,6 +51,8 @@ export async function createTestApp(options: TestAppOptions = {}) {
     .useValue(clock)
     .overrideProvider(NEO4J_GATEWAY)
     .useValue(neo4j)
+    .overrideProvider(DASHBOARD_SHARE_RESOLVER)
+    .useValue(shares)
     // No módulo de teste o adaptador HTTP só existe depois do compile: sem isto o serve-static cai no loader nulo.
     .overrideProvider(AbstractLoader)
     .useClass(ExpressLoader)
@@ -60,6 +67,7 @@ export async function createTestApp(options: TestAppOptions = {}) {
     db,
     clock,
     neo4j,
+    shares,
     http: request.agent(app.getHttpServer()),
     close: async () => {
       await app.close()

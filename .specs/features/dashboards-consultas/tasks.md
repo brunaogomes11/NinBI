@@ -186,8 +186,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/dashboards/dashboard-access.spec.ts` (linhas inseridas direto no banco): dono tem ver, editar e excluir; Admin tem os três num dashboard de outro; outro Editor e um Visualizador recebem `null` em `find` e 404 em `assert`; compartilhamento `view` dá só ver e `assert('edit')` lança 403; compartilhamento `edit` dá ver e editar, mas `assert('delete')` lança 403; id `nao-e-uuid` dá 404; `sidebarDashboardIds` devolve os próprios e os compartilhados em ordem de criação, sem os de outros donos
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/dashboards/dashboard-access.spec.ts` (linhas inseridas direto no banco): dono tem ver, editar e excluir; Admin tem os três num dashboard de outro; outro Editor e um Visualizador recebem `null` em `find` e 404 em `assert`; compartilhamento `view` dá só ver e `assert('edit')` lança 403; compartilhamento `edit` dá ver e editar, mas `assert('delete')` lança 403; id `nao-e-uuid` dá 404; `sidebarDashboardIds` devolve os próprios e os compartilhados em ordem de criação, sem os de outros donos
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
