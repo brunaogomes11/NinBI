@@ -827,8 +827,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes com gesto: SETUP-01 (os quatro campos pelo rótulo), SETUP-02 (preencher e clicar envia e mostra a página inicial), SETUP-03 (resposta 409 leva à tela de login), SETUP-04 (senha "1234567" mostra "A senha precisa ter ao menos 8 caracteres" e nenhuma requisição sai), SETUP-05 ("As senhas não conferem"), SHELL-14 (símbolo e "NinBI" na tela)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: SETUP-01 (os quatro campos pelo rótulo), SETUP-02 (preencher e clicar envia e mostra a página inicial), SETUP-03 (resposta 409 leva à tela de login), SETUP-04 (senha "1234567" mostra "A senha precisa ter ao menos 8 caracteres" e nenhuma requisição sai), SETUP-05 ("As senhas não conferem"), SHELL-14 (símbolo e "NinBI" na tela)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

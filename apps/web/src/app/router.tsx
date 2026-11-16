@@ -7,6 +7,7 @@ import {
   RequireSetupDone,
   RequireSetupPending,
 } from '@/features/auth/guards'
+import { SetupPage } from '@/features/auth/SetupPage'
 
 // Marcadores até a página real de cada rota chegar nas tasks seguintes.
 function Placeholder({ name }: { name: string }) {
@@ -17,9 +18,7 @@ export const appRoutes: RouteObject[] = [
   {
     path: '/primeiro-acesso',
     element: <RequireSetupPending />,
-    children: [
-      { index: true, element: <Placeholder name="Criar administrador" /> },
-    ],
+    children: [{ index: true, element: <SetupPage /> }],
   },
   {
     element: <RequireSetupDone />,

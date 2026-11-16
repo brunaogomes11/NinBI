@@ -22,7 +22,9 @@ describe('roteador e guardas', () => {
     })
 
     await waitFor(() => expect(currentUrl(router)).toBe('/primeiro-acesso'))
-    expect(screen.getByText('Criar administrador')).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Criar administrador' }),
+    ).toBeInTheDocument()
   })
 
   it('SETUP-03 com usuários o primeiro acesso vai para o login', async () => {
