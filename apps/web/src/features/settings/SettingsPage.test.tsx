@@ -1,5 +1,7 @@
+import type { Role } from '@ninbi/contracts'
 import { screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
+import { connectionsHandler } from '@/test/fixtures/connections'
 import {
   makeUser,
   renderApp,
@@ -17,11 +19,12 @@ afterEach(() => {
   })
 })
 
-function openSettings(path: string) {
+function openSettings(path: string, role: Role = 'ADMIN') {
   return renderApp(path, {
     handlers: [
       setupStatusHandler(false),
-      sessionHandler(makeUser()),
+      sessionHandler(makeUser({ role })),
+      connectionsHandler(),
       usersHandler(),
     ],
   })
@@ -33,6 +36,7 @@ describe('SettingsPage', () => {
       handlers: [
         setupStatusHandler(false),
         sessionHandler(makeUser()),
+        connectionsHandler(),
         usersHandler(),
       ],
     })
@@ -42,11 +46,16 @@ describe('SettingsPage', () => {
     expect(
       await screen.findByRole('heading', { name: 'Configurações' }),
     ).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Usuários' })).toHaveAttribute(
+    // Com a aba "Conexões" ligada (AD-041), ela é a primeira e abre selecionada; "Usuários" está ao lado.
+    expect(screen.getByRole('tab', { name: 'Conexões' })).toHaveAttribute(
       'aria-selected',
       'true',
     )
-    expect(router.state.location.pathname).toBe('/configuracoes/usuarios')
+    expect(screen.getByRole('tab', { name: 'Usuários' })).toHaveAttribute(
+      'aria-selected',
+      'false',
+    )
+    expect(router.state.location.pathname).toBe('/configuracoes/conexoes')
   })
 
   it('CFG-02 abas na ordem Conexões, Usuários, LLM', async () => {
@@ -56,11 +65,18 @@ describe('SettingsPage', () => {
       'LLM',
     ])
 
-    // Nesta feature só "Usuários" tem conteúdo.
-    const first = openSettings('/configuracoes/usuarios')
-    expect(await screen.findAllByRole('tab')).toHaveLength(1)
-    expect(screen.getByRole('tab', { name: 'Usuários' })).toBeInTheDocument()
-    first.unmount()
+    // Com "Conexões" ligada (AD-041): o Admin vê Conexões e Usuários; o Editor, só Conexões.
+    const admin = openSettings('/configuracoes/conexoes')
+    expect(
+      (await screen.findAllByRole('tab')).map((tab) => tab.textContent),
+    ).toEqual(['Conexões', 'Usuários'])
+    admin.unmount()
+
+    const editor = openSettings('/configuracoes/conexoes', 'EDITOR')
+    expect(
+      (await screen.findAllByRole('tab')).map((tab) => tab.textContent),
+    ).toEqual(['Conexões'])
+    editor.unmount()
 
     for (const tab of SETTINGS_TABS) tab.available = true
     openSettings('/configuracoes/usuarios')
@@ -101,7 +117,7 @@ describe('SettingsPage', () => {
     const { router } = openSettings('/configuracoes')
 
     await waitFor(() =>
-      expect(router.state.location.pathname).toBe('/configuracoes/usuarios'),
+      expect(router.state.location.pathname).toBe('/configuracoes/conexoes'),
     )
   })
 })

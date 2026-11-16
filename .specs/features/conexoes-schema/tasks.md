@@ -330,9 +330,9 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes com gesto: CONN-01 (Admin e Editor abrem "Configurações" › "Conexões" e veem "Vendas", `neo4j+s://vendas.exemplo:7687`, "Padrão do servidor" e "16/11/2026, 14:30" para `2026-11-16T17:30:00Z`), CONN-02 (lista vazia mostra "Nenhuma conexão cadastrada"), CONN-03 (resposta pendente mostra linhas de esqueleto e nenhum nome), CONN-04 (500 mostra "Não foi possível carregar as conexões"; clicar em "Tentar novamente" com o handler já em 200 mostra a lista), CONN-05 (Admin vê "Nova conexão", "Editar" e "Excluir"; Editor não vê nenhum dos três)
-- [ ] Testes ROLE-04 e CFG-02 de fundacao-auth atualizados e verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: CONN-01 (Admin e Editor abrem "Configurações" › "Conexões" e veem "Vendas", `neo4j+s://vendas.exemplo:7687`, "Padrão do servidor" e "16/11/2026, 14:30" para `2026-11-16T17:30:00Z`), CONN-02 (lista vazia mostra "Nenhuma conexão cadastrada"), CONN-03 (resposta pendente mostra linhas de esqueleto e nenhum nome), CONN-04 (500 mostra "Não foi possível carregar as conexões"; clicar em "Tentar novamente" com o handler já em 200 mostra a lista), CONN-05 (Admin vê "Nova conexão", "Editar" e "Excluir"; Editor não vê nenhum dos três)
+- [x] Testes ROLE-04 e CFG-02 de fundacao-auth atualizados e verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

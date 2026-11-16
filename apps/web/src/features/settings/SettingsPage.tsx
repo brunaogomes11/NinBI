@@ -3,11 +3,15 @@ import { Navigate, useNavigate, useParams } from 'react-router'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ForbiddenPage } from '@/features/auth/ForbiddenPage'
 import { useSession } from '@/features/auth/useSession'
+import { ConnectionsTab } from '@/features/connections/ConnectionsTab'
 import { UsersTab } from '@/features/users/UsersTab'
 import { visibleSettingsTabs } from './settingsTabs'
 
 /** Conteúdo de cada aba pelo id; cada feature registra o seu aqui. */
-const TAB_CONTENT: Record<string, ComponentType> = { usuarios: UsersTab }
+const TAB_CONTENT: Record<string, ComponentType> = {
+  conexoes: ConnectionsTab,
+  usuarios: UsersTab,
+}
 
 /** `/configuracoes` abre a primeira aba que o papel vê. */
 export function SettingsIndexRedirect() {

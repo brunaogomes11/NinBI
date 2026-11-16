@@ -14,7 +14,7 @@ export const SETTINGS_TABS: SettingsTab[] = [
     id: 'conexoes',
     label: 'Conexões',
     permission: 'connections.read',
-    available: false,
+    available: true,
   },
   {
     id: 'usuarios',

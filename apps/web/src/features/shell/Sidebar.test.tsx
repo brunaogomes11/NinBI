@@ -66,9 +66,10 @@ describe('Sidebar', () => {
 
   it.each([
     ['ADMIN', true],
-    ['EDITOR', false],
+    ['EDITOR', true],
     ['VIEWER', false],
   ] as const)(
+    // Com a aba "Conexões" ligada (AD-041), o Editor também vê Configurações.
     'ROLE-04 só Admin vê Configurações na sidebar (%s)',
     async (role, visible) => {
       await renderSidebar(role)
