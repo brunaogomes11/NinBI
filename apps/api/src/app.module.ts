@@ -10,6 +10,7 @@ import { HealthModule } from './health/health.module'
 import { Neo4jModule } from './neo4j/neo4j.module'
 import { SchemaModule } from './schema/schema.module'
 import { SetupModule } from './setup/setup.module'
+import { SidebarModule } from './sidebar/sidebar.module'
 import { UsersModule } from './users/users.module'
 import { WebModule } from './web/web.module'
 
@@ -26,6 +27,7 @@ import { WebModule } from './web/web.module'
     Neo4jModule,
     SchemaModule,
     SetupModule,
+    SidebarModule,
     UsersModule,
     WebModule,
   ],
