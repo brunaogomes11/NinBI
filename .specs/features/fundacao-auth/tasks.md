@@ -275,9 +275,9 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] `pnpm infra:up` termina com 0 e roda de novo sem recriar containers
-- [ ] Nenhuma imagem além de `postgres:17-alpine` e `neo4j:5-community` foi baixada
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] `pnpm infra:up` termina com 0 e roda de novo sem recriar containers
+- [x] Nenhuma imagem além de `postgres:17-alpine` e `neo4j:5-community` foi baixada
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: none
 **Gate**: build

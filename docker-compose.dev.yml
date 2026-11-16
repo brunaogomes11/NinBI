@@ -1,0 +1,58 @@
+name: ninbi-dev
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ninbi
+      POSTGRES_PASSWORD: ninbi
+      POSTGRES_DB: ninbi
+    ports:
+      - "55432:5432"
+    volumes:
+      - ninbi-dev-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ninbi -d ninbi"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      NEO4J_AUTH: neo4j/ninbi-dev-password
+    ports:
+      - "7475:7474"
+      - "7688:7687"
+    volumes:
+      - ninbi-dev-neo4j:/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "cypher-shell -u neo4j -p ninbi-dev-password 'RETURN 1'"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+
+  neo4j-seed:
+    image: neo4j:5-community
+    profiles: ["seed"]
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    volumes:
+      - ./infra/neo4j:/seed:ro
+    command:
+      - cypher-shell
+      - -a
+      - bolt://neo4j:7687
+      - -u
+      - neo4j
+      - -p
+      - ninbi-dev-password
+      - -f
+      - /seed/seed.cypher
+
+volumes:
+  ninbi-dev-pg:
+  ninbi-dev-neo4j:

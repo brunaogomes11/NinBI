@@ -14,6 +14,8 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "brand:symbol": "node scripts/brand/crop-symbol.mjs",
+    "infra:up": "node scripts/docker.mjs up",
+    "infra:down": "node scripts/docker.mjs down",
     "test": "pnpm -r test"
   },
   "devDependencies": {
