@@ -187,9 +187,9 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/queries/cypher-params.spec.ts`: `FLT-11 parâmetro vazio chega ao Neo4j como null` (`{ uf: null }` fica `null`; pelo `QueryService`, `$uf` sem valor chega ao fake como `null`), `FLT-12 lista de valores chega ao Neo4j como lista` (`['Eletrônicos', 'Livros']` chega ao fake como a mesma lista; `[2024, 2025]` vira dois `Integer`), `FLT-13 datas do intervalo chegam como datas do Cypher` (`{ periodo_inicio: { kind: 'date', value: '2025-01-01' }, periodo_fim: null }` chega ao fake com `neo4j.isDate(periodo_inicio)` verdadeiro e `toString()` "2025-01-01", e `periodo_fim` `null`); `10` vira `Integer` 10 e `10.5` fica `10.5`
-- [ ] Testes de `QueryService` de `dashboards-consultas` e `ia-cypher` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/queries/cypher-params.spec.ts`: `FLT-11 parâmetro vazio chega ao Neo4j como null` (`{ uf: null }` fica `null`; pelo `QueryService`, `$uf` sem valor chega ao fake como `null`), `FLT-12 lista de valores chega ao Neo4j como lista` (`['Eletrônicos', 'Livros']` chega ao fake como a mesma lista; `[2024, 2025]` vira dois `Integer`), `FLT-13 datas do intervalo chegam como datas do Cypher` (`{ periodo_inicio: { kind: 'date', value: '2025-01-01' }, periodo_fim: null }` chega ao fake com `neo4j.isDate(periodo_inicio)` verdadeiro e `toString()` "2025-01-01", e `periodo_fim` `null`); `10` vira `Integer` 10 e `10.5` fica `10.5`
+- [x] Testes de `QueryService` de `dashboards-consultas` e `ia-cypher` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick

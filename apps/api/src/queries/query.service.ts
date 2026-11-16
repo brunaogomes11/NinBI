@@ -16,6 +16,7 @@ import {
   Neo4jGatewayError,
   Neo4jTimeoutError,
 } from '../neo4j/neo4j.gateway'
+import { toCypherParams } from './cypher-params'
 import {
   extractParameterNames,
   validateReadOnlyCypher,
@@ -103,10 +104,11 @@ export class QueryService {
         params[name] = null
       }
       Object.assign(params, input.params)
+      const cypherParams = toCypherParams(params)
 
       let read: Awaited<ReturnType<Neo4jGateway['read']>>
       try {
-        read = await this.gateway.read(cfg, input.cypher, params, {
+        read = await this.gateway.read(cfg, input.cypher, cypherParams, {
           timeoutMs: this.timeoutMs,
           maxRows: this.maxRows + 1,
           signal: input.signal,
