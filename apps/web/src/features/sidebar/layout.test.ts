@@ -92,4 +92,19 @@ describe('layout da sidebar', () => {
     expect(shape(intoGroup)).toEqual(['G3[C]', 'G1[A]', 'G2[B]'])
     expect(shape(onChild)).toEqual(['G1[A]', 'G3[C]', 'G2[B]'])
   })
+
+  it('ACL-05 moveItem insere o dashboard vindo de Compartilhados comigo', () => {
+    const layout: SidebarDto = {
+      items: [dash('A'), group('G', 'B')],
+      shared: [dash('S')],
+    }
+
+    const intoGroup = moveItem(layout, 'S', { before: 'B' })
+    const atEnd = moveItem(layout, 'S', { rootEnd: true })
+
+    expect(shape(intoGroup)).toEqual(['A', 'G[S,B]'])
+    expect(shape(atEnd)).toEqual(['A', 'G[B]', 'S'])
+    expect(intoGroup.shared).toEqual([])
+    expect(atEnd.shared).toEqual([])
+  })
 })

@@ -45,7 +45,7 @@ function open(
       connectionsHandler(connections),
       http.get('/api/sidebar', () => {
         counters.sidebarGets += 1
-        return HttpResponse.json({ items: [] })
+        return HttpResponse.json({ items: [], shared: [] })
       }),
       create,
     ],

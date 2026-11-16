@@ -85,6 +85,6 @@ export function sidebarSaveHandler(saved: SavedSidebar[]): RequestHandler {
   return http.put('/api/sidebar', async ({ request }) => {
     const body = (await request.json()) as SavedSidebar
     saved.push(body)
-    return HttpResponse.json({ items: body.items.map(withNames) })
+    return HttpResponse.json({ items: body.items.map(withNames), shared: [] })
   })
 }

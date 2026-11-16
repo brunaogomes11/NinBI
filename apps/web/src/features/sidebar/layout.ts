@@ -64,7 +64,9 @@ export function moveItem(
     layout.items.find((item) => item.id === draggedId) ??
     layout.items
       .flatMap((item): Node[] => (item.type === 'group' ? item.items : []))
-      .find((item) => item.id === draggedId)
+      .find((item) => item.id === draggedId) ??
+    // ACL-05: vindo de "Compartilhados comigo", entra no layout e sai da seção.
+    layout.shared.find((item) => item.id === draggedId)
   if (!dragged) return layout
 
   if ('before' in target) {
@@ -84,18 +86,22 @@ export function moveItem(
   }
 
   const rest = without(layout.items, draggedId)
+  const shared = layout.shared.filter((item) => item.id !== draggedId)
 
-  if ('rootEnd' in target) return { ...layout, items: [...rest, dragged] }
+  if ('rootEnd' in target)
+    return { ...layout, shared, items: [...rest, dragged] }
 
   if ('intoGroup' in target) {
     if (dragged.type === 'group') {
       return {
         ...layout,
+        shared,
         items: insertBefore(rest, target.intoGroup, dragged),
       }
     }
     return {
       ...layout,
+      shared,
       items: rest.map((item) =>
         item.id === target.intoGroup && item.type === 'group'
           ? { ...item, items: [...item.items, dragged] }
@@ -108,10 +114,15 @@ export function moveItem(
     const holder = findGroupOf(rest, target.before)
     return {
       ...layout,
+      shared,
       items: insertBefore(rest, holder ? holder.id : target.before, dragged),
     }
   }
-  return { ...layout, items: insertBefore(rest, target.before, dragged) }
+  return {
+    ...layout,
+    shared,
+    items: insertBefore(rest, target.before, dragged),
+  }
 }
 
 export function addGroup(

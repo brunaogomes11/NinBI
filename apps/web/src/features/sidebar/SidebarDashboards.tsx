@@ -72,16 +72,18 @@ interface Dnd {
 function DashboardItem({
   node,
   dnd,
+  dropTarget = true,
 }: {
   node: SidebarDashboardNode
   dnd: Dnd
+  dropTarget?: boolean
 }) {
   return (
     <NavLink
       to={`/dashboards/${node.id}`}
       className={sidebarItemClass}
       {...dnd.draggable(node.id)}
-      {...dnd.dropOn({ before: node.id })}
+      {...(dropTarget ? dnd.dropOn({ before: node.id }) : {})}
     >
       <span title={node.name} className="min-w-0 truncate">
         {node.name}
@@ -287,6 +289,27 @@ export function SidebarDashboards() {
             ) : (
               <DashboardItem key={item.id} node={item} dnd={dnd} />
             ),
+          )}
+          {sidebar.data.shared.length > 0 && (
+            <section
+              aria-labelledby="sidebar-shared-title"
+              className="mt-2 flex flex-col gap-1"
+            >
+              <h2
+                id="sidebar-shared-title"
+                className="px-3 py-1 font-medium text-muted-foreground text-xs"
+              >
+                {MESSAGES.sharedWithMe}
+              </h2>
+              {sidebar.data.shared.map((item) => (
+                <DashboardItem
+                  key={item.id}
+                  node={item}
+                  dnd={dnd}
+                  dropTarget={false}
+                />
+              ))}
+            </section>
           )}
           <div
             data-testid="sidebar-end"

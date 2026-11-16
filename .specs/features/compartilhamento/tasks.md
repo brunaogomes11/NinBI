@@ -432,10 +432,10 @@ T16
 
 **Done when**:
 
-- [ ] Testes de `layout.test.ts`: `ACL-05 moveItem insere o dashboard vindo de Compartilhados comigo` (layout A, grupo G [B]; mover S para dentro de G antes de B dá G [S, B]; para o fim dá A, G, S)
-- [ ] Testes com gesto: `ACL-04 sidebar mostra Compartilhados comigo com os dashboards compartilhados` (título da seção e o link para `/dashboards/<id>`), `ACL-10 sem compartilhados a seção Compartilhados comigo não aparece`, `ACL-05 arrastar de Compartilhados comigo para um grupo o mantém no grupo` (`fireEvent.dragStart` no item compartilhado e `drop` no cabeçalho do grupo: o item aparece no grupo, a seção some e o `PUT` leva o id dentro do grupo)
-- [ ] Testes de sidebar de `dashboards-consultas` continuam verdes
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes de `layout.test.ts`: `ACL-05 moveItem insere o dashboard vindo de Compartilhados comigo` (layout A, grupo G [B]; mover S para dentro de G antes de B dá G [S, B]; para o fim dá A, G, S)
+- [x] Testes com gesto: `ACL-04 sidebar mostra Compartilhados comigo com os dashboards compartilhados` (título da seção e o link para `/dashboards/<id>`), `ACL-10 sem compartilhados a seção Compartilhados comigo não aparece`, `ACL-05 arrastar de Compartilhados comigo para um grupo o mantém no grupo` (`fireEvent.dragStart` no item compartilhado e `drop` no cabeçalho do grupo: o item aparece no grupo, a seção some e o `PUT` leva o id dentro do grupo)
+- [x] Testes de sidebar de `dashboards-consultas` continuam verdes
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build

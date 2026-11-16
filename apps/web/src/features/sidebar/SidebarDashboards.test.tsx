@@ -100,7 +100,7 @@ describe('SidebarDashboards', () => {
               { code: 'INTERNAL_ERROR', message: 'falhou' },
               { status: 500 },
             )
-          : HttpResponse.json({ items: ITEMS }),
+          : HttpResponse.json({ items: ITEMS, shared: [] }),
       ),
     )
 
