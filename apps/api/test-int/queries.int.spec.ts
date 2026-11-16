@@ -3,6 +3,11 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { PasswordHasher } from '../src/auth/password-hasher'
 import { CryptoService } from '../src/crypto/crypto.service'
 import { connections, dashboards, users } from '../src/database/schema'
+import {
+  NEO4J_GATEWAY,
+  type Neo4jGateway,
+  Neo4jGatewayError,
+} from '../src/neo4j/neo4j.gateway'
 import { QUERY_TIMEOUT_MS } from '../src/queries/query.service'
 import { createIntApp } from './harness'
 
@@ -73,11 +78,34 @@ describe('execução de consultas no Neo4j real', () => {
     expect(write.status).toBe(422)
     expect(write.body.code).toBe('QUERY_WRITE_BLOCKED')
 
-    const labels = await t.run('CALL db.labels() YIELD label RETURN label')
-    expect(labels.status).toBe(200)
-    const names = (labels.body.rows as string[][]).map((row) => row[0])
-    expect(names).toContain('Loja')
-    expect(names).not.toContain('NinbiProbe')
+    // `db.labels()` não lista tokens criados por `db.createLabel`: a prova de que nada foi
+    // gravado usa uma escrita visível (um nó) pela mesma transação de leitura do gateway.
+    const probe = neo4j.driver(
+      NEO4J_DEV.uri,
+      neo4j.auth.basic(NEO4J_DEV.username, NEO4J_DEV.password),
+    )
+    try {
+      await expect(
+        t.app.get<Neo4jGateway>(NEO4J_GATEWAY).read(
+          {
+            uri: NEO4J_DEV.uri,
+            database: null,
+            username: NEO4J_DEV.username,
+            password: NEO4J_DEV.password,
+          },
+          'CREATE (:NinbiQry01Probe)',
+          {},
+          { timeoutMs: 10_000 },
+        ),
+      ).rejects.toBeInstanceOf(Neo4jGatewayError)
+      const count = await probe.executeQuery(
+        'MATCH (n:NinbiQry01Probe) RETURN count(n) AS total',
+      )
+      expect(count.records[0]?.get('total').toNumber()).toBe(0)
+    } finally {
+      await probe.executeQuery('MATCH (n:NinbiQry01Probe) DETACH DELETE n')
+      await probe.close()
+    }
   })
 
   it('QRY-06 Neo4j real recusa CALL db.createLabel com a mensagem de leitura', async () => {
