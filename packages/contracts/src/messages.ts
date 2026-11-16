@@ -123,4 +123,14 @@ export const MESSAGES = {
   noValidCoordinates: 'Nenhuma linha com coordenadas válidas',
   mapTilesFailed: 'Não foi possível carregar o mapa de fundo',
   invalidWidgetConfig: 'Configuração da visualização inválida',
+  llmModelRequired: 'Informe o modelo',
+  llmModelTooLong: 'O modelo pode ter no máximo 200 caracteres',
+  llmBaseUrlRequired: 'Informe a URL base',
+  llmBaseUrlInvalid: 'Informe uma URL válida',
+  llmApiKeyRequired: 'Informe a chave de API',
+  llmKeepKeyHint: 'Deixe em branco para manter a chave atual',
+  llmProviderOk: 'Provedor respondendo',
+  llmRemoveConfirm:
+    'Remover a configuração do LLM? Os recursos de IA ficarão desligados.',
+  llmNotConfigured: 'Nenhum provedor de IA configurado',
 } as const

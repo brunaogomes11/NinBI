@@ -122,8 +122,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `packages/contracts/src/llm.spec.ts`: `LLM-02 provedores na ordem OpenAI, Anthropic, Google Gemini, Ollama e Compatível com OpenAI` (rótulos de `LLM_PROVIDERS` na ordem), `LLM-06 Ollama e Compatível com OpenAI exigem URL base` (sem `baseUrl` ou só espaços dão "Informe a URL base" no caminho `baseUrl`; OpenAI sem URL passa; `ftp://x` dá "Informe uma URL válida"), `LLM-08 modelo vazio dá Informe o modelo` (vazio e só espaços; 201 caracteres recusados; 200 passa)
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] Testes em `packages/contracts/src/llm.spec.ts`: `LLM-02 provedores na ordem OpenAI, Anthropic, Google Gemini, Ollama e Compatível com OpenAI` (rótulos de `LLM_PROVIDERS` na ordem), `LLM-06 Ollama e Compatível com OpenAI exigem URL base` (sem `baseUrl` ou só espaços dão "Informe a URL base" no caminho `baseUrl`; OpenAI sem URL passa; `ftp://x` dá "Informe uma URL válida"), `LLM-08 modelo vazio dá Informe o modelo` (vazio e só espaços; 201 caracteres recusados; 200 passa)
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick
@@ -735,7 +735,7 @@ Proof: run api | ✓ FIX-10 várias instruções contam como falha de validaçã
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** none
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre 587ea49 - em andamento.
 **Walked:** dispensado por AD-023
 
 ---
