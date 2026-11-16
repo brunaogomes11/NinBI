@@ -37,7 +37,11 @@ export class Neo4jTimeoutError extends Error {
 
 /** O Neo4j recusou ou falhou; `message` é a do Neo4j, sem alteração. */
 export class Neo4jGatewayError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    /** `code` do erro do driver (`Neo.ClientError...`, `ServiceUnavailable`...), quando houver. */
+    readonly code?: string,
+  ) {
     super(message)
     this.name = 'Neo4jGatewayError'
   }

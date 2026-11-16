@@ -14,8 +14,10 @@ import {
 const DRIVER_TIMEOUT_MARGIN_MS = 5_000
 
 function toGatewayError(error: unknown): Neo4jGatewayError {
+  const code = (error as { code?: unknown } | null)?.code
   return new Neo4jGatewayError(
     error instanceof Error ? error.message : String(error),
+    typeof code === 'string' ? code : undefined,
   )
 }
 

@@ -1,5 +1,10 @@
 import { z } from 'zod'
 
+const queryLimitsSchema = z.object({
+  NINBI_QUERY_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+  NINBI_QUERY_MAX_ROWS: z.coerce.number().int().positive().default(5_000),
+})
+
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(8080),
   DATABASE_URL: z.string().min(1),
@@ -9,6 +14,7 @@ const envSchema = z.object({
     .default('false')
     .transform((value) => value === 'true'),
   WEB_DIST_DIR: z.string().min(1).optional(),
+  ...queryLimitsSchema.shape,
 })
 
 export type Env = z.infer<typeof envSchema>
@@ -33,4 +39,16 @@ export function loadEncryptionKey(
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
   loadEncryptionKey(source)
   return envSchema.parse(source)
+}
+
+/** Prazo e limite de linhas das consultas; lê só as duas variáveis, sem exigir o resto do ambiente. */
+export function loadQueryLimits(source: NodeJS.ProcessEnv = process.env): {
+  timeoutMs: number
+  maxRows: number
+} {
+  const env = queryLimitsSchema.parse(source)
+  return {
+    timeoutMs: env.NINBI_QUERY_TIMEOUT_MS,
+    maxRows: env.NINBI_QUERY_MAX_ROWS,
+  }
 }
