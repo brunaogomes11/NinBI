@@ -109,4 +109,18 @@ export const MESSAGES = {
     `A consulta excedeu o tempo limite de ${seconds} s`,
   rowsTruncated: (limit: number) =>
     `Mostrando as primeiras ${limit.toLocaleString('pt-BR')} linhas`,
+  runQueryToMap: 'Execute a consulta para escolher as colunas',
+  chooseField: (field: string) => `Escolha ${field}`,
+  mappingColumnMissing: (name: string) =>
+    `A visualização não combina com o resultado: a coluna ${name} não existe`,
+  columnWithoutNumbers: (name: string) => `A coluna ${name} não tem números`,
+  categoriesCut: (shown: number, total: number) =>
+    `Mostrando ${shown} de ${total} categorias`,
+  invalidCoordinates: (count: number) =>
+    count === 1
+      ? '1 linha sem coordenadas válidas'
+      : `${count} linhas sem coordenadas válidas`,
+  noValidCoordinates: 'Nenhuma linha com coordenadas válidas',
+  mapTilesFailed: 'Não foi possível carregar o mapa de fundo',
+  invalidWidgetConfig: 'Configuração da visualização inválida',
 } as const

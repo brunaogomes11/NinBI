@@ -1,8 +1,6 @@
 import { z } from 'zod'
 import { MESSAGES } from './messages'
-
-export const WIDGET_VISUALIZATIONS = ['TABLE'] as const
-export type WidgetVisualization = (typeof WIDGET_VISUALIZATIONS)[number]
+import { WIDGET_VISUALIZATIONS, widgetConfigSchema } from './widget-config'
 
 export const GRID_COLUMNS = 12
 export const MAX_CYPHER_LENGTH = 20_000
@@ -122,14 +120,30 @@ export const dashboardCreateSchema = z.object({
   connectionId,
 })
 
-const widgetSchema = z.object({
-  id: z.uuid(),
-  title: widgetTitle,
-  cypher: z.string().max(MAX_CYPHER_LENGTH, MESSAGES.cypherTooLong).nullable(),
-  visualization: z.enum(WIDGET_VISUALIZATIONS),
-  config: z.record(z.string(), z.unknown()),
-  layout: widgetLayoutSchema,
-})
+const widgetSchema = z
+  .object({
+    id: z.uuid(),
+    title: widgetTitle,
+    cypher: z
+      .string()
+      .max(MAX_CYPHER_LENGTH, MESSAGES.cypherTooLong)
+      .nullable(),
+    visualization: z.enum(WIDGET_VISUALIZATIONS),
+    config: z.record(z.string(), z.unknown()),
+    layout: widgetLayoutSchema,
+  })
+  .superRefine((widget, ctx) => {
+    const parsed = widgetConfigSchema(widget.visualization).safeParse(
+      widget.config,
+    )
+    if (!parsed.success) {
+      ctx.addIssue({
+        code: 'custom',
+        message: MESSAGES.invalidWidgetConfig,
+        path: ['config'],
+      })
+    }
+  })
 
 const tabSchema = z.object({
   id: z.uuid(),

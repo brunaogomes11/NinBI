@@ -114,9 +114,9 @@ T15 → T16
 
 **Done when**:
 
-- [ ] Testes em `packages/contracts/src/widget-config.spec.ts`: `VIZ-01 rótulos das visualizações na ordem da spec` (`WIDGET_VISUALIZATIONS.map(v => VISUALIZATION_LABELS[v])` é `Tabela, Lista, Área, Barras, Linha, Pizza, Radar, Radial, KPI, Mapa`), `VIZ-15 contrato aceita o mapeamento de cada visualização e recusa o que não combina` (um widget válido de cada uma das 10 visualizações passa no `dashboardSaveSchema`; `BAR` sem `x`, `BAR` com `series: []`, `LIST` com três `values`, `MAP` sem `lon` e `PIE` com `config: {}` são recusados com "Configuração da visualização inválida"; `visualization: 'PIZZA'` é recusado), `MESSAGES.chooseField('Eixo X')` é "Escolha Eixo X", `mappingColumnMissing('vendas')` é "A visualização não combina com o resultado: a coluna vendas não existe", `columnWithoutNumbers('vendas')` é "A coluna vendas não tem números", `categoriesCut(12, 30)` é "Mostrando 12 de 30 categorias", `invalidCoordinates(3)` é "3 linhas sem coordenadas válidas" e `invalidCoordinates(1)` é "1 linha sem coordenadas válidas"
-- [ ] Testes de contrato existentes de `dashboards-consultas` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] Testes em `packages/contracts/src/widget-config.spec.ts`: `VIZ-01 rótulos das visualizações na ordem da spec` (`WIDGET_VISUALIZATIONS.map(v => VISUALIZATION_LABELS[v])` é `Tabela, Lista, Área, Barras, Linha, Pizza, Radar, Radial, KPI, Mapa`), `VIZ-15 contrato aceita o mapeamento de cada visualização e recusa o que não combina` (um widget válido de cada uma das 10 visualizações passa no `dashboardSaveSchema`; `BAR` sem `x`, `BAR` com `series: []`, `LIST` com três `values`, `MAP` sem `lon` e `PIE` com `config: {}` são recusados com "Configuração da visualização inválida"; `visualization: 'PIZZA'` é recusado), `MESSAGES.chooseField('Eixo X')` é "Escolha Eixo X", `mappingColumnMissing('vendas')` é "A visualização não combina com o resultado: a coluna vendas não existe", `columnWithoutNumbers('vendas')` é "A coluna vendas não tem números", `categoriesCut(12, 30)` é "Mostrando 12 de 30 categorias", `invalidCoordinates(3)` é "3 linhas sem coordenadas válidas" e `invalidCoordinates(1)` é "1 linha sem coordenadas válidas"
+- [x] Testes de contrato existentes de `dashboards-consultas` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick
@@ -644,7 +644,7 @@ Proof: run web | ✓ CHART-18 pizza só com zeros mostra A consulta não retorno
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** none
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre 2e3e5ae - em andamento.
 **Walked:** dispensado por AD-023
 
 ---
