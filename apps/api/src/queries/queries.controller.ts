@@ -1,5 +1,6 @@
 import { Body, Controller, HttpCode, Inject, Param, Post } from '@nestjs/common'
 import {
+  filterParameterNames,
   MESSAGES,
   type QueryResultDto,
   type QueryRunInput,
@@ -14,7 +15,7 @@ import { AppError } from '../common/app-error'
 import { ZodValidationPipe } from '../common/zod.pipe'
 import { DashboardAccessService } from '../dashboard-access/dashboard-access.service'
 import { type AppDatabase, DB } from '../database/database.module'
-import { widgets } from '../database/schema'
+import { dashboards, widgets } from '../database/schema'
 import { QueryService } from './query.service'
 
 const UUID_PATTERN =
@@ -69,11 +70,24 @@ export class QueriesController {
     if (widget.cypher === null || widget.cypher.trim() === '') {
       throw new AppError(400, 'VALIDATION_ERROR', MESSAGES.widgetNoQuery)
     }
+    // FLT-28: só os parâmetros dos filtros salvos chegam ao Cypher do widget.
+    const [dashboard] = await this.db
+      .select({ filters: dashboards.filters })
+      .from(dashboards)
+      .where(eq(dashboards.id, id))
+    const allowed = new Set(
+      (dashboard?.filters ?? []).flatMap((filter) =>
+        filterParameterNames(filter),
+      ),
+    )
+    const params = Object.fromEntries(
+      Object.entries(body.params ?? {}).filter(([name]) => allowed.has(name)),
+    )
     return this.queries.run({
       userId: user.id,
       connectionId: access.connectionId,
       cypher: widget.cypher,
-      params: body.params,
+      params,
       widgetId,
       maskErrors: !access.canEdit,
     })

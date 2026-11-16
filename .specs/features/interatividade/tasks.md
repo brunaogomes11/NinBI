@@ -208,8 +208,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/queries/widget-params.spec.ts`: `FLT-28 parâmetro que não é de um filtro é ignorado na execução do widget salvo` (dashboard com o filtro `categoria` e widget `WHERE c.nome = $categoria AND n.uf = $uf`; `params: { categoria: 'Livros', uf: 'SP', extra: 1 }` chega ao fake como `{ categoria: 'Livros', uf: null }`, sem `extra`), filtro "Intervalo de datas" `periodo` deixa passar `periodo_inicio` e `periodo_fim`, a rota `.../query` de quem edita repassa `uf: 'SP'`
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/queries/widget-params.spec.ts`: `FLT-28 parâmetro que não é de um filtro é ignorado na execução do widget salvo` (dashboard com o filtro `categoria` e widget `WHERE c.nome = $categoria AND n.uf = $uf`; `params: { categoria: 'Livros', uf: 'SP', extra: 1 }` chega ao fake como `{ categoria: 'Livros', uf: null }`, sem `extra`), filtro "Intervalo de datas" `periodo` deixa passar `periodo_inicio` e `periodo_fim`, a rota `.../query` de quem edita repassa `uf: 'SP'`
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
