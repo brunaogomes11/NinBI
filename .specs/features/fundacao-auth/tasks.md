@@ -358,8 +358,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes `FND-03 health responde 200 com postgres up` e `FND-04 health responde 503 com postgres down` passam
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes `FND-03 health responde 200 com postgres up` e `FND-04 health responde 503 com postgres down` passam
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
