@@ -412,8 +412,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes com gesto em `WidgetCard.test.tsx`: `GRID-07 widget é um card do tema com o título no topo` (elemento com `bg-card` e `rounded-card` cujo primeiro texto é o título), `TBL-09 esqueleto no card enquanto a consulta roda`, `TBL-10 consulta sem linhas mostra A consulta não retornou dados`, `TBL-11 erro mostra a mensagem e Tentar novamente para quem edita` (422 com a mensagem do Neo4j mostra essa mensagem; clicar em "Tentar novamente" com o handler já em 200 mostra a tabela), `TBL-12 erro mostra Não foi possível carregar este widget para quem só vê` (widget de quem não edita, 422 com a mensagem genérica: mostra "Não foi possível carregar este widget" e "Tentar novamente", sem nenhum Cypher), `TBL-14 widget sem Cypher mostra Widget sem consulta` (nenhuma requisição sai)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto em `WidgetCard.test.tsx`: `GRID-07 widget é um card do tema com o título no topo` (elemento com `bg-card` e `rounded-card` cujo primeiro texto é o título), `TBL-09 esqueleto no card enquanto a consulta roda`, `TBL-10 consulta sem linhas mostra A consulta não retornou dados`, `TBL-11 erro mostra a mensagem e Tentar novamente para quem edita` (422 com a mensagem do Neo4j mostra essa mensagem; clicar em "Tentar novamente" com o handler já em 200 mostra a tabela), `TBL-12 erro mostra Não foi possível carregar este widget para quem só vê` (widget de quem não edita, 422 com a mensagem genérica: mostra "Não foi possível carregar este widget" e "Tentar novamente", sem nenhum Cypher), `TBL-14 widget sem Cypher mostra Widget sem consulta` (nenhuma requisição sai)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
