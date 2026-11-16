@@ -1087,7 +1087,7 @@ Proof: run web | ✓ DASH-22 Visualizador em configuracoes dashboards vê a pág
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, sonnet) sobre 5123dd7 - em andamento.
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre 5123dd7 - returned (ef3d166). Lote 2 (T8-T14) - returned (0faf236). Lote 3 (T15-T21) - returned (877a1ff). Lote 4 (T22-T28) - returned (36c15f4). check_proofs em 36c15f4: apiint vermelho (57P01 intermitente) → corrigido em 256725e. check_proofs em 256725e: 154 pass / 0 fail. Verifier (haiku) sobre 256725e - em andamento.
 **Walked:** dispensado por AD-023
 
 ---
