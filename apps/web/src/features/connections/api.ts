@@ -40,3 +40,12 @@ export function useUpdateConnection(id: string) {
       queryClient.invalidateQueries({ queryKey: CONNECTIONS_QUERY_KEY }),
   })
 }
+
+export function useDeleteConnection(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => apiFetch(`/api/connections/${id}`, { method: 'DELETE' }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: CONNECTIONS_QUERY_KEY }),
+  })
+}

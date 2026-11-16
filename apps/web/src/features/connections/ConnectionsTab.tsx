@@ -18,6 +18,7 @@ import { TopBarAction } from '@/features/shell/TopBar'
 import { formatDateTime } from '@/lib/format'
 import { useConnections } from './api'
 import { ConnectionFormDialog } from './ConnectionFormDialog'
+import { ConnectionRowActions } from './ConnectionRowActions'
 
 const SKELETON_ROWS = 5
 
@@ -33,7 +34,6 @@ export function ConnectionsTab() {
   const canManage = !!user && can(user.role, 'connections.manage')
   const connections = useConnections()
   const [newOpen, setNewOpen] = useState(false)
-  const [editing, setEditing] = useState<ConnectionDto | null>(null)
   const columns = canManage ? 5 : 4
 
   return (
@@ -53,11 +53,6 @@ export function ConnectionsTab() {
       {canManage && (
         <>
           <ConnectionFormDialog open={newOpen} onOpenChange={setNewOpen} />
-          <ConnectionFormDialog
-            open={editing !== null}
-            onOpenChange={(open) => !open && setEditing(null)}
-            connection={editing ?? undefined}
-          />
         </>
       )}
       {connections.isError ? (
@@ -129,19 +124,7 @@ export function ConnectionsTab() {
                     <TableCell>{lastRead(connection)}</TableCell>
                     {canManage && (
                       <TableCell>
-                        <div className="flex gap-1">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setEditing(connection)}
-                          >
-                            Editar
-                          </Button>
-                          <Button type="button" variant="ghost" size="sm">
-                            Excluir
-                          </Button>
-                        </div>
+                        <ConnectionRowActions connection={connection} />
                       </TableCell>
                     )}
                   </TableRow>

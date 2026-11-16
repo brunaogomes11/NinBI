@@ -371,8 +371,8 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes com gesto: CONN-17 ("Excluir" na linha "Vendas" mostra "Excluir a conexão Vendas? O schema guardado também será apagado."; "Cancelar" fecha sem requisição), CONN-18 (confirmar envia `DELETE` e "Vendas" some da lista)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto: CONN-17 ("Excluir" na linha "Vendas" mostra "Excluir a conexão Vendas? O schema guardado também será apagado."; "Cancelar" fecha sem requisição), CONN-18 (confirmar envia `DELETE` e "Vendas" some da lista)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
