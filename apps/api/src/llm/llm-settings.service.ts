@@ -93,6 +93,28 @@ export class LlmSettingsService {
     await this.db.delete(llmSettings).where(eq(llmSettings.id, SINGLE_ROW_ID))
   }
 
+  /**
+   * Configuração do formulário para o teste (LLM-09): a chave digitada vale; vazia, usa a guardada.
+   * Não grava nada.
+   */
+  async snapshotFor(input: LlmSettingsInput): Promise<LlmSnapshot> {
+    const existing = await this.row()
+    const apiKey =
+      input.apiKey ||
+      (existing?.apiKeyEncrypted
+        ? this.crypto.decrypt(existing.apiKeyEncrypted)
+        : null)
+    if (!apiKey && PROVIDERS_REQUIRING_KEY.includes(input.provider)) {
+      throw apiKeyRequired()
+    }
+    return {
+      provider: input.provider,
+      model: input.model,
+      baseUrl: input.baseUrl || null,
+      apiKey,
+    }
+  }
+
   /** Lê a configuração e decifra a chave uma vez; quem gera usa esta cópia até o fim (LLM-15). */
   async snapshot(): Promise<LlmSnapshot | null> {
     const row = await this.row()

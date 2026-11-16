@@ -248,8 +248,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/llm/llm-test.spec.ts`: `LLM-09 testar envia um pedido mínimo sem schema e responde ok` (200 `{ ok: true }`; o modelo falso recebeu uma mensagem só, sem "Labels" nem nome de label do schema de exemplo; o factory foi criado com o provedor e o modelo do corpo e com a chave guardada quando `apiKey` veio vazia; nada mudou em `llm_settings`), `LLM-10 teste com falha responde 422 com a mensagem do provedor` (erro roteirizado "Incorrect API key provided" volta em `message`)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/llm/llm-test.spec.ts`: `LLM-09 testar envia um pedido mínimo sem schema e responde ok` (200 `{ ok: true }`; o modelo falso recebeu uma mensagem só, sem "Labels" nem nome de label do schema de exemplo; o factory foi criado com o provedor e o modelo do corpo e com a chave guardada quando `apiKey` veio vazia; nada mudou em `llm_settings`), `LLM-10 teste com falha responde 422 com a mensagem do provedor` (erro roteirizado "Incorrect API key provided" volta em `message`)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build
