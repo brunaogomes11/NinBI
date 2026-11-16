@@ -19,12 +19,12 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { ResultTable } from './ResultTable'
 import {
   hasWidgetQuery,
   useWidgetResult,
   type WidgetEditSource,
 } from './useWidgetResult'
+import { WidgetVisualization } from './WidgetVisualization'
 
 /** Classe da alça de arrasto do widget na grade: só o título arrasta (GRID-02). */
 export const DRAG_HANDLE_CLASS = 'widget-drag-handle'
@@ -84,7 +84,13 @@ function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
       <p className="text-sm text-muted-foreground">{MESSAGES.queryNoData}</p>
     )
   }
-  return <ResultTable result={query.data} />
+  return (
+    <WidgetVisualization
+      result={query.data}
+      visualization={widget.visualization}
+      config={widget.config}
+    />
+  )
 }
 
 function WidgetMenu({ title, edit }: { title: string; edit: WidgetCardEdit }) {
