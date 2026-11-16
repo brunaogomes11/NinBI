@@ -144,8 +144,13 @@ describe('chart-data', () => {
     const r = result(['nome', 'total'], rows)
     const notice = 'Mostrando 12 de 30 categorias'
 
+    const firstTwelve = Array.from({ length: 12 }, (_, i) => `c${i}`)
     const pie = buildCategories(r, { category: 'nome', value: 'total' }, 'PIE')
     expect(pie.ok && pie.data).toHaveLength(12)
+    expect(pie.ok && pie.data.map((item) => item.label)).toEqual(firstTwelve)
+    expect(pie.ok && pie.data.map((item) => item.value)).toEqual(
+      Array.from({ length: 12 }, (_, i) => i + 1),
+    )
     expect(pie.ok && pie.notice).toBe(notice)
     const radial = buildCategories(
       r,
@@ -153,9 +158,15 @@ describe('chart-data', () => {
       'RADIAL',
     )
     expect(radial.ok && radial.data).toHaveLength(12)
+    expect(radial.ok && radial.data.map((item) => item.label)).toEqual(
+      firstTwelve,
+    )
     expect(radial.ok && radial.notice).toBe(notice)
     const radar = buildRadar(r, { axis: 'nome', series: ['total'] })
     expect(radar.ok && radar.data).toHaveLength(12)
+    expect(radar.ok && radar.data.map((point) => point.axis)).toEqual(
+      firstTwelve,
+    )
     expect(radar.ok && radar.notice).toBe(notice)
 
     const exact = result(['nome', 'total'], rows.slice(0, 12))
