@@ -909,8 +909,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: SHELL-01 (logado em `/`: `navigation` da sidebar, `banner` da barra superior e `main` presentes, `<html>` com `dark`, cards com a classe `bg-card`), SHELL-07 ("Nenhum dashboard ainda"), SHELL-10 (raiz com `h-screen` e `overflow-hidden`, sidebar sem overflow próprio fora da lista, `main` com `overflow-y-auto` e `overflow-x-hidden`, sidebar com largura fixa `w-60` e `shrink-0`)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes: SHELL-01 (logado em `/`: `navigation` da sidebar, `banner` da barra superior e `main` presentes, `<html>` com `dark`, cards com a classe `bg-card`), SHELL-07 ("Nenhum dashboard ainda"), SHELL-10 (raiz com `h-screen` e `overflow-hidden`, sidebar sem overflow próprio fora da lista, `main` com `overflow-y-auto` e `overflow-x-hidden`, sidebar com largura fixa `w-60` e `shrink-0`)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

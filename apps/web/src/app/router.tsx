@@ -9,6 +9,8 @@ import {
 } from '@/features/auth/guards'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { SetupPage } from '@/features/auth/SetupPage'
+import { HomePage } from '@/features/home/HomePage'
+import { AppShell } from '@/features/shell/AppShell'
 
 // Marcadores até a página real de cada rota chegar nas tasks seguintes.
 function Placeholder({ name }: { name: string }) {
@@ -39,13 +41,18 @@ export const appRoutes: RouteObject[] = [
           {
             element: <RequirePasswordChanged />,
             children: [
-              { path: '/', element: <Placeholder name="Página inicial" /> },
               {
-                element: <RequirePermission permission="users.manage" />,
+                element: <AppShell />,
                 children: [
+                  { path: '/', element: <HomePage /> },
                   {
-                    path: '/configuracoes/usuarios',
-                    element: <Placeholder name="Usuários" />,
+                    element: <RequirePermission permission="users.manage" />,
+                    children: [
+                      {
+                        path: '/configuracoes/usuarios',
+                        element: <Placeholder name="Usuários" />,
+                      },
+                    ],
                   },
                 ],
               },
