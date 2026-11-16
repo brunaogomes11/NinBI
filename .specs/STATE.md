@@ -186,6 +186,118 @@
 - **Date**: 2026-11-16
 - **Status**: active
 
+### AD-024 (active)
+- **Decision**: Monorepo pnpm 11 com Node 24: `apps/web` (Vite + React 19 + TypeScript + Tailwind v4 + shadcn/ui, ESM), `apps/api` (NestJS 11, CommonJS com `module: nodenext`, compilado com `tsc`) e `packages/contracts` (papéis, matriz de permissões, schemas zod, mensagens em português e códigos de erro; build dual ESM+CJS com tsup). Testes e o Vite resolvem `@ninbi/contracts` direto do código-fonte por alias. Em produção um só processo serve a API em `/api` e o build do web na porta 8080.
+- **Reason**: Design de `fundacao-auth`: front e back validam com os mesmos schemas e mostram as mesmas mensagens; um só processo simplifica o self-hosted (AD-001).
+- **Trade-off**: O pacote compartilhado exige build antes do `typecheck` da API; o build do web e da API sobem juntos.
+- **Scope**: Todas as features.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-025 (active)
+- **Decision**: Drizzle ORM com migrações SQL geradas pelo drizzle-kit em `apps/api/drizzle/`, aplicadas no start do app. Produção usa `node-postgres`; os testes rápidos usam PGlite em memória com o mesmo schema e as mesmas migrações.
+- **Reason**: Drizzle tem driver oficial para PGlite, o que permite testar contra PostgreSQL real em processo, sem serviço externo.
+- **Trade-off**: PGlite tem uma conexão só: concorrência é provada nos testes de integração (AD-026).
+- **Scope**: Todas as features com dados.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-026 (active)
+- **Decision**: Vitest em todo o monorepo (API com `unplugin-swc` para os metadados de decorators do Nest; web com jsdom, Testing Library, user-event e MSW). Três níveis: testes rápidos sem serviço externo (PGlite e `FakeNeo4jGateway`), que são o gate de cada task; testes de integração em `apps/api/test-int/` contra o PostgreSQL e o Neo4j de um `docker-compose.dev.yml` de vida longa (`postgres:17-alpine`, `neo4j:5-community`, volumes nomeados, projeto `ninbi-dev`, subido por `pnpm infra:up` de forma idempotente); e um smoke do `docker-compose.yml` de produção (`pnpm smoke`). Nada de Testcontainers nem container criado por execução. A imagem do app só é construída pelo smoke, que termina com `docker compose down -v` e `docker image prune -f`. Todo nome de teste começa com o ID do requisito, e todo script de teste roda com `--reporter=verbose`.
+- **Reason**: Pedido do usuário via orquestrador: testes rápidos sem serviço; Docker instalado ("instalei o docker. pode ser feliz ai, mas cuidado com o uso de disco.") com o disco C quase cheio.
+- **Trade-off**: As checks que dependem do Docker só rodam com o Docker Desktop ligado; o smoke ocupa a porta 8080 enquanto roda.
+- **Scope**: Todas as features.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-027 (active)
+- **Decision**: Sessão por token opaco aleatório no cookie `ninbi_session` (httpOnly, SameSite=Lax, `Secure` por `NINBI_COOKIE_SECURE`), com só o SHA-256 do token na tabela `sessions` e expiração deslizante de 7 dias por `last_used_at`. Papel e situação do usuário são lidos do banco a cada requisição. Redefinir senha e desativar apagam as sessões do usuário. Senha provisória restringe a sessão a `me`, `initial-password` e `logout`.
+- **Reason**: Revogação imediata (USR-07, USR-09, USR-15) e troca de papel na próxima requisição (ROLE-05), sem segredo de assinatura para configurar.
+- **Trade-off**: Uma consulta ao banco por requisição autenticada.
+- **Scope**: Todas as features.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-028 (active)
+- **Decision**: Senhas com `scrypt` de `node:crypto` (N=16384, r=8, p=1, sal de 16 bytes), no formato `scrypt$N$r$p$sal$hash`.
+- **Reason**: Hash com sal sem dependência nativa, que compila igual no Windows e no Alpine.
+- **Trade-off**: Argon2id seria mais resistente a GPU; trocar depois exige rehash no login.
+- **Scope**: fundacao-auth e qualquer feature que guarde senha de usuário.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-029 (active)
+- **Decision**: A matriz de papéis da spec de `fundacao-auth` é código em `packages/contracts/src/roles.ts` (`ROLE_PERMISSIONS`, `can()`), aplicada no backend por `@RequirePermission` com `PermissionGuard` global e lida pelo frontend para sidebar, abas e páginas. A permissão por dashboard ("pode ver", "pode editar") fica num `DashboardAccessService` que combina papel global e compartilhamentos, sem substituir a matriz. Erros da API têm o corpo `{ code, message, fieldErrors? }`, com `message` já em português.
+- **Reason**: Uma fonte única para a regra que governa todas as features (ROLE-01).
+- **Trade-off**: Nova permissão exige mudar o pacote compartilhado e os dois apps.
+- **Scope**: Todas as features.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-030 (active)
+- **Decision**: O bloqueio por tentativas de login usa a tabela `login_throttle` no PostgreSQL, por e-mail em minúsculas: a 5ª falha em 15 minutos bloqueia por 15 minutos a partir dela.
+- **Reason**: Sobrevive a restart sem Redis nem serviço extra.
+- **Trade-off**: Um atacante pode bloquear o login de um e-mail conhecido por 15 minutos.
+- **Scope**: fundacao-auth.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-031 (active)
+- **Decision**: Os tokens do tema vivem só em `apps/web/src/styles/theme.css`, em hexadecimal: `:root` é o claro e `.dark` o escuro, com a classe `dark` em `<html>` por padrão. Paleta tirada a olho da logo: roxo `#8B5CF6`, ciano `#2EE6F0`, azul `#4C9EFF`, magenta `#D946EF`, fundo escuro `#0B0D12`; `--gradient-brand` vai do roxo ao ciano. Texto, ícones e linhas finas em ciano usam `--accent-text`, que no claro é `#08717E` para passar de 4,5:1. Fonte Plus Jakarta Sans empacotada com fontsource, sem CDN. Nenhum `.tsx` escreve cor literal. Os gráficos usam `--chart-1..5` (ciano, roxo, magenta, `#6F7CF7`, `#4C9EFF`).
+- **Reason**: AD-017 e AD-018; a família da fonte e os valores das cores foram delegados ao Design.
+- **Trade-off**: O "BI" do logotipo no tema claro é um ciano escuro, não o ciano da logo; as cores foram medidas sem ferramenta e podem ser ajustadas mantendo os nomes.
+- **Scope**: Todas as features com tela.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-032 (active)
+- **Decision**: Seams das features seguintes: `CryptoService` com AES-256-GCM e chave de 32 bytes em base64 de `NINBI_ENCRYPTION_KEY` (formato `v1:<iv>:<tag>:<cifra>`); `Neo4jGateway` sobre `neo4j-driver` com `session.executeRead`, simulado por `FakeNeo4jGateway` nos testes rápidos; `LlmModule` com `ChatModelFactory` sobre os pacotes `@langchain/*`, simulado por `FakeListChatModel` nos testes.
+- **Reason**: As features seguintes precisam de testes sem serviço externo (AD-026) e de credenciais criptografadas (specs de `conexoes-schema` e `ia-cypher`).
+- **Trade-off**: Os fakes não pegam diferenças de comportamento do Neo4j e dos provedores; os testes de integração contra o Neo4j do compose de dev cobrem a leitura real.
+- **Scope**: conexoes-schema, dashboards-consultas, ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-033 (active)
+- **Decision**: As abas de "Configurações" vêm de um registro único (`SETTINGS_TABS`: Conexões, Usuários, LLM, nessa ordem), cada uma com permissão e um sinal `available` que a feature dona liga. O item "Configurações" só aparece na sidebar quando o papel vê ao menos uma aba disponível: nesta feature só o Admin o vê; o Editor passa a vê-lo quando `conexoes-schema` liga a aba "Conexões". A aba ativa fica na URL (`/configuracoes/<aba>`).
+- **Reason**: ROLE-04 e CFG-02: o Editor não deve ver uma página sem conteúdo.
+- **Trade-off**: Cada feature com aba altera o registro.
+- **Scope**: fundacao-auth, conexoes-schema, ia-cypher, compartilhamento, dashboards-consultas.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-034 (active)
+- **Decision**: O dataset de exemplo do Neo4j é o "Varejo" (`infra/neo4j/seed.cypher`): 12 lojas com latitude e longitude, 6 categorias, 60 produtos, 200 clientes e 2.000 pedidos com data em 24 meses e valor, ligados por `FEZ`, `CONTEM`, `PERTENCE_A` e `VENDIDO_EM`. É determinístico e idempotente pelo nó `(:NinbiSeed {versao: 1})`, e roda por um serviço `neo4j-seed` com a própria imagem do Neo4j.
+- **Reason**: A spec pede categorias, números, datas e latitude/longitude para exercitar todos os widgets; o dataset Movies não tem coordenadas.
+- **Trade-off**: Dados sintéticos, sem significado de negócio.
+- **Scope**: fundacao-auth, e o dado de demonstração de todas as features.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-035 (active)
+- **Decision**: Biome é o lint e o formatador do monorepo (`pnpm lint` = `biome check .`), ignorando `src/components/ui` gerado pelo shadcn, `dist`, `drizzle` e `.specs`.
+- **Reason**: Uma ferramenta, configuração mínima, rápida no Windows.
+- **Trade-off**: Sem as regras específicas de plugins ESLint (react-hooks, por exemplo).
+- **Scope**: Todas as features.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-036 (active)
+- **Decision**: As rotas do web são em português: `/entrar`, `/primeiro-acesso`, `/definir-senha`, `/`, `/configuracoes/<aba>`. Um 401 leva a `/entrar?voltar=<caminho>`, e `voltar` só é aceito quando começa com `/` e não com `//`. Roteamento com React Router 7 em modo biblioteca, estado de servidor com TanStack Query, formulários com react-hook-form e os schemas de `@ninbi/contracts`.
+- **Reason**: Interface só em português (AD-010), AUTH-08.
+- **Trade-off**: Nenhum relevante.
+- **Scope**: Todas as features com tela.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-037 (active)
+- **Decision**: Cada task da Execute leva `**Model**: sonnet` ou `**Model**: haiku`. Toda task com testes é `sonnet`; `haiku` só para tasks sem testes e mecânicas (config, scaffolding, assets, wiring trivial). As fases são montadas para que cada lote de execução de cerca de 7 tasks tenha um só modelo, e o Execution Plan lista os lotes com o modelo de cada um.
+- **Reason**: Pipeline de modelos definido pelo usuário, repassado pelo orquestrador.
+- **Trade-off**: Fases com tamanho dirigido pelo lote, não só pela coesão.
+- **Scope**: Todas as features; fase Tasks.
+- **Date**: 2026-11-16
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:
