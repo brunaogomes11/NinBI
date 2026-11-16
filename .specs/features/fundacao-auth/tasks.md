@@ -194,9 +194,9 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] `pnpm --filter @ninbi/api build` gera `dist/main.js`
-- [ ] `pnpm --filter @ninbi/api test` e `test:int` saem com 0 sem testes
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] `pnpm --filter @ninbi/api build` gera `dist/main.js`
+- [x] `pnpm --filter @ninbi/api test` e `test:int` saem com 0 sem testes
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: none
 **Gate**: build
