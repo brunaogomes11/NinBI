@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -161,4 +162,37 @@
 .cypher-editor .token.operator,
 .cypher-editor .token.punctuation {
   color: var(--muted-foreground);
+}
+
+/* Mapa: o fundo vem do tema; no tema escuro os tiles claros são invertidos (MAP-07). */
+.leaflet-container {
+  background: var(--card-elevated);
+  font-family: inherit;
+}
+.dark .ninbi-map-tiles {
+  filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9);
+}
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background-color: var(--card-elevated);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+.leaflet-control-attribution {
+  background: var(--card);
+  color: var(--muted-foreground);
+}
+.leaflet-control-attribution a {
+  color: var(--accent-text);
+}
+.leaflet-tooltip {
+  background: var(--card-elevated);
+  color: var(--foreground);
+  border-color: var(--border);
+  border-radius: var(--radius-control);
+  box-shadow: none;
+}
+.ninbi-map-marker {
+  background: transparent;
+  border: 0;
 }
