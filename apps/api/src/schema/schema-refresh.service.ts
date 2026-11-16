@@ -103,7 +103,8 @@ export class SchemaRefreshService {
     )
   }
 
-  private async state(connectionId: string): Promise<SchemaStateDto> {
+  /** Estado atual da leitura, sem iniciar nada. */
+  async state(connectionId: string): Promise<SchemaStateDto> {
     const [row] = await this.db
       .select({
         status: connections.schemaStatus,

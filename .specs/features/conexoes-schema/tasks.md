@@ -307,9 +307,9 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes rápidos: SCH-01 (`POST /api/connections` e, depois de `whenSettled`, o `GET` do schema traz `status: 'READY'` e os labels do fixture, sem outra chamada), SCH-07 (com o fixture alterado, `POST .../refresh` e `whenSettled` trazem a propriedade nova e `readAt` novo), SCH-08 (com a leitura pendurada, `GET` e `POST .../refresh` devolvem `status: 'READING'`), SCH-13 (Visualizador recebe 403 em `GET .../schema` e em `POST .../refresh`; Editor recebe 200 e 202), SCH-15 (labels `Zeta`, `alfa`, `Beta` voltam `alfa`, `Beta`, `Zeta`; tipos e propriedades também em ordem), SCH-22 (Admin envia `sendExample: false` para `Cliente.email`, o `GET` mostra `sendExample: false` só nela; `true` volta), SCH-24 (Editor recebe 403 no `PUT`)
-- [ ] Teste de integração `apps/api/test-int/schema-refresh.int.spec.ts`: SCH-11 (dois `POST .../refresh` simultâneos no PostgreSQL real com o leitor pendurado: os dois respondem `READING` e o leitor foi chamado uma vez)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
+- [x] Testes rápidos: SCH-01 (`POST /api/connections` e, depois de `whenSettled`, o `GET` do schema traz `status: 'READY'` e os labels do fixture, sem outra chamada), SCH-07 (com o fixture alterado, `POST .../refresh` e `whenSettled` trazem a propriedade nova e `readAt` novo), SCH-08 (com a leitura pendurada, `GET` e `POST .../refresh` devolvem `status: 'READING'`), SCH-13 (Visualizador recebe 403 em `GET .../schema` e em `POST .../refresh`; Editor recebe 200 e 202), SCH-15 (labels `Zeta`, `alfa`, `Beta` voltam `alfa`, `Beta`, `Zeta`; tipos e propriedades também em ordem), SCH-22 (Admin envia `sendExample: false` para `Cliente.email`, o `GET` mostra `sendExample: false` só nela; `true` volta), SCH-24 (Editor recebe 403 no `PUT`)
+- [x] Teste de integração `apps/api/test-int/schema-refresh.int.spec.ts`: SCH-11 (dois `POST .../refresh` simultâneos no PostgreSQL real com o leitor pendurado: os dois respondem `READING` e o leitor foi chamado uma vez)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
 
 **Tests**: integration
 **Gate**: full

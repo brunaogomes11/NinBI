@@ -17,6 +17,7 @@ import {
   Neo4jGatewayError,
   Neo4jTimeoutError,
 } from '../neo4j/neo4j.gateway'
+import { SchemaRefreshService } from '../schema/schema-refresh.service'
 import { connectionNotFound, isConnectionId } from './connection-errors'
 
 /** Prazo do teste de conexão (CONN-09). */
@@ -73,6 +74,8 @@ export class ConnectionsService {
     @Inject(DB) private readonly db: AppDatabase,
     @Inject(CryptoService) private readonly crypto: CryptoService,
     @Inject(NEO4J_GATEWAY) private readonly neo4j: Neo4jGateway,
+    @Inject(SchemaRefreshService)
+    private readonly refresh: SchemaRefreshService,
     @Inject(CONNECTION_VERIFY_TIMEOUT_MS)
     private readonly verifyTimeoutMs: number,
   ) {}
@@ -117,7 +120,9 @@ export class ConnectionsService {
         })
         .returning()
       if (!created) throw new Error('conexão não inserida')
-      return toConnectionDto(created, null)
+      // A leitura do schema roda em segundo plano: só o claim é esperado (SCH-01).
+      const state = await this.refresh.start(created.id)
+      return toConnectionDto({ ...created, schemaStatus: state.status }, null)
     } catch (error) {
       // O índice único em lower(name) decide a corrida entre dois cadastros iguais (CONN-22).
       if (isUniqueViolation(error)) throw nameTaken()
@@ -184,7 +189,7 @@ export class ConnectionsService {
     const deleted = await this.db
       .delete(connections)
       .where(eq(connections.id, id))
-      .returning({ id: connections.id })
+      .returning()
     if (deleted.length === 0) throw connectionNotFound()
   }
 
