@@ -500,8 +500,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Teste com um controller só de teste, uma rota por permissão: cada papel recebe 200 ou 403 exatamente como a matriz manda (ROLE-01)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste com um controller só de teste, uma rota por permissão: cada papel recebe 200 ou 403 exatamente como a matriz manda (ROLE-01)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
