@@ -351,8 +351,8 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes com gesto: CONN-07 (preencher os cinco campos e salvar envia nome, URI, banco, usuário e senha, e "Vendas" aparece na lista), CONN-08 (422 com "Neo.ClientError.Security.Unauthorized: The client is unauthorized" mostra essa mensagem e os campos continuam com o que foi digitado), CONN-09 (422 `NEO4J_TIMEOUT` mostra "Não foi possível conectar em 10 s"), CONN-10 (URI `http://x` mostra "URI inválida" no campo e nenhuma requisição sai), CONN-11 (409 mostra "Já existe uma conexão com este nome" no campo "Nome"; nome com 81 caracteres mostra "O nome pode ter até 80 caracteres" sem enviar), CONN-15 (editar mudando só o nome e com "Senha" vazia envia um corpo sem `password`), CONN-16 (edição com 422 mostra a mensagem do Neo4j e mantém o diálogo aberto), CONN-20 (com a resposta pendente, "Salvar" está desabilitado)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: CONN-07 (preencher os cinco campos e salvar envia nome, URI, banco, usuário e senha, e "Vendas" aparece na lista), CONN-08 (422 com "Neo.ClientError.Security.Unauthorized: The client is unauthorized" mostra essa mensagem e os campos continuam com o que foi digitado), CONN-09 (422 `NEO4J_TIMEOUT` mostra "Não foi possível conectar em 10 s"), CONN-10 (URI `http://x` mostra "URI inválida" no campo e nenhuma requisição sai), CONN-11 (409 mostra "Já existe uma conexão com este nome" no campo "Nome"; nome com 81 caracteres mostra "O nome pode ter até 80 caracteres" sem enviar), CONN-15 (editar mudando só o nome e com "Senha" vazia envia um corpo sem `password`), CONN-16 (edição com 422 mostra a mensagem do Neo4j e mantém o diálogo aberto), CONN-20 (com a resposta pendente, "Salvar" está desabilitado)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
