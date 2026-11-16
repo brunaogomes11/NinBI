@@ -153,9 +153,9 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] `pnpm install` termina sem erro
-- [ ] `pnpm lint` passa
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] `pnpm install` termina sem erro
+- [x] `pnpm lint` passa
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: none
 **Gate**: build
