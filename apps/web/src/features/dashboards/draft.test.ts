@@ -1,16 +1,20 @@
-import { dashboardSaveSchema } from '@ninbi/contracts'
+import { type DashboardFilter, dashboardSaveSchema } from '@ninbi/contracts'
 import { describe, expect, it } from 'vitest'
 import { makeDashboard, makeWidget } from '@/test/fixtures/dashboards'
 import {
+  addFilter,
   addTab,
   addWidget,
   fromDto,
   isDirty,
+  removeFilter,
   removeWidget,
   setConnection,
   setLayout,
   setName,
+  setRefreshInterval,
   toSavePayload,
+  updateFilter,
   updateWidget,
 } from './draft'
 
@@ -165,5 +169,99 @@ describe('draft', () => {
     const payload = toSavePayload(fromDto(saved()))
     expect(payload.version).toBe(3)
     expect(dashboardSaveSchema.safeParse(payload).success).toBe(true)
+  })
+
+  it('FLT-17 rascunho leva os filtros ao salvar', () => {
+    const category: DashboardFilter = {
+      id: uuid(50),
+      label: 'Categoria',
+      parameter: 'categoria',
+      type: 'SINGLE_SELECT',
+      options: { source: 'STATIC', values: ['Livros', 'Jogos'] },
+      defaultValue: null,
+    }
+    const original = saved()
+    const added = addFilter(fromDto(original), category)
+    expect(isDirty(added, original)).toBe(true)
+    expect(toSavePayload(added).filters).toEqual([category])
+
+    const renamed = updateFilter(added, uuid(50), {
+      ...category,
+      label: 'Tipo',
+      defaultValue: 'Livros',
+    })
+    const payload = toSavePayload(renamed)
+    expect(payload.filters).toEqual([
+      { ...category, label: 'Tipo', defaultValue: 'Livros' },
+    ])
+    expect(dashboardSaveSchema.safeParse(payload).success).toBe(true)
+  })
+
+  it('RFR-03 intervalo padrão vai no payload', () => {
+    const original = saved()
+    const draft = setRefreshInterval(fromDto(original), 300)
+    expect(toSavePayload(draft).refreshIntervalSec).toBe(300)
+    expect(isDirty(draft, original)).toBe(true)
+  })
+
+  it('XFL-09 removeFilter tira o Ao clicar dos widgets', () => {
+    const mapping = { category: 'categoria', value: 'total' }
+    const filter = (id: string, parameter: string): DashboardFilter => ({
+      id,
+      label: parameter,
+      parameter,
+      type: 'TEXT',
+      options: null,
+      defaultValue: null,
+    })
+    const dto = makeDashboard({
+      filters: [filter(uuid(50), 'categoria'), filter(uuid(51), 'busca')],
+      tabs: [
+        {
+          id: uuid(1),
+          name: 'Aba 1',
+          widgets: [
+            makeWidget({
+              id: uuid(11),
+              visualization: 'RADIAL',
+              config: {
+                mapping,
+                crossFilter: { filterId: uuid(50), column: 'categoria' },
+              },
+            }),
+            makeWidget({
+              id: uuid(12),
+              visualization: 'RADIAL',
+              config: {
+                mapping,
+                crossFilter: { filterId: uuid(51), column: 'categoria' },
+              },
+            }),
+          ],
+        },
+        {
+          id: uuid(2),
+          name: 'Aba 2',
+          widgets: [
+            makeWidget({
+              id: uuid(13),
+              visualization: 'RADIAL',
+              config: {
+                mapping,
+                crossFilter: { filterId: uuid(50), column: 'categoria' },
+              },
+            }),
+          ],
+        },
+      ],
+    })
+    const draft = removeFilter(fromDto(dto), uuid(50))
+    expect(draft.filters.map((f) => f.id)).toEqual([uuid(51)])
+    expect(draft.tabs[0]?.widgets[0]?.config).toEqual({ mapping })
+    expect(draft.tabs[1]?.widgets[0]?.config).toEqual({ mapping })
+    expect(draft.tabs[0]?.widgets[1]?.config).toEqual({
+      mapping,
+      crossFilter: { filterId: uuid(51), column: 'categoria' },
+    })
   })
 })

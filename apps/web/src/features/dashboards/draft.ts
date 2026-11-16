@@ -1,7 +1,10 @@
 import {
+  type CrossFilterConfig,
   type DashboardDto,
+  type DashboardFilter,
   type DashboardSaveInput,
   MESSAGES,
+  type RefreshInterval,
   type WidgetDto,
   type WidgetLayout,
   type WidgetVisualization,
@@ -13,6 +16,8 @@ export interface DashboardDraft {
   name: string
   connectionId: string
   tabs: DashboardDto['tabs']
+  filters: DashboardFilter[]
+  refreshIntervalSec: number
 }
 
 const NEW_WIDGET_SIZE = { w: 4, h: 4 } as const
@@ -23,6 +28,8 @@ export function fromDto(dto: DashboardDto): DashboardDraft {
     name: dto.name,
     connectionId: dto.connectionId,
     tabs: dto.tabs,
+    filters: dto.filters,
+    refreshIntervalSec: dto.refreshIntervalSec,
   })
 }
 
@@ -32,6 +39,8 @@ export function toSavePayload(draft: DashboardDraft): DashboardSaveInput {
     version: draft.version,
     name: draft.name,
     connectionId: draft.connectionId,
+    filters: draft.filters,
+    refreshIntervalSec: draft.refreshIntervalSec as RefreshInterval,
     tabs: draft.tabs.map((tab) => ({
       id: tab.id,
       name: tab.name,
@@ -188,6 +197,75 @@ export function setConnection(
   connectionId: string,
 ): DashboardDraft {
   return { ...draft, connectionId }
+}
+
+export function addFilter(
+  draft: DashboardDraft,
+  filter: DashboardFilter,
+): DashboardDraft {
+  return { ...draft, filters: [...draft.filters, filter] }
+}
+
+export function updateFilter(
+  draft: DashboardDraft,
+  filterId: string,
+  filter: DashboardFilter,
+): DashboardDraft {
+  return {
+    ...draft,
+    filters: draft.filters.map((f) => (f.id === filterId ? filter : f)),
+  }
+}
+
+/** Remove o filtro e o "Ao clicar" dos widgets que apontavam para ele (XFL-09). */
+export function removeFilter(
+  draft: DashboardDraft,
+  filterId: string,
+): DashboardDraft {
+  return {
+    ...draft,
+    filters: draft.filters.filter((f) => f.id !== filterId),
+    tabs: draft.tabs.map((tab) => ({
+      ...tab,
+      widgets: tab.widgets.map((widget) => {
+        const crossFilter = widget.config.crossFilter as
+          | CrossFilterConfig
+          | undefined
+        if (crossFilter?.filterId !== filterId) return widget
+        const { crossFilter: _removed, ...config } = widget.config
+        return { ...widget, config }
+      }),
+    })),
+  }
+}
+
+export function setRefreshInterval(
+  draft: DashboardDraft,
+  refreshIntervalSec: number,
+): DashboardDraft {
+  return { ...draft, refreshIntervalSec }
+}
+
+/** Grava ou tira (`null`) o "Ao clicar" do widget, em qualquer aba. */
+export function setCrossFilter(
+  draft: DashboardDraft,
+  widgetId: string,
+  crossFilter: CrossFilterConfig | null,
+): DashboardDraft {
+  return {
+    ...draft,
+    tabs: draft.tabs.map((tab) => ({
+      ...tab,
+      widgets: tab.widgets.map((widget) => {
+        if (widget.id !== widgetId) return widget
+        const { crossFilter: _old, ...config } = widget.config
+        return {
+          ...widget,
+          config: crossFilter ? { ...config, crossFilter } : config,
+        }
+      }),
+    })),
+  }
 }
 
 /** Há diferença entre o rascunho e o que está salvo? */

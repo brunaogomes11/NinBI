@@ -331,8 +331,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `draft.test.ts`: `FLT-17 rascunho leva os filtros ao salvar` (`addFilter` e `updateFilter` aparecem em `toSavePayload`, que passa no `dashboardSaveSchema`; `isDirty` fica verdadeiro), `RFR-03 intervalo padrão vai no payload` (`setRefreshInterval(300)` leva `refreshIntervalSec: 300`), `XFL-09 removeFilter tira o Ao clicar dos widgets` (dois widgets com `crossFilter` para o filtro removido e um para outro filtro: os dois perdem `crossFilter`, o terceiro mantém; o `mapping` fica intacto); testes existentes de `draft.ts` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `draft.test.ts`: `FLT-17 rascunho leva os filtros ao salvar` (`addFilter` e `updateFilter` aparecem em `toSavePayload`, que passa no `dashboardSaveSchema`; `isDirty` fica verdadeiro), `RFR-03 intervalo padrão vai no payload` (`setRefreshInterval(300)` leva `refreshIntervalSec: 300`), `XFL-09 removeFilter tira o Ao clicar dos widgets` (dois widgets com `crossFilter` para o filtro removido e um para outro filtro: os dois perdem `crossFilter`, o terceiro mantém; o `mapping` fica intacto); testes existentes de `draft.ts` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
