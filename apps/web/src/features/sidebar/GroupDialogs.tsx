@@ -30,14 +30,14 @@ const groupNameSchema = z.object({
 
 type GroupNameInput = z.input<typeof groupNameSchema>
 
-/** "Novo grupo" e "Renomear grupo": um campo "Nome" de 1 a 40 caracteres (SIDE-01, SIDE-02, SIDE-08). */
+/** "Novo grupo", "Renomear grupo" e "Renomear aba": um campo "Nome" de 1 a 40 caracteres (SIDE-01, SIDE-02, SIDE-08). */
 export function GroupNameDialog({
   title,
   initialName = '',
   onSubmit,
   onClose,
 }: {
-  title: 'Novo grupo' | 'Renomear grupo'
+  title: 'Novo grupo' | 'Renomear grupo' | 'Renomear aba'
   initialName?: string
   onSubmit: (name: string) => void
   onClose: () => void

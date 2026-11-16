@@ -38,7 +38,14 @@ import { useDashboard } from './api'
 import { DashboardGrid } from './DashboardGrid'
 import { DashboardTabsBar } from './DashboardTabsBar'
 import { DeleteDashboardDialog } from './DeleteDashboardDialog'
-import { type DashboardDraft, setConnection, setName } from './draft'
+import {
+  addTab,
+  type DashboardDraft,
+  removeTab,
+  renameTab,
+  setConnection,
+  setName,
+} from './draft'
 import { useDashboardEditor } from './useDashboardEditor'
 
 function NotFound() {
@@ -233,6 +240,23 @@ function DashboardView({
             tabs={tabs}
             activeTabId={shownTab.id}
             onSelect={setSelectedTabId}
+            edit={
+              draft
+                ? {
+                    onAdd: () => {
+                      const id = crypto.randomUUID()
+                      editor.change((current) => addTab(current, id))
+                      setSelectedTabId(id)
+                    },
+                    onRename: (tabId, name) =>
+                      editor.change((current) =>
+                        renameTab(current, tabId, name),
+                      ),
+                    onRemove: (tabId) =>
+                      editor.change((current) => removeTab(current, tabId)),
+                  }
+                : undefined
+            }
           />
           <DashboardGrid
             key={shownTab.id}

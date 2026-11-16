@@ -620,8 +620,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes com gesto: `TAB-03 Nova aba adiciona Aba N e a ativa` (com uma aba, aparece "Aba 2" selecionada e vazia), `TAB-04 renomear a aba mostra o novo nome` ("Aba 1" vira "Vendas"; nome vazio mostra "Informe o nome" e 41 caracteres mostram "O nome pode ter até 40 caracteres"), `TAB-05 Excluir aba com widgets pede confirmação com o nome e o número de widgets` ("Excluir a aba Vendas e seus 3 widgets?"; confirmar tira a aba), `TAB-06 Excluir aba fica desabilitado com uma aba só`
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: `TAB-03 Nova aba adiciona Aba N e a ativa` (com uma aba, aparece "Aba 2" selecionada e vazia), `TAB-04 renomear a aba mostra o novo nome` ("Aba 1" vira "Vendas"; nome vazio mostra "Informe o nome" e 41 caracteres mostram "O nome pode ter até 40 caracteres"), `TAB-05 Excluir aba com widgets pede confirmação com o nome e o número de widgets` ("Excluir a aba Vendas e seus 3 widgets?"; confirmar tira a aba), `TAB-06 Excluir aba fica desabilitado com uma aba só`
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
