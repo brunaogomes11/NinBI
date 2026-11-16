@@ -42,7 +42,13 @@ function firstJsonObject(text: string): Record<string, unknown> | null {
     if (end >= 0) {
       try {
         const parsed: unknown = JSON.parse(text.slice(start, end + 1))
-        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        // Só vale o objeto que traz `cypher`; prosa com outro JSON antes não o esconde (FIX-05).
+        if (
+          parsed &&
+          typeof parsed === 'object' &&
+          !Array.isArray(parsed) &&
+          typeof (parsed as { cypher?: unknown }).cypher === 'string'
+        ) {
           return parsed as Record<string, unknown>
         }
       } catch {

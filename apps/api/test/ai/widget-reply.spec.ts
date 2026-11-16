@@ -31,6 +31,21 @@ describe('widget-reply', () => {
       reply: { cypher: 'MATCH (n) RETURN n', title: 'Nós' },
     })
 
+    const proseWithJson = parseWidgetReply(
+      'Use {"x": 1} como referência.\n```cypher\nMATCH (n) RETURN n AS n\n```',
+    )
+    expect(proseWithJson).toMatchObject({
+      ok: true,
+      reply: { cypher: 'MATCH (n) RETURN n AS n' },
+    })
+    const jsonWithoutCypher = parseWidgetReply(
+      '{"title": "Vendas"}\n```cypher\nMATCH (n) RETURN n AS n\n```',
+    )
+    expect(jsonWithoutCypher).toMatchObject({
+      ok: true,
+      reply: { cypher: 'MATCH (n) RETURN n AS n' },
+    })
+
     const alone = parseWidgetReply('```cypher\nMATCH (n) RETURN n\n```')
     expect(alone).toMatchObject({
       ok: true,
