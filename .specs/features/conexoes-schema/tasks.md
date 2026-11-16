@@ -223,9 +223,9 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes rápidos: SCH-02 (nó com labels `Pessoa` e `Cliente` dá a propriedade aos dois; `codigo` com `["String"]` numa linha e `["Long"]` em outra fica `["String", "Long"]` sem repetir; label sem propriedade aparece com lista vazia), SCH-03 (`` :`CONTEM` `` vira `CONTEM` com `quantidade: ["Long"]`), SCH-04 (o exemplo é o valor devolvido pela consulta de exemplo, inteiro; propriedade sem linha fica `example: null`), SCH-05 (`FEZ` guarda `{from: 'Cliente', to: 'Pedido'}`), SCH-26 (erro `Neo.ClientError.Security.Forbidden` do gateway sobe com a mesma mensagem)
-- [ ] Teste de integração `apps/api/test-int/schema-reader.int.spec.ts` contra o "Varejo": SCH-02 (`Pedido` tem `data` com `["Date"]` e `valorTotal`), SCH-03 (`CONTEM` tem `quantidade`), SCH-04 (o exemplo de `Pedido.codigo` existe: `MATCH (p:Pedido) WHERE p.codigo = <exemplo> RETURN count(p)` dá 1 ou mais), SCH-05 (`FEZ` liga `Cliente` a `Pedido`; `VENDIDO_EM` liga `Pedido` a `Loja`)
-- [ ] Gate check passes: `pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
+- [x] Testes rápidos: SCH-02 (nó com labels `Pessoa` e `Cliente` dá a propriedade aos dois; `codigo` com `["String"]` numa linha e `["Long"]` em outra fica `["String", "Long"]` sem repetir; label sem propriedade aparece com lista vazia), SCH-03 (`` :`CONTEM` `` vira `CONTEM` com `quantidade: ["Long"]`), SCH-04 (o exemplo é o valor devolvido pela consulta de exemplo, inteiro; propriedade sem linha fica `example: null`), SCH-05 (`FEZ` guarda `{from: 'Cliente', to: 'Pedido'}`), SCH-26 (erro `Neo.ClientError.Security.Forbidden` do gateway sobe com a mesma mensagem)
+- [x] Teste de integração `apps/api/test-int/schema-reader.int.spec.ts` contra o "Varejo": SCH-02 (`Pedido` tem `data` com `["Date"]` e `valorTotal`), SCH-03 (`CONTEM` tem `quantidade`), SCH-04 (o exemplo de `Pedido.codigo` existe: `MATCH (p:Pedido) WHERE p.codigo = <exemplo> RETURN count(p)` dá 1 ou mais), SCH-05 (`FEZ` liga `Cliente` a `Pedido`; `VENDIDO_EM` liga `Pedido` a `Loja`)
+- [x] Gate check passes: `pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
 
 **Tests**: integration
 **Gate**: full
