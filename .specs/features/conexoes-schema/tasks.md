@@ -118,8 +118,8 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes: CONN-10 (aceita `neo4j://h`, `neo4j+s://h`, `neo4j+ssc://h`, `bolt://h:7687`, `bolt+s://h`, `bolt+ssc://h` e `BOLT://h`; recusa `http://h`, `h:7687`, `neo4j://` sem host e vazio, todos com "URI inválida"), CONN-11 (nome vazio e só espaços dão "Informe o nome"; 81 caracteres dão "O nome pode ter até 80 caracteres"; 80 passa), CONN-12 (banco `""` e `"  "` viram `null`; `"vendas"` fica), usuário e senha vazios com as mensagens; `connectionUpdateSchema` aceita senha vazia e ausente
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] Testes: CONN-10 (aceita `neo4j://h`, `neo4j+s://h`, `neo4j+ssc://h`, `bolt://h:7687`, `bolt+s://h`, `bolt+ssc://h` e `BOLT://h`; recusa `http://h`, `h:7687`, `neo4j://` sem host e vazio, todos com "URI inválida"), CONN-11 (nome vazio e só espaços dão "Informe o nome"; 81 caracteres dão "O nome pode ter até 80 caracteres"; 80 passa), CONN-12 (banco `""` e `"  "` viram `null`; `"vendas"` fica), usuário e senha vazios com as mensagens; `connectionUpdateSchema` aceita senha vazia e ausente
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick
@@ -658,7 +658,7 @@ Proof: run api | ✓ SCH-29 conexão excluída durante a leitura descarta o resu
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** none
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre fae0714 - em andamento.
 **Walked:** dispensado por AD-023
 
 ---
