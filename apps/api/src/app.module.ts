@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { AiModule } from './ai/ai.module'
 import { AuthModule } from './auth/auth.module'
 import { ClockModule } from './common/clock'
 import { ConnectionsModule } from './connections/connections.module'
@@ -21,6 +22,7 @@ import { WebModule } from './web/web.module'
 
 @Module({
   imports: [
+    AiModule,
     AuthModule,
     ClockModule,
     ConnectionsModule,
