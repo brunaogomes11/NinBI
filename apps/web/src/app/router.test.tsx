@@ -6,6 +6,7 @@ import {
   renderApp,
   sessionHandler,
   setupStatusHandler,
+  usersHandler,
 } from '@/test/renderApp'
 
 function currentUrl(router: {
@@ -60,7 +61,11 @@ describe('roteador e guardas', () => {
 
   it('AUTH-08 sessão aberta no login segue para o voltar do próprio app', async () => {
     const { router } = renderApp('/entrar?voltar=%2Fconfiguracoes%2Fusuarios', {
-      handlers: [setupStatusHandler(false), sessionHandler(makeUser())],
+      handlers: [
+        setupStatusHandler(false),
+        sessionHandler(makeUser()),
+        usersHandler(),
+      ],
     })
 
     await waitFor(() =>
@@ -91,7 +96,11 @@ describe('roteador e guardas', () => {
 
   it('ROLE-03 Admin abre a página de usuários', async () => {
     const { router } = renderApp('/configuracoes/usuarios', {
-      handlers: [setupStatusHandler(false), sessionHandler(makeUser())],
+      handlers: [
+        setupStatusHandler(false),
+        sessionHandler(makeUser()),
+        usersHandler(),
+      ],
     })
 
     await waitFor(() =>

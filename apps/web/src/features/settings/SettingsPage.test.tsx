@@ -5,6 +5,7 @@ import {
   renderApp,
   sessionHandler,
   setupStatusHandler,
+  usersHandler,
 } from '@/test/renderApp'
 import { SETTINGS_TABS } from './settingsTabs'
 
@@ -18,14 +19,22 @@ afterEach(() => {
 
 function openSettings(path: string) {
   return renderApp(path, {
-    handlers: [setupStatusHandler(false), sessionHandler(makeUser())],
+    handlers: [
+      setupStatusHandler(false),
+      sessionHandler(makeUser()),
+      usersHandler(),
+    ],
   })
 }
 
 describe('SettingsPage', () => {
   it('CFG-01 clicar em Configurações mostra a página com a aba Usuários', async () => {
     const { user, router } = renderApp('/', {
-      handlers: [setupStatusHandler(false), sessionHandler(makeUser())],
+      handlers: [
+        setupStatusHandler(false),
+        sessionHandler(makeUser()),
+        usersHandler(),
+      ],
     })
 
     await user.click(await screen.findByRole('link', { name: 'Configurações' }))

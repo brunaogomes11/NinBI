@@ -7,6 +7,7 @@ import {
   noSessionHandler,
   renderApp,
   setupStatusHandler,
+  usersHandler,
 } from '@/test/renderApp'
 
 function loginHandler(
@@ -153,7 +154,11 @@ describe('LoginPage', () => {
 
   it('AUTH-08 401 leva ao login e depois do login abre a página pedida', async () => {
     const { user, router } = renderApp('/configuracoes/usuarios', {
-      handlers: [...base, loginHandler(() => HttpResponse.json(makeUser()))],
+      handlers: [
+        ...base,
+        loginHandler(() => HttpResponse.json(makeUser())),
+        usersHandler(),
+      ],
     })
 
     await screen.findByLabelText('E-mail')

@@ -1,4 +1,4 @@
-import type { Role, SessionUserDto } from '@ninbi/contracts'
+import type { Role, SessionUserDto, UserDto } from '@ninbi/contracts'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http, type RequestHandler } from 'msw'
@@ -42,6 +42,24 @@ export function noSessionHandler(): RequestHandler {
       { status: 401 },
     ),
   )
+}
+
+/** Uma linha da lista de usuários (Ana Souza, ativa, por padrão). */
+export function makeUserRow(overrides: Partial<UserDto> = {}): UserDto {
+  return {
+    id: 'u-1',
+    name: 'Ana Souza',
+    email: 'ana@x.com',
+    role: 'ADMIN',
+    status: 'ACTIVE',
+    mustChangePassword: false,
+    ...overrides,
+  }
+}
+
+/** `GET /api/users` com a lista dada. */
+export function usersHandler(users: UserDto[] = []): RequestHandler {
+  return http.get('/api/users', () => HttpResponse.json(users))
 }
 
 export interface RenderAppOptions {

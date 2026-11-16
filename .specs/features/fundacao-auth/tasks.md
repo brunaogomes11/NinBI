@@ -989,8 +989,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: USR-01 (linhas com nome, e-mail, "Editor"/"Visualizador", "Ativo"/"Desativado", na ordem da resposta), USR-02 (com a resposta pendente, há linhas de esqueleto e nenhum nome), USR-03 (500 mostra a mensagem; clicar em "Tentar novamente" com o handler já respondendo 200 mostra a lista)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes: USR-01 (linhas com nome, e-mail, "Editor"/"Visualizador", "Ativo"/"Desativado", na ordem da resposta), USR-02 (com a resposta pendente, há linhas de esqueleto e nenhum nome), USR-03 (500 mostra a mensagem; clicar em "Tentar novamente" com o handler já respondendo 200 mostra a lista)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
