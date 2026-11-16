@@ -94,14 +94,19 @@ export class LlmSettingsService {
   }
 
   /**
-   * Configuração do formulário para o teste (LLM-09): a chave digitada vale; vazia, usa a guardada.
+   * Configuração do formulário para o teste (LLM-09): a chave digitada vale; vazia, usa a guardada só com o mesmo provedor e a mesma URL base.
    * Não grava nada.
    */
   async snapshotFor(input: LlmSettingsInput): Promise<LlmSnapshot> {
     const existing = await this.row()
+    // A chave guardada só acompanha o provedor e a URL base a que pertence (F5).
+    const sameTarget =
+      existing !== undefined &&
+      existing.provider === input.provider &&
+      (existing.baseUrl ?? null) === (input.baseUrl || null)
     const apiKey =
       input.apiKey ||
-      (existing?.apiKeyEncrypted
+      (sameTarget && existing?.apiKeyEncrypted
         ? this.crypto.decrypt(existing.apiKeyEncrypted)
         : null)
     if (!apiKey && PROVIDERS_REQUIRING_KEY.includes(input.provider)) {
