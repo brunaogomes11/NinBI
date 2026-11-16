@@ -146,9 +146,9 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `packages/contracts/src/cypher-tokens.spec.ts`: `FLT-09 extractParameterNames acha os parâmetros fora de strings e comentários` (`MATCH (n) WHERE n.c = $categoria AND n.d >= $periodo_inicio RETURN '$falso' // $comentario` dá `['categoria', 'periodo_inicio']`; `$categoria` repetido aparece uma vez; `` `$crase` `` não conta)
-- [ ] Testes de QRY-02 a QRY-05, QRY-09, QRY-10 e QRY-15 de `dashboards-consultas` continuam verdes sem mudança
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test && pnpm --filter @ninbi/api test`
+- [x] Testes em `packages/contracts/src/cypher-tokens.spec.ts`: `FLT-09 extractParameterNames acha os parâmetros fora de strings e comentários` (`MATCH (n) WHERE n.c = $categoria AND n.d >= $periodo_inicio RETURN '$falso' // $comentario` dá `['categoria', 'periodo_inicio']`; `$categoria` repetido aparece uma vez; `` `$crase` `` não conta)
+- [x] Testes de QRY-02 a QRY-05, QRY-09, QRY-10 e QRY-15 de `dashboards-consultas` continuam verdes sem mudança
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test && pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
