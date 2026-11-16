@@ -440,8 +440,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: 4 falhas não bloqueiam; a 5ª em 15 min bloqueia; continua bloqueado aos 14 min 59 s; libera aos 15 min; falhas espalhadas por mais de 15 min não bloqueiam; `ANA@x.com` e `ana@x.com` contam juntos
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: 4 falhas não bloqueiam; a 5ª em 15 min bloqueia; continua bloqueado aos 14 min 59 s; libera aos 15 min; falhas espalhadas por mais de 15 min não bloqueiam; `ANA@x.com` e `ana@x.com` contam juntos
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
