@@ -291,8 +291,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `cross-filter.test.ts` (resultado `RETURN categoria, total, dia` com três linhas): `XFL-02 clickValue lê a coluna configurada na linha clicada` (linha 1, coluna `categoria`, tipo `TEXT` dá "Livros"; coluna `total` em `NUMBER` dá 120.5; em `SINGLE_SELECT` dá 120.5 como número; coluna `dia` `'2025-02-03T10:00:00Z'` em `DATE` dá `'2025-02-03'`; célula `null` ou coluna ausente dá `undefined`; `bigint` em `TEXT` dá os dígitos), `XFL-04 selectedRows marca as linhas com o valor selecionado` (valor "Livros" em resultado com "Livros" nas linhas 0 e 2 dá `{0, 2}`; valor que não existe dá conjunto vazio)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `cross-filter.test.ts` (resultado `RETURN categoria, total, dia` com três linhas): `XFL-02 clickValue lê a coluna configurada na linha clicada` (linha 1, coluna `categoria`, tipo `TEXT` dá "Livros"; coluna `total` em `NUMBER` dá 120.5; em `SINGLE_SELECT` dá 120.5 como número; coluna `dia` `'2025-02-03T10:00:00Z'` em `DATE` dá `'2025-02-03'`; célula `null` ou coluna ausente dá `undefined`; `bigint` em `TEXT` dá os dígitos), `XFL-04 selectedRows marca as linhas com o valor selecionado` (valor "Livros" em resultado com "Livros" nas linhas 0 e 2 dá `{0, 2}`; valor que não existe dá conjunto vazio)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
