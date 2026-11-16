@@ -580,8 +580,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes de `draft.test.ts`: `TAB-03 addTab nomeia a aba com o número de abas` (com duas abas, a nova é "Aba 3"; depois de excluir uma e adicionar, o nome segue o número de abas), `GRID-05 addWidget põe o widget 4 por 4 abaixo do último` (aba com widgets até `y + h = 7`: o novo é "Novo widget" em `{x: 0, y: 7, w: 4, h: 4}`; aba vazia: `y: 0`), `EDIT-08 setName e setConnection alteram o rascunho` (e `isDirty` passa a verdadeiro; voltar ao valor original volta a falso), `WDG-05 updateWidget troca título e Cypher`, `WDG-09 removeWidget tira o widget da aba`, `toSavePayload` passa em `dashboardSaveSchema` e leva a `version` do DTO
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes de `draft.test.ts`: `TAB-03 addTab nomeia a aba com o número de abas` (com duas abas, a nova é "Aba 3"; depois de excluir uma e adicionar, o nome segue o número de abas), `GRID-05 addWidget põe o widget 4 por 4 abaixo do último` (aba com widgets até `y + h = 7`: o novo é "Novo widget" em `{x: 0, y: 7, w: 4, h: 4}`; aba vazia: `y: 0`), `EDIT-08 setName e setConnection alteram o rascunho` (e `isDirty` passa a verdadeiro; voltar ao valor original volta a falso), `WDG-05 updateWidget troca título e Cypher`, `WDG-09 removeWidget tira o widget da aba`, `toSavePayload` passa em `dashboardSaveSchema` e leva a `version` do DTO
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
