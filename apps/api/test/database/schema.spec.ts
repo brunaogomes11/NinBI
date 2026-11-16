@@ -10,7 +10,7 @@ const baseUser = {
 } as const
 
 describe('schema do banco', () => {
-  it('USR-13 migrações aplicam e criam as quatro tabelas', async () => {
+  it('USR-13 migrações aplicam e criam as tabelas da fundação e das conexões', async () => {
     const { db, client } = await createTestDb()
     const rows = await db.execute<{ table_name: string }>(
       sql`select table_name from information_schema.tables where table_schema = 'public' order by table_name`,
@@ -19,8 +19,11 @@ describe('schema do banco', () => {
       .map((row) => row.table_name)
       .filter((name) => !name.startsWith('__'))
     expect(names).toEqual([
+      'connection_schemas',
+      'connections',
       'installation',
       'login_throttle',
+      'schema_example_opt_outs',
       'sessions',
       'users',
     ])

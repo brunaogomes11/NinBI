@@ -159,9 +159,9 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/database/connections-schema.spec.ts`: migrações aplicam no PGlite; CONN-22 (inserir `Vendas` depois de `vendas` viola `connections_name_lower_uq`); CONN-18 (apagar a conexão apaga a linha de `connection_schemas` e as de `schema_example_opt_outs`); conexão nova nasce com `schema_status = 'NEVER'`
-- [ ] `drizzle-kit generate` não gera diferença depois do commit
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/database/connections-schema.spec.ts`: migrações aplicam no PGlite; CONN-22 (inserir `Vendas` depois de `vendas` viola `connections_name_lower_uq`); CONN-18 (apagar a conexão apaga a linha de `connection_schemas` e as de `schema_example_opt_outs`); conexão nova nasce com `schema_status = 'NEVER'`
+- [x] `drizzle-kit generate` não gera diferença depois do commit
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

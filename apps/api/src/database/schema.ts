@@ -4,8 +4,10 @@ import {
   check,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   smallint,
   text,
   timestamp,
@@ -16,6 +18,16 @@ import {
 
 export const roleEnum = pgEnum('role', ['ADMIN', 'EDITOR', 'VIEWER'])
 export const userStatusEnum = pgEnum('user_status', ['ACTIVE', 'DISABLED'])
+export const schemaStatusEnum = pgEnum('schema_status', [
+  'NEVER',
+  'READING',
+  'READY',
+  'FAILED',
+])
+export const schemaElementKindEnum = pgEnum('schema_element_kind', [
+  'LABEL',
+  'RELATIONSHIP',
+])
 
 const timestamptz = (name: string) =>
   timestamp(name, { withTimezone: true, mode: 'date' })
@@ -70,6 +82,57 @@ export const installation = pgTable(
   (table) => [check('installation_single_row', sql`${table.id} = 1`)],
 )
 
+export const connections = pgTable(
+  'connections',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: varchar('name', { length: 80 }).notNull(),
+    uri: text('uri').notNull(),
+    database: varchar('database', { length: 120 }),
+    username: varchar('username', { length: 120 }).notNull(),
+    passwordEncrypted: text('password_encrypted').notNull(),
+    schemaStatus: schemaStatusEnum('schema_status').notNull().default('NEVER'),
+    schemaReadStartedAt: timestamptz('schema_read_started_at'),
+    schemaError: text('schema_error'),
+    createdAt: timestamptz('created_at').notNull().defaultNow(),
+    updatedAt: timestamptz('updated_at').notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('connections_name_lower_uq').on(sql`lower(${table.name})`),
+  ],
+)
+
+export const connectionSchemas = pgTable('connection_schemas', {
+  connectionId: uuid('connection_id')
+    .primaryKey()
+    .references(() => connections.id, { onDelete: 'cascade' }),
+  readAt: timestamptz('read_at').notNull(),
+  document: jsonb('document').notNull(),
+})
+
+export const schemaExampleOptOuts = pgTable(
+  'schema_example_opt_outs',
+  {
+    connectionId: uuid('connection_id')
+      .notNull()
+      .references(() => connections.id, { onDelete: 'cascade' }),
+    elementKind: schemaElementKindEnum('element_kind').notNull(),
+    elementName: text('element_name').notNull(),
+    propertyName: text('property_name').notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [
+        table.connectionId,
+        table.elementKind,
+        table.elementName,
+        table.propertyName,
+      ],
+    }),
+  ],
+)
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type SessionRow = typeof sessions.$inferSelect
+export type ConnectionRow = typeof connections.$inferSelect
