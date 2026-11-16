@@ -151,18 +151,30 @@ describe('criar, abrir e listar dashboards', () => {
 
     for (const who of [owner, admin]) {
       const body = (await who.agent.get(url)).body
-      expect(body.permissions).toEqual({ edit: true, delete: true })
+      expect(body.permissions).toEqual({
+        edit: true,
+        delete: true,
+        share: true,
+      })
       expect(body.tabs[0].widgets[0].cypher).toBe(
         'MATCH (l:Loja) RETURN l.nome',
       )
     }
     const shared = (await editor.agent.get(url)).body
-    expect(shared.permissions).toEqual({ edit: true, delete: false })
+    expect(shared.permissions).toEqual({
+      edit: true,
+      delete: false,
+      share: false,
+    })
     expect(shared.tabs.at(-1).widgets[0].cypher).toBe(
       'MATCH (l:Loja) RETURN l.nome',
     )
     const seen = (await viewer.agent.get(url)).body
-    expect(seen.permissions).toEqual({ edit: false, delete: false })
+    expect(seen.permissions).toEqual({
+      edit: false,
+      delete: false,
+      share: false,
+    })
     expect(seen.tabs[0].widgets[0]).toMatchObject({
       cypher: null,
       hasQuery: true,
@@ -213,7 +225,11 @@ describe('criar, abrir e listar dashboards', () => {
     })
     const response = await admin.agent.get(`/api/dashboards/${dashboard.id}`)
     expect(response.status).toBe(200)
-    expect(response.body.permissions).toEqual({ edit: true, delete: true })
+    expect(response.body.permissions).toEqual({
+      edit: true,
+      delete: true,
+      share: true,
+    })
     expect(response.body.ownerId).toBe(ana.user.id)
   })
 

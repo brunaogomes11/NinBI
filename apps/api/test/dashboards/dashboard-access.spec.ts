@@ -115,7 +115,11 @@ describe('acesso aos dashboards', () => {
     const error = await t.access
       .assert(viewer, t.dashboard.id, 'edit')
       .catch((e: unknown) => e)
-    expect(error).toMatchObject({ status: 403, code: 'FORBIDDEN' })
+    // AD-048: faltar edição responde DASHBOARD_EDIT_FORBIDDEN (ACL-13)
+    expect(error).toMatchObject({
+      status: 403,
+      code: 'DASHBOARD_EDIT_FORBIDDEN',
+    })
   })
 
   it('DASH-19 compartilhamento edit dá ver e editar, mas assert delete lança 403', async () => {

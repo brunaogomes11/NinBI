@@ -49,7 +49,7 @@ export function makeDashboard(
     ownerName: 'Ana Souza',
     connectionId: 'c-1',
     connectionName: 'Vendas',
-    permissions: { edit: true, delete: true },
+    permissions: { edit: true, delete: true, share: true },
     tabs: [{ id: 't-1', name: 'Aba 1', widgets: [makeWidget()] }],
     ...overrides,
   }

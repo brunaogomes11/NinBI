@@ -17,9 +17,10 @@ export interface DashboardAccess {
   canView: true
   canEdit: boolean
   canDelete: boolean
+  canShare: boolean
 }
 
-export type DashboardNeed = 'view' | 'edit' | 'delete'
+export type DashboardNeed = 'view' | 'edit' | 'delete' | 'share'
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -59,11 +60,13 @@ export class DashboardAccessService {
       canView: true as const,
     }
     if (row.ownerId === user.id || can(user.role, 'dashboards.all')) {
-      return { ...base, canEdit: true, canDelete: true }
+      return { ...base, canEdit: true, canDelete: true, canShare: true }
     }
     const shared = await this.shares.accessFor(user.id, row.id)
     if (!shared) return null
-    return { ...base, canEdit: shared === 'edit', canDelete: false }
+    // ACL-02: o Visualizador nunca edita, mesmo com compartilhamento de edição.
+    const canEdit = shared === 'edit' && user.role !== 'VIEWER'
+    return { ...base, canEdit, canDelete: false, canShare: false }
   }
 
   async assert(
@@ -73,9 +76,16 @@ export class DashboardAccessService {
   ): Promise<DashboardAccess> {
     const access = await this.find(user, dashboardId)
     if (!access) throw dashboardNotFound()
+    if (need === 'edit' && !access.canEdit) {
+      throw new AppError(
+        403,
+        'DASHBOARD_EDIT_FORBIDDEN',
+        MESSAGES.dashboardEditForbidden,
+      )
+    }
     if (
-      (need === 'edit' && !access.canEdit) ||
-      (need === 'delete' && !access.canDelete)
+      (need === 'delete' && !access.canDelete) ||
+      (need === 'share' && !access.canShare)
     ) {
       throw new AppError(403, 'FORBIDDEN', MESSAGES.forbiddenRoute)
     }

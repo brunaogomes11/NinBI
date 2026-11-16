@@ -91,7 +91,8 @@ describe('execução de consultas', () => {
       .post(t.textUrl)
       .send({ cypher: 'MATCH (l:Loja) RETURN l.nome AS nome' })
     expect(res.status).toBe(403)
-    expect(res.body.code).toBe('FORBIDDEN')
+    // AD-048: faltar edição responde DASHBOARD_EDIT_FORBIDDEN (ACL-13)
+    expect(res.body.code).toBe('DASHBOARD_EDIT_FORBIDDEN')
     expect(t.neo4j.calls).toEqual([])
   })
 

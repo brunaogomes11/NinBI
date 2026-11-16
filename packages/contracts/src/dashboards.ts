@@ -39,7 +39,7 @@ export interface DashboardDto {
   ownerName: string
   connectionId: string
   connectionName: string
-  permissions: { edit: boolean; delete: boolean }
+  permissions: { edit: boolean; delete: boolean; share: boolean }
   tabs: DashboardTabDto[]
 }
 

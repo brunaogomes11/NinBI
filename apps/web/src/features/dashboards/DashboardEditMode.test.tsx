@@ -107,7 +107,7 @@ describe('DashboardPage em edição', () => {
     // sem permissão de edição, o parâmetro é ignorado
     open(
       '/dashboards/d-1?editar=1',
-      saved({ permissions: { edit: false, delete: false } }),
+      saved({ permissions: { edit: false, delete: false, share: false } }),
     )
     await screen.findByRole('heading', { name: 'Vendas' })
     expect(screen.queryByRole('button', { name: 'Salvar' })).toBeNull()

@@ -202,9 +202,9 @@ T16
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/sharing/dashboard-access.spec.ts`: `ACL-02 Visualizador com compartilhamento de edição só vê` (`GET` dá 200 com `permissions.edit` falso; `PUT` dá 403), `SHARE-01 só o dono e os Admins têm permissão de compartilhar` (`permissions.share` verdadeiro para dono e Admin; falso para compartilhamento `edit` e `view`), `ACL-13 gravar sem permissão de edição responde Você não tem mais permissão` (compartilhamento `edit` rebaixado para `view` direto no banco: o `PUT` responde 403 `DASHBOARD_EDIT_FORBIDDEN` com a mensagem e o dashboard não muda), `assert('share')` para compartilhamento `edit` lança 403 `FORBIDDEN`
-- [ ] Teste DASH-18 de `dashboards-consultas` atualizado e verde
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/sharing/dashboard-access.spec.ts`: `ACL-02 Visualizador com compartilhamento de edição só vê` (`GET` dá 200 com `permissions.edit` falso; `PUT` dá 403), `SHARE-01 só o dono e os Admins têm permissão de compartilhar` (`permissions.share` verdadeiro para dono e Admin; falso para compartilhamento `edit` e `view`), `ACL-13 gravar sem permissão de edição responde Você não tem mais permissão` (compartilhamento `edit` rebaixado para `view` direto no banco: o `PUT` responde 403 `DASHBOARD_EDIT_FORBIDDEN` com a mensagem e o dashboard não muda), `assert('share')` para compartilhamento `edit` lança 403 `FORBIDDEN`
+- [x] Teste DASH-18 de `dashboards-consultas` atualizado e verde
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

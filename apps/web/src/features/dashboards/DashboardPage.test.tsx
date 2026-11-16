@@ -130,9 +130,9 @@ describe('DashboardPage', () => {
 
   it('DASH-18 Editar e Excluir aparecem só para quem pode', async () => {
     const cases = [
-      { edit: false, delete: false },
-      { edit: true, delete: false },
-      { edit: true, delete: true },
+      { edit: false, delete: false, share: false },
+      { edit: true, delete: false, share: false },
+      { edit: true, delete: true, share: true },
     ]
     for (const permissions of cases) {
       const dashboard = twoTabs({ permissions })

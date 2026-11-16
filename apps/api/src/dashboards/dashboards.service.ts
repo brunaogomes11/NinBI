@@ -65,7 +65,7 @@ export class DashboardsService {
       })
       return row.id
     })
-    return this.load(id, { canEdit: true, canDelete: true })
+    return this.load(id, { canEdit: true, canDelete: true, canShare: true })
   }
 
   async get(user: SessionUser, dashboardId: string): Promise<DashboardDto> {
@@ -212,7 +212,7 @@ export class DashboardsService {
   /** Monta o DTO; quem não edita não recebe o Cypher (AD-043). */
   private async load(
     dashboardId: string,
-    permissions: Pick<DashboardAccess, 'canEdit' | 'canDelete'>,
+    permissions: Pick<DashboardAccess, 'canEdit' | 'canDelete' | 'canShare'>,
   ): Promise<DashboardDto> {
     const [row] = await this.db
       .select({
@@ -251,7 +251,11 @@ export class DashboardsService {
       ownerName: row.ownerName,
       connectionId: row.connectionId,
       connectionName: row.connectionName,
-      permissions: { edit: permissions.canEdit, delete: permissions.canDelete },
+      permissions: {
+        edit: permissions.canEdit,
+        delete: permissions.canDelete,
+        share: permissions.canShare,
+      },
       tabs: tabs.map((tab) => ({
         id: tab.id,
         name: tab.name,

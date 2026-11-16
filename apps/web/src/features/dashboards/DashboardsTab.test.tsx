@@ -77,7 +77,7 @@ describe('DashboardsTab', () => {
       name: 'Estoque',
       ownerId: 'user-bruno',
       ownerName: 'Bruno Lima',
-      permissions: { edit: true, delete: true },
+      permissions: { edit: true, delete: true, share: true },
     })
     const { user, router } = open(
       '/configuracoes/dashboards',
