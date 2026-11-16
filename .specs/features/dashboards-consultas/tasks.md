@@ -143,8 +143,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes em `packages/contracts/src/dashboards.spec.ts`: DASH-06 (nome vazio e só espaços dão "Informe o nome do dashboard"; 81 caracteres dão "O nome pode ter até 80 caracteres"; 80 passa), SIDE-02 e TAB-04 (nome de grupo e de aba vazios dão "Informe o nome"; 41 caracteres dão "O nome pode ter até 40 caracteres"; 40 passa), WDG-07 (título vazio dá "Informe o título"; 81 dá "O título pode ter até 80 caracteres"), GRID-03 (`w: 1`, `h: 1`, `w: 13` e `x: 10, w: 4` são recusados; `w: 2, h: 2` e `x: 0, w: 12` passam), `QRY-09 Cypher com mais de 20000 caracteres no contrato` (`queryRunSchema` e o Cypher de widget com 20.001 caracteres dão "A consulta passa de 20.000 caracteres"; 20.000 passa), `dashboardSaveSchema` sem abas é recusado, `sidebarLayoutSchema` com um dashboard repetido é recusado, `MESSAGES.queryTimeout(30)` é "A consulta excedeu o tempo limite de 30 s" e `MESSAGES.rowsTruncated(5000)` é "Mostrando as primeiras 5.000 linhas"
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] Testes em `packages/contracts/src/dashboards.spec.ts`: DASH-06 (nome vazio e só espaços dão "Informe o nome do dashboard"; 81 caracteres dão "O nome pode ter até 80 caracteres"; 80 passa), SIDE-02 e TAB-04 (nome de grupo e de aba vazios dão "Informe o nome"; 41 caracteres dão "O nome pode ter até 40 caracteres"; 40 passa), WDG-07 (título vazio dá "Informe o título"; 81 dá "O título pode ter até 80 caracteres"), GRID-03 (`w: 1`, `h: 1`, `w: 13` e `x: 10, w: 4` são recusados; `w: 2, h: 2` e `x: 0, w: 12` passam), `QRY-09 Cypher com mais de 20000 caracteres no contrato` (`queryRunSchema` e o Cypher de widget com 20.001 caracteres dão "A consulta passa de 20.000 caracteres"; 20.000 passa), `dashboardSaveSchema` sem abas é recusado, `sidebarLayoutSchema` com um dashboard repetido é recusado, `MESSAGES.queryTimeout(30)` é "A consulta excedeu o tempo limite de 30 s" e `MESSAGES.rowsTruncated(5000)` é "Mostrando as primeiras 5.000 linhas"
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick
@@ -1087,7 +1087,7 @@ Proof: run web | ✓ DASH-22 Visualizador em configuracoes dashboards vê a pág
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** none
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre 5123dd7 - em andamento.
 **Walked:** dispensado por AD-023
 
 ---

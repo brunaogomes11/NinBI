@@ -1,4 +1,5 @@
 export * from './connections'
+export * from './dashboards'
 export * from './errors'
 export * from './messages'
 export * from './roles'

@@ -41,4 +41,42 @@ export const MESSAGES = {
   schemaLoadFailed: 'Não foi possível ler o schema',
   schemaEmpty: 'Este banco não tem dados',
   schemaPropertyNotFound: 'Propriedade não encontrada no schema',
+  dashboardNameRequired: 'Informe o nome do dashboard',
+  dashboardNameTooLong: 'O nome pode ter até 80 caracteres',
+  shortNameTooLong: 'O nome pode ter até 40 caracteres',
+  widgetTitleRequired: 'Informe o título',
+  widgetTitleTooLong: 'O título pode ter até 80 caracteres',
+  cypherTooLong: 'A consulta passa de 20.000 caracteres',
+  connectionRequired: 'Escolha uma conexão',
+  dashboardNotFound: 'Dashboard não encontrado',
+  dashboardVersionConflict:
+    'Este dashboard foi alterado por outra pessoa. Recarregue para continuar.',
+  dashboardSaveFailed: 'Não foi possível salvar. Tente novamente.',
+  dashboardsLoadFailed: 'Não foi possível carregar os dashboards',
+  dashboardsEmpty: 'Nenhum dashboard ainda',
+  dashboardPick: 'Escolha um dashboard na barra lateral',
+  dashboardNeedsConnection: 'Cadastre uma conexão antes de criar um dashboard',
+  sidebarSaveFailed: 'Não foi possível salvar a organização',
+  groupEmpty: 'Grupo vazio',
+  discardChanges: 'Descartar as alterações?',
+  leaveWithoutSaving: 'Sair sem salvar as alterações?',
+  tabEmpty: 'Esta aba está vazia',
+  newWidget: 'Novo widget',
+  running: 'Executando...',
+  queryNoData: 'A consulta não retornou dados',
+  widgetLoadFailed: 'Não foi possível carregar este widget',
+  widgetNoQuery: 'Widget sem consulta',
+  widgetNotFound: 'Widget não encontrado',
+  queryReadOnly: 'Somente consultas de leitura são permitidas',
+  queryMultipleStatements: 'Envie uma consulta por vez',
+  queryWriteBlocked: (clause: string) =>
+    `Somente consultas de leitura são permitidas. Cláusula bloqueada: ${clause}`,
+  neo4jUnreachable: (name: string) =>
+    `Não foi possível conectar ao banco ${name}`,
+  connectionInUse: (count: number) =>
+    `Esta conexão é usada por ${count} dashboard(s)`,
+  queryTimeout: (seconds: number) =>
+    `A consulta excedeu o tempo limite de ${seconds} s`,
+  rowsTruncated: (limit: number) =>
+    `Mostrando as primeiras ${limit.toLocaleString('pt-BR')} linhas`,
 } as const
