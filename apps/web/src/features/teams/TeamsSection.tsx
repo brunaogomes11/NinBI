@@ -19,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useTeams } from './api'
+import { DeleteTeamDialog } from './DeleteTeamDialog'
 import { TeamDialog } from './TeamDialog'
 
 const SKELETON_ROWS = 3
@@ -26,9 +27,11 @@ const SKELETON_ROWS = 3
 function TeamRowActions({
   team,
   onEdit,
+  onDelete,
 }: {
   team: TeamDto
   onEdit: () => void
+  onDelete: () => void
 }) {
   return (
     <DropdownMenu>
@@ -46,7 +49,9 @@ function TeamRowActions({
         <DropdownMenuItem onSelect={onEdit}>
           {MESSAGES.editTeam}
         </DropdownMenuItem>
-        <DropdownMenuItem>{MESSAGES.deleteTeam}</DropdownMenuItem>
+        <DropdownMenuItem onSelect={onDelete}>
+          {MESSAGES.deleteTeam}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -55,6 +60,7 @@ function TeamRowActions({
 export function TeamsSection() {
   const teams = useTeams()
   const [dialog, setDialog] = useState<'new' | TeamDto | null>(null)
+  const [deleting, setDeleting] = useState<TeamDto | null>(null)
 
   return (
     <section aria-labelledby="teams-title" className="mt-8 flex flex-col gap-3">
@@ -116,6 +122,7 @@ export function TeamsSection() {
                     <TeamRowActions
                       team={team}
                       onEdit={() => setDialog(team)}
+                      onDelete={() => setDeleting(team)}
                     />
                   </TableCell>
                 </TableRow>
@@ -129,6 +136,9 @@ export function TeamsSection() {
           team={dialog === 'new' ? undefined : dialog}
           onClose={() => setDialog(null)}
         />
+      ) : null}
+      {deleting ? (
+        <DeleteTeamDialog team={deleting} onClose={() => setDeleting(null)} />
       ) : null}
     </section>
   )

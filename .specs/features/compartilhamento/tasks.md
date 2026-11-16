@@ -350,8 +350,8 @@ T16
 
 **Done when**:
 
-- [ ] Testes com gesto: `TEAM-07 Excluir equipe pede confirmação com o nome e o número de dashboards` ("Excluir a equipe Comercial? 3 dashboards deixarão de estar compartilhados com ela."; "Cancelar" fecha sem requisição), `TEAM-08 confirmar a exclusão tira a equipe da lista` (o `DELETE` sai e "Comercial" some)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto: `TEAM-07 Excluir equipe pede confirmação com o nome e o número de dashboards` ("Excluir a equipe Comercial? 3 dashboards deixarão de estar compartilhados com ela."; "Cancelar" fecha sem requisição), `TEAM-08 confirmar a exclusão tira a equipe da lista` (o `DELETE` sai e "Comercial" some)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
