@@ -18,7 +18,11 @@ export interface NinbiTooltipProps {
 export function NinbiTooltip({ active, payload, label }: NinbiTooltipProps) {
   if (active === false || !payload || payload.length === 0) return null
   const first = payload[0]
-  const heading = first?.payload?.xLabel ?? first?.payload?.axis ?? label
+  // O radial entrega o índice numérico da barra como `label`: não é título.
+  const heading =
+    first?.payload?.xLabel ??
+    first?.payload?.axis ??
+    (typeof label === 'string' ? label : undefined)
   return (
     <div className="grid min-w-32 gap-1.5 rounded-control border border-border bg-card-elevated px-3 py-2 text-xs shadow-xl">
       {heading !== undefined && heading !== '' && (

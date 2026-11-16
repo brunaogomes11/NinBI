@@ -1,5 +1,11 @@
 import type { QueryResultDto } from '@ninbi/contracts'
-import { render, screen, within } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { mockElementSize, resizeTo } from '@/test/element-size'
 import { makeQueryResult } from '@/test/fixtures/dashboards'
@@ -91,14 +97,25 @@ describe('CartesianChartView', () => {
     expect(one.container.querySelector('.recharts-legend-wrapper')).toBeNull()
   })
 
-  it('CHART-03 dica mostra o valor do eixo X e de cada série', () => {
+  it('CHART-03 dica mostra o valor do eixo X e de cada série', async () => {
     const chart = draw('BAR', monthly())
     expect(
       chart.container.querySelector('.recharts-bar-rectangle'),
     ).toBeInTheDocument()
-    expect(
-      chart.container.querySelector('.recharts-tooltip-wrapper'),
-    ).toBeInTheDocument()
+    const wrapper = chart.container.querySelector('.recharts-tooltip-wrapper')
+    expect(wrapper?.textContent).toBe('')
+    // o Recharts acha o ponto pela posição do mouse sobre o gráfico
+    const surface = chart.container.querySelector(
+      '.recharts-wrapper',
+    ) as HTMLElement
+    fireEvent.mouseMove(surface, { clientX: 100, clientY: 100 })
+    await waitFor(() => {
+      expect(wrapper).toHaveTextContent('jan')
+      expect(wrapper).toHaveTextContent('vendas')
+      expect(wrapper).toHaveTextContent('1.234,56')
+      expect(wrapper).toHaveTextContent('custo')
+      expect(wrapper).toHaveTextContent('800')
+    })
     chart.unmount()
 
     render(

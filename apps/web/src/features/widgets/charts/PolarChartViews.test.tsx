@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { mockElementSize } from '@/test/element-size'
 import { makeQueryResult } from '@/test/fixtures/dashboards'
@@ -79,16 +79,36 @@ describe('PolarChartViews', () => {
     expect(lengths[0]).toBeLessThan(lengths[4] ?? 0)
   })
 
-  it('CHART-14 dica do radar e do radial mostra categoria e valor', () => {
+  it('CHART-14 dica do radar e do radial mostra categoria e valor', async () => {
     const radar = drawRadar(3)
-    expect(
-      radar.container.querySelector('.recharts-tooltip-wrapper'),
-    ).toBeInTheDocument()
+    const radarTip = radar.container.querySelector('.recharts-tooltip-wrapper')
+    expect(radarTip?.textContent).toBe('')
+    fireEvent.mouseMove(
+      radar.container.querySelector('.recharts-wrapper') as HTMLElement,
+      { clientX: 300, clientY: 100 },
+    )
+    await waitFor(() => {
+      expect(radarTip?.textContent).toBe('Loja 1vendas10custo5')
+    })
     radar.unmount()
+
     const radial = drawRadial(3)
-    expect(
-      radial.container.querySelector('.recharts-tooltip-wrapper'),
-    ).toBeInTheDocument()
+    const radialTip = radial.container.querySelector(
+      '.recharts-tooltip-wrapper',
+    )
+    expect(radialTip?.textContent).toBe('')
+    const sector = radial.container.querySelector(
+      '.recharts-radial-bar-sector',
+    ) as Element
+    fireEvent.mouseEnter(sector)
+    fireEvent.mouseOver(sector)
+    fireEvent.mouseMove(
+      radial.container.querySelector('.recharts-wrapper') as HTMLElement,
+      { clientX: 300, clientY: 100 },
+    )
+    await waitFor(() => {
+      expect(radialTip?.textContent).toBe('Loja 110')
+    })
     radial.unmount()
 
     const first = render(
