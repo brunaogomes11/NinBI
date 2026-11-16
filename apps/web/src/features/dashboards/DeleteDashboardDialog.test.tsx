@@ -24,6 +24,7 @@ function open(calls: Calls) {
           items: deleted
             ? []
             : [{ type: 'dashboard', id: 'd-1', name: 'Vendas' }],
+          shared: [],
         }),
       ),
       http.get('/api/dashboards/d-1', () => HttpResponse.json(makeDashboard())),
