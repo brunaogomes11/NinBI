@@ -889,8 +889,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes com gesto: SHELL-06 (clicar no bloco "Ana Souza / Admin" abre o menu com "Alterar senha" e "Sair"; iniciais "AS"), AUTH-06 (clicar em "Sair" mostra a tela de login e o logout foi chamado)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: SHELL-06 (clicar no bloco "Ana Souza / Admin" abre o menu com "Alterar senha" e "Sair"; iniciais "AS"), AUTH-06 (clicar em "Sair" mostra a tela de login e o logout foi chamado)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

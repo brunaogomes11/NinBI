@@ -2,7 +2,11 @@ import type { Role, SessionUserDto } from '@ninbi/contracts'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http, type RequestHandler } from 'msw'
-import { createMemoryRouter, RouterProvider } from 'react-router'
+import {
+  createMemoryRouter,
+  type RouteObject,
+  RouterProvider,
+} from 'react-router'
 import { AppProviders, createQueryClient } from '@/app/providers'
 import { appRoutes } from '@/app/router'
 import { server } from './server'
@@ -43,6 +47,8 @@ export function noSessionHandler(): RequestHandler {
 export interface RenderAppOptions {
   /** Handlers do MSW desta renderização (somados aos do teste). */
   handlers?: RequestHandler[]
+  /** Rotas no lugar de `appRoutes`, para testar uma peça isolada. */
+  routes?: RouteObject[]
 }
 
 /**
@@ -53,7 +59,9 @@ export interface RenderAppOptions {
 export function renderApp(path = '/', options: RenderAppOptions = {}) {
   server.use(...(options.handlers ?? []))
   const queryClient = createQueryClient()
-  const router = createMemoryRouter(appRoutes, { initialEntries: [path] })
+  const router = createMemoryRouter(options.routes ?? appRoutes, {
+    initialEntries: [path],
+  })
   const user = userEvent.setup()
   const result = render(
     <AppProviders client={queryClient}>
