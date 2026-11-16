@@ -180,9 +180,9 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Teste rápido `apps/api/test/neo4j/driver-neo4j.gateway.spec.ts`: CONN-09 (um `net.createServer` que aceita e nunca responde; `verify` com `timeoutMs: 200` rejeita com `Neo4jTimeoutError` em menos de 2 s); porta fechada rejeita com `Neo4jGatewayError`
-- [ ] Teste de integração `apps/api/test-int/neo4j-gateway.int.spec.ts`: `verify` com as credenciais certas resolve; CONN-08 (senha errada rejeita com `Neo4jGatewayError` cuja `message` é a do Neo4j, sem a senha); CONN-12 (com `database: null`, `read('CALL db.info() YIELD name RETURN name')` devolve o banco padrão `neo4j`); SCH-12 (`read` com `CREATE (:NinbiWriteProbe)` rejeita e `MATCH (n:NinbiWriteProbe) RETURN count(n)` continua 0)
-- [ ] Gate check passes: `pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
+- [x] Teste rápido `apps/api/test/neo4j/driver-neo4j.gateway.spec.ts`: CONN-09 (um `net.createServer` que aceita e nunca responde; `verify` com `timeoutMs: 200` rejeita com `Neo4jTimeoutError` em menos de 2 s); porta fechada rejeita com `Neo4jGatewayError`
+- [x] Teste de integração `apps/api/test-int/neo4j-gateway.int.spec.ts`: `verify` com as credenciais certas resolve; CONN-08 (senha errada rejeita com `Neo4jGatewayError` cuja `message` é a do Neo4j, sem a senha); CONN-12 (com `database: null`, `read('CALL db.info() YIELD name RETURN name')` devolve o banco padrão `neo4j`); SCH-12 (`read` com `CREATE (:NinbiWriteProbe)` rejeita e `MATCH (n:NinbiWriteProbe) RETURN count(n)` continua 0)
+- [x] Gate check passes: `pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
 
 **Tests**: integration
 **Gate**: full

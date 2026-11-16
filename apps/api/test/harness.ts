@@ -6,7 +6,9 @@ import { configureApp } from '../src/app.factory'
 import { AppModule } from '../src/app.module'
 import { Clock } from '../src/common/clock'
 import { type AppDatabase, DB } from '../src/database/database.module'
+import { NEO4J_GATEWAY } from '../src/neo4j/neo4j.gateway'
 import { createTestDb } from './db'
+import { FakeNeo4jGateway } from './fakes/fake-neo4j.gateway'
 
 /** Relógio controlável: começa em 2026-01-01T12:00:00Z e só anda quando o teste manda. */
 export class FakeClock extends Clock {
@@ -31,6 +33,7 @@ export interface TestAppOptions {
 export async function createTestApp(options: TestAppOptions = {}) {
   const { db, client } = await createTestDb()
   const clock = new FakeClock()
+  const neo4j = new FakeNeo4jGateway()
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule],
     controllers: options.controllers,
@@ -39,6 +42,8 @@ export async function createTestApp(options: TestAppOptions = {}) {
     .useValue(options.db ?? db)
     .overrideProvider(Clock)
     .useValue(clock)
+    .overrideProvider(NEO4J_GATEWAY)
+    .useValue(neo4j)
     // No módulo de teste o adaptador HTTP só existe depois do compile: sem isto o serve-static cai no loader nulo.
     .overrideProvider(AbstractLoader)
     .useClass(ExpressLoader)
@@ -49,6 +54,7 @@ export async function createTestApp(options: TestAppOptions = {}) {
     app,
     db,
     clock,
+    neo4j,
     http: request.agent(app.getHttpServer()),
     close: async () => {
       await app.close()

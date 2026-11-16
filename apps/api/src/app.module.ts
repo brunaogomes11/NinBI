@@ -4,6 +4,7 @@ import { ClockModule } from './common/clock'
 import { CryptoModule } from './crypto/crypto.module'
 import { DatabaseModule } from './database/database.module'
 import { HealthModule } from './health/health.module'
+import { Neo4jModule } from './neo4j/neo4j.module'
 import { SetupModule } from './setup/setup.module'
 import { UsersModule } from './users/users.module'
 import { WebModule } from './web/web.module'
@@ -15,6 +16,7 @@ import { WebModule } from './web/web.module'
     CryptoModule,
     DatabaseModule,
     HealthModule,
+    Neo4jModule,
     SetupModule,
     UsersModule,
     WebModule,
