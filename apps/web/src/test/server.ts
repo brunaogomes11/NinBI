@@ -10,5 +10,7 @@ export const server = setupServer(
       attribution: '© Teste',
     }),
   ),
+  http.get('/api/llm-config', () => HttpResponse.json({ configured: false })),
+  http.get('/api/ai/status', () => HttpResponse.json({ configured: false })),
   http.get('/api/sidebar', () => HttpResponse.json({ items: [], shared: [] })),
 )

@@ -66,11 +66,11 @@ describe('SettingsPage', () => {
       'LLM',
     ])
 
-    // Com "Conexões" e "Dashboards" ligadas (AD-041, AD-046): o Admin vê Conexões, Usuários e Dashboards; o Editor, só Conexões.
+    // Com a aba "LLM" ligada (AD-086): o Admin vê as quatro abas; o Editor, só Conexões.
     const admin = openSettings('/configuracoes/conexoes')
     expect(
       (await screen.findAllByRole('tab')).map((tab) => tab.textContent),
-    ).toEqual(['Conexões', 'Usuários', 'Dashboards'])
+    ).toEqual(['Conexões', 'Usuários', 'Dashboards', 'LLM'])
     admin.unmount()
 
     const editor = openSettings('/configuracoes/conexoes', 'EDITOR')

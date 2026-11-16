@@ -372,10 +372,10 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes com gesto em `LlmSettingsTab.test.tsx` (Admin abre "Configurações" › "LLM"): `LLM-01 aba LLM mostra Provedor, Modelo, Chave de API e URL base`, `LLM-02 select Provedor oferece os cinco provedores na ordem`, `LLM-04 campo da chave mostra só os 4 últimos caracteres` (com `apiKeyLast4: '1234'`: o campo está vazio e mostra `••••1234`; nenhum texto da página tem outro trecho da chave), `LLM-05 salvar sem digitar a chave não envia chave` (mudar o modelo e salvar: o `PUT` leva `apiKey` vazia e a ajuda "Deixe em branco para manter a chave atual" está visível), `LLM-06 URL base vazia mostra Informe a URL base` (Ollama sem URL, sem requisição), `LLM-07 sem chave mostra Informe a chave de API no campo` (OpenAI sem chave guardada, sem requisição; 400 da API com `fieldErrors.apiKey` também aparece no campo), `LLM-08 modelo vazio mostra Informe o modelo`
-- [ ] Teste `LLM-14 web não depende de pacote de provedor de LLM` em `src/features/llm/no-provider-calls.test.ts`: `apps/web/package.json` não tem dependência `@langchain/*`, `openai`, `@anthropic-ai/*` nem `@google/*`, e nenhum arquivo de `src/` contém `api.openai.com`, `api.anthropic.com` ou `generativelanguage.googleapis.com`
-- [ ] Teste CFG-02 de `fundacao-auth` atualizado e verde
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `LlmSettingsTab.test.tsx` (Admin abre "Configurações" › "LLM"): `LLM-01 aba LLM mostra Provedor, Modelo, Chave de API e URL base`, `LLM-02 select Provedor oferece os cinco provedores na ordem`, `LLM-04 campo da chave mostra só os 4 últimos caracteres` (com `apiKeyLast4: '1234'`: o campo está vazio e mostra `••••1234`; nenhum texto da página tem outro trecho da chave), `LLM-05 salvar sem digitar a chave não envia chave` (mudar o modelo e salvar: o `PUT` leva `apiKey` vazia e a ajuda "Deixe em branco para manter a chave atual" está visível), `LLM-06 URL base vazia mostra Informe a URL base` (Ollama sem URL, sem requisição), `LLM-07 sem chave mostra Informe a chave de API no campo` (OpenAI sem chave guardada, sem requisição; 400 da API com `fieldErrors.apiKey` também aparece no campo), `LLM-08 modelo vazio mostra Informe o modelo`
+- [x] Teste `LLM-14 web não depende de pacote de provedor de LLM` em `src/features/llm/no-provider-calls.test.ts`: `apps/web/package.json` não tem dependência `@langchain/*`, `openai`, `@anthropic-ai/*` nem `@google/*`, e nenhum arquivo de `src/` contém `api.openai.com`, `api.anthropic.com` ou `generativelanguage.googleapis.com`
+- [x] Teste CFG-02 de `fundacao-auth` atualizado e verde
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

@@ -5,6 +5,7 @@ import { ForbiddenPage } from '@/features/auth/ForbiddenPage'
 import { useSession } from '@/features/auth/useSession'
 import { ConnectionsTab } from '@/features/connections/ConnectionsTab'
 import { DashboardsTab } from '@/features/dashboards/DashboardsTab'
+import { LlmSettingsTab } from '@/features/llm/LlmSettingsTab'
 import { UsersTab } from '@/features/users/UsersTab'
 import { visibleSettingsTabs } from './settingsTabs'
 
@@ -13,6 +14,7 @@ const TAB_CONTENT: Record<string, ComponentType> = {
   conexoes: ConnectionsTab,
   usuarios: UsersTab,
   dashboards: DashboardsTab,
+  llm: LlmSettingsTab,
 }
 
 /** `/configuracoes` abre a primeira aba que o papel vê. */

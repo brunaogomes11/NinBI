@@ -28,7 +28,7 @@ export const SETTINGS_TABS: SettingsTab[] = [
     permission: 'dashboards.all',
     available: true,
   },
-  { id: 'llm', label: 'LLM', permission: 'llm.manage', available: false },
+  { id: 'llm', label: 'LLM', permission: 'llm.manage', available: true },
 ]
 
 /** Abas prontas que o papel pode abrir, na ordem do registro. */
