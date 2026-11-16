@@ -1,6 +1,7 @@
 import {
   type DashboardCreateInput,
   type DashboardDto,
+  type DashboardSaveInput,
   MESSAGES,
   type QueryResultDto,
   type SidebarDto,
@@ -93,6 +94,22 @@ export function useDashboard(id: string) {
     queryKey: dashboardQueryKey(id),
     queryFn: ({ signal }) =>
       apiFetch<DashboardDto>(`/api/dashboards/${id}`, { signal }),
+  })
+}
+
+/** Grava o dashboard inteiro (nome, conexão, abas, widgets, layout) com a versão lida. */
+export function useSaveDashboard(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: DashboardSaveInput) =>
+      apiFetch<DashboardDto>(`/api/dashboards/${id}`, {
+        method: 'PUT',
+        body: payload,
+      }),
+    onSuccess: (saved) => {
+      queryClient.setQueryData(dashboardQueryKey(id), saved)
+      return queryClient.invalidateQueries({ queryKey: SIDEBAR_QUERY_KEY })
+    },
   })
 }
 

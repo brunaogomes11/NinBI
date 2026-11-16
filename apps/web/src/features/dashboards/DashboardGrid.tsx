@@ -4,6 +4,7 @@ import ReactGridLayout, {
   verticalCompactor,
 } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
+import type { WidgetEditSource } from '@/features/widgets/useWidgetResult'
 import { WidgetCard } from '@/features/widgets/WidgetCard'
 import { useContainerWidth } from './useContainerWidth'
 
@@ -25,10 +26,13 @@ export function DashboardGrid({
   dashboardId,
   version,
   widgets,
+  edit,
 }: {
   dashboardId: string
   version: number
   widgets: WidgetDto[]
+  /** Presente só em edição: os widgets executam o Cypher e a conexão do rascunho. */
+  edit?: WidgetEditSource
 }) {
   const { ref, width } = useContainerWidth()
 
@@ -59,6 +63,7 @@ export function DashboardGrid({
                 dashboardId={dashboardId}
                 version={version}
                 widget={widget}
+                edit={edit}
               />
             </div>
           ))}

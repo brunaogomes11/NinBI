@@ -3,6 +3,15 @@ import { useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, RefreshCw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -11,7 +20,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useConnections } from '@/features/connections/api'
 import { TopBarAction } from '@/features/shell/TopBar'
 import { widgetResultKey } from '@/features/widgets/useWidgetResult'
 import { ApiError } from '@/lib/api'
@@ -19,6 +38,8 @@ import { useDashboard } from './api'
 import { DashboardGrid } from './DashboardGrid'
 import { DashboardTabsBar } from './DashboardTabsBar'
 import { DeleteDashboardDialog } from './DeleteDashboardDialog'
+import { type DashboardDraft, setConnection, setName } from './draft'
+import { useDashboardEditor } from './useDashboardEditor'
 
 function NotFound() {
   return (
@@ -54,6 +75,53 @@ function useNotFoundWatcher(dashboardId: string, onNotFound: () => void) {
   )
 }
 
+/** Campos "Nome" e "Conexão" do dashboard, só em edição (EDIT-08). */
+function DashboardEditFields({
+  draft,
+  onChange,
+}: {
+  draft: DashboardDraft
+  onChange: (apply: (current: DashboardDraft) => DashboardDraft) => void
+}) {
+  const connections = useConnections()
+  return (
+    <div className="flex flex-wrap items-end gap-4">
+      <div className="flex min-w-48 flex-1 flex-col gap-1.5">
+        <Label htmlFor="dashboard-name">Nome</Label>
+        <Input
+          id="dashboard-name"
+          autoComplete="off"
+          value={draft.name}
+          onChange={(event) => {
+            const name = event.target.value
+            onChange((current) => setName(current, name))
+          }}
+        />
+      </div>
+      <div className="flex min-w-48 flex-1 flex-col gap-1.5">
+        <Label htmlFor="dashboard-connection">Conexão</Label>
+        <Select
+          value={draft.connectionId}
+          onValueChange={(connectionId) =>
+            onChange((current) => setConnection(current, connectionId))
+          }
+        >
+          <SelectTrigger id="dashboard-connection" className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {(connections.data ?? []).map((connection) => (
+              <SelectItem key={connection.id} value={connection.id}>
+                {connection.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  )
+}
+
 function DashboardView({
   dashboard,
   onNotFound,
@@ -64,14 +132,22 @@ function DashboardView({
   const queryClient = useQueryClient()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [selectedTabId, setSelectedTabId] = useState(dashboard.tabs[0]?.id)
-  const activeTab =
-    dashboard.tabs.find((tab) => tab.id === selectedTabId) ?? dashboard.tabs[0]
   useNotFoundWatcher(dashboard.id, onNotFound)
+  const editor = useDashboardEditor(dashboard, onNotFound)
+  const { draft } = editor
+  const tabs = draft ? draft.tabs : dashboard.tabs
+  const shownTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0]
+  const edit = draft ? { connectionId: draft.connectionId } : undefined
 
   function refresh() {
-    for (const widget of activeTab?.widgets ?? []) {
+    for (const widget of shownTab?.widgets ?? []) {
       void queryClient.invalidateQueries({
-        queryKey: widgetResultKey(dashboard.id, dashboard.version, widget),
+        queryKey: widgetResultKey(
+          dashboard.id,
+          dashboard.version,
+          widget,
+          edit,
+        ),
       })
     }
   }
@@ -80,24 +156,45 @@ function DashboardView({
     <div className="flex flex-col gap-4">
       {dashboard.permissions.edit && (
         <TopBarAction>
-          <Button
-            type="button"
-            className="bg-[image:var(--gradient-brand)] text-primary-foreground"
-          >
-            Editar
-          </Button>
+          {draft ? (
+            <Button
+              type="button"
+              disabled={editor.saving}
+              onClick={editor.save}
+              className="bg-[image:var(--gradient-brand)] text-primary-foreground"
+            >
+              Salvar
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={editor.start}
+              className="bg-[image:var(--gradient-brand)] text-primary-foreground"
+            >
+              Editar
+            </Button>
+          )}
         </TopBarAction>
       )}
       <div className="flex items-center justify-between gap-3">
         <h1 className="min-w-0 truncate font-semibold text-xl">
-          {dashboard.name}
+          {draft ? draft.name : dashboard.name}
         </h1>
         <div className="flex items-center gap-2">
+          {draft && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={editor.requestDiscard}
+            >
+              Descartar
+            </Button>
+          )}
           <Button type="button" variant="outline" onClick={refresh}>
             <RefreshCw aria-hidden="true" />
             Atualizar
           </Button>
-          {dashboard.permissions.delete && (
+          {dashboard.permissions.delete && !draft && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -124,21 +221,68 @@ function DashboardView({
         onOpenChange={setDeleteOpen}
         onNotFound={onNotFound}
       />
-      {activeTab && (
+      {draft && <DashboardEditFields draft={draft} onChange={editor.change} />}
+      {editor.saveError && (
+        <p role="alert" className="text-destructive text-sm">
+          {editor.saveError}
+        </p>
+      )}
+      {shownTab && (
         <>
           <DashboardTabsBar
-            tabs={dashboard.tabs}
-            activeTabId={activeTab.id}
+            tabs={tabs}
+            activeTabId={shownTab.id}
             onSelect={setSelectedTabId}
           />
           <DashboardGrid
-            key={activeTab.id}
+            key={shownTab.id}
             dashboardId={dashboard.id}
             version={dashboard.version}
-            widgets={activeTab.widgets}
+            widgets={shownTab.widgets}
+            edit={edit}
           />
         </>
       )}
+      <AlertDialog
+        open={editor.discardOpen}
+        onOpenChange={editor.setDiscardOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{MESSAGES.discardChanges}</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={editor.confirmDiscard}>
+              Descartar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog
+        open={editor.blocker.state === 'blocked'}
+        onOpenChange={(open) => {
+          if (!open && editor.blocker.state === 'blocked') {
+            editor.blocker.reset()
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{MESSAGES.leaveWithoutSaving}</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (editor.blocker.state === 'blocked') editor.blocker.proceed()
+              }}
+            >
+              Sair
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
