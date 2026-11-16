@@ -706,6 +706,14 @@
 - **Date**: 2026-11-16
 - **Status**: active
 
+### AD-133 (active)
+- **Decision**: Confirma a regra de AD-063: uma coluna só é numérica quando todos os valores não nulos são números; um único texto (ex.: `'n/d'`) a torna não numérica e a sugestão não a oferece como série ou valor. Quem precisa tratar texto no meio de números converte no Cypher (ex.: `toFloat(...)`, `CASE ... END` devolvendo `null`) antes de mapear a coluna.
+- **Reason**: Verificação de `widgets-graficos` (F1): o verificador esperava que um texto isolado não desclassificasse a coluna; a regra de AD-063 evita sugerir como numérica uma coluna que o usuário não pretende somar. VIZ-14 continua valendo para colunas mapeadas à mão com texto ocasional. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: A coluna com um `'n/d'` não é sugerida sozinha; o usuário trata o texto no Cypher.
+- **Scope**: widgets-graficos, ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:
