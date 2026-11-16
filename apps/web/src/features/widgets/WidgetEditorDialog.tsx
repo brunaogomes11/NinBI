@@ -128,7 +128,11 @@ export function WidgetEditorDialog({
                 {run.isPending ? MESSAGES.running : 'Executar'}
               </Button>
             </div>
-            {!run.isPending && <Preview result={run.data} error={run.error} />}
+            <section aria-label="Prévia" className="flex min-w-0 flex-col">
+              {!run.isPending && (
+                <Preview result={run.data} error={run.error} />
+              )}
+            </section>
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancelar

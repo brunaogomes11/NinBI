@@ -56,6 +56,7 @@ describe('WidgetEditorDialog', () => {
 
     expect(dialog.getByLabelText('Título')).toHaveValue('Novo widget')
     expect(dialog.getByRole('button', { name: 'Executar' })).toBeInTheDocument()
+    expect(dialog.getByRole('region', { name: 'Prévia' })).toBeInTheDocument()
     await user.type(
       dialog.getByRole('textbox', { name: 'Cypher' }),
       'MATCH (n) RETURN n',
