@@ -318,8 +318,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes cobrem, com o texto exato: senha curta ("A senha precisa ter ao menos 8 caracteres"), senhas diferentes ("As senhas não conferem"), e-mail vazio e mal formado, senha vazia, nome e e-mail com 121 caracteres, e os casos válidos
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] Testes cobrem, com o texto exato: senha curta ("A senha precisa ter ao menos 8 caracteres"), senhas diferentes ("As senhas não conferem"), e-mail vazio e mal formado, senha vazia, nome e e-mail com 121 caracteres, e os casos válidos
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: build

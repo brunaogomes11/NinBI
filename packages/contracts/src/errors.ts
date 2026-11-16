@@ -1,0 +1,23 @@
+export const ERROR_CODES = [
+  'VALIDATION_ERROR',
+  'INVALID_CREDENTIALS',
+  'TOO_MANY_ATTEMPTS',
+  'UNAUTHENTICATED',
+  'FORBIDDEN',
+  'PASSWORD_CHANGE_REQUIRED',
+  'PASSWORD_NOT_TEMPORARY',
+  'SETUP_ALREADY_DONE',
+  'EMAIL_TAKEN',
+  'LAST_ADMIN',
+  'CURRENT_PASSWORD_INCORRECT',
+  'NOT_FOUND',
+  'INTERNAL_ERROR',
+] as const
+
+export type ErrorCode = (typeof ERROR_CODES)[number]
+
+export interface ApiErrorBody {
+  code: ErrorCode
+  message: string
+  fieldErrors?: Record<string, string>
+}
