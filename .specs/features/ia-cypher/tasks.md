@@ -310,8 +310,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/queries/query-service-ai.spec.ts`: `AIQ-13 QueryService repassa o signal ao gateway` (o `FakeNeo4jGateway` com `'hang'` termina quando o `signal` aborta, antes do prazo), `FIX-04 erro do Neo4j guarda o código sem serializá-lo` (o erro lançado tem `neo4jCode` `Neo.ClientError.Statement.ArithmeticError`; a resposta HTTP de `POST .../query` tem só `code` e `message`)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/queries/query-service-ai.spec.ts`: `AIQ-13 QueryService repassa o signal ao gateway` (o `FakeNeo4jGateway` com `'hang'` termina quando o `signal` aborta, antes do prazo), `FIX-04 erro do Neo4j guarda o código sem serializá-lo` (o erro lançado tem `neo4jCode` `Neo.ClientError.Statement.ArithmeticError`; a resposta HTTP de `POST .../query` tem só `code` e `message`)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

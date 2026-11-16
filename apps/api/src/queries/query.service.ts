@@ -33,6 +33,8 @@ export interface RunQueryInput {
   widgetId?: string | null
   /** Quem só vê o dashboard não enxerga o erro do banco (TBL-12). */
   maskErrors?: boolean
+  /** Cancela a consulta no Neo4j (AIQ-13). */
+  signal?: AbortSignal
 }
 
 type LogResult =
@@ -107,6 +109,7 @@ export class QueryService {
         read = await this.gateway.read(cfg, input.cypher, params, {
           timeoutMs: this.timeoutMs,
           maxRows: this.maxRows + 1,
+          signal: input.signal,
         })
       } catch (error) {
         const translated = this.translate(error, connection.name, input)
@@ -179,10 +182,10 @@ export class QueryService {
           ),
         }
       }
-      return {
-        result: 'failed',
-        error: this.fail('QUERY_FAILED', error.message, mask),
-      }
+      const failed = this.fail('QUERY_FAILED', error.message, mask)
+      // Só o código segue para quem decide a correção; o filtro de erros não o serializa (FIX-04).
+      failed.neo4jCode = error.code
+      return { result: 'failed', error: failed }
     }
     throw error
   }

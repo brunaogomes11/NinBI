@@ -10,4 +10,7 @@ export class AppError extends Error {
   ) {
     super(message)
   }
+
+  /** Código do Neo4j de um `QUERY_FAILED`; fica no servidor, nunca vai na resposta (FIX-04). */
+  neo4jCode?: string
 }
