@@ -1051,8 +1051,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Teste `SHELL-09 telas não mostram rótulos em inglês` passa
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Teste `SHELL-09 telas não mostram rótulos em inglês` passa
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
