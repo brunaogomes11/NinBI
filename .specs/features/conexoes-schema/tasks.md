@@ -138,9 +138,9 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes: CONN-13 (`encrypt('s3nh@-Neo4j')` começa com `v1:`, não contém o texto nem o seu base64, `decrypt` devolve o texto; duas cifras do mesmo texto diferem; cifra adulterada lança), CONN-21 (`bootstrap()` com env sem a chave grava "NINBI_ENCRYPTION_KEY não definida" no logger capturado e chama `process.exit(1)`, com `process.exit` substituído no teste; chave de 16 bytes dá a outra mensagem)
-- [ ] `docker compose -f docker-compose.yml config` mostra `NINBI_ENCRYPTION_KEY` no serviço `app`
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: CONN-13 (`encrypt('s3nh@-Neo4j')` começa com `v1:`, não contém o texto nem o seu base64, `decrypt` devolve o texto; duas cifras do mesmo texto diferem; cifra adulterada lança), CONN-21 (`bootstrap()` com env sem a chave grava "NINBI_ENCRYPTION_KEY não definida" no logger capturado e chama `process.exit(1)`, com `process.exit` substituído no teste; chave de 16 bytes dá a outra mensagem)
+- [x] `docker compose -f docker-compose.yml config` mostra `NINBI_ENCRYPTION_KEY` no serviço `app`
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick

@@ -8,11 +8,13 @@ const project = 'ninbi-smoke'
 const baseUrl = 'http://localhost:8080'
 const startTimeoutMs = 180_000
 const docker = resolveDocker()
+// Chave fixa só do smoke; o compose de produção não traz valor padrão.
+const smokeEncryptionKey = 'bmluYmktc21va2Uta2V5bmluYmktc21va2Uta2V5bmk='
 
 function run(args, { inherit = false } = {}) {
   return spawnSync(docker, args, {
     cwd: root,
-    env: dockerEnv(docker),
+    env: { ...dockerEnv(docker), NINBI_ENCRYPTION_KEY: smokeEncryptionKey },
     encoding: 'utf-8',
     stdio: inherit ? 'inherit' : 'pipe',
   })

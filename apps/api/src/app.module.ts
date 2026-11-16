@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { AuthModule } from './auth/auth.module'
 import { ClockModule } from './common/clock'
+import { CryptoModule } from './crypto/crypto.module'
 import { DatabaseModule } from './database/database.module'
 import { HealthModule } from './health/health.module'
 import { SetupModule } from './setup/setup.module'
@@ -11,6 +12,7 @@ import { WebModule } from './web/web.module'
   imports: [
     AuthModule,
     ClockModule,
+    CryptoModule,
     DatabaseModule,
     HealthModule,
     SetupModule,

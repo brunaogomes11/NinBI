@@ -3,6 +3,7 @@ import { z } from 'zod'
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(8080),
   DATABASE_URL: z.string().min(1),
+  NINBI_ENCRYPTION_KEY: z.string().min(1),
   NINBI_COOKIE_SECURE: z
     .enum(['true', 'false'])
     .default('false')
@@ -12,6 +13,24 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>
 
+const KEY_BYTES = 32
+
+/** Lê a chave de cifra (base64 de 32 bytes); lança com a mensagem que vai ao log de inicialização. */
+export function loadEncryptionKey(
+  source: NodeJS.ProcessEnv = process.env,
+): Buffer {
+  const raw = source.NINBI_ENCRYPTION_KEY
+  if (raw === undefined || raw.trim() === '') {
+    throw new Error('NINBI_ENCRYPTION_KEY não definida')
+  }
+  const key = Buffer.from(raw.trim(), 'base64')
+  if (key.length !== KEY_BYTES) {
+    throw new Error('NINBI_ENCRYPTION_KEY deve ter 32 bytes em base64')
+  }
+  return key
+}
+
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
+  loadEncryptionKey(source)
   return envSchema.parse(source)
 }

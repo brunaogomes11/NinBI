@@ -7,6 +7,8 @@ services:
       - "${NINBI_PORT:-8080}:8080"
     environment:
       DATABASE_URL: postgres://ninbi:ninbi@postgres:5432/ninbi
+      # Sem valor padrão: a chave protege as senhas das conexões. Veja .env.example.
+      NINBI_ENCRYPTION_KEY: ${NINBI_ENCRYPTION_KEY:?Defina NINBI_ENCRYPTION_KEY}
     depends_on:
       postgres:
         condition: service_healthy

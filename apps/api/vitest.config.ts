@@ -13,6 +13,9 @@ export default defineConfig({
     },
   },
   test: {
+    env: {
+      NINBI_ENCRYPTION_KEY: 'bmluYmktdGVzdC1rZXluaW5iaS10ZXN0LWtleW5pbmI=',
+    },
     include: ['test/**/*.spec.ts'],
     passWithNoTests: true,
     testTimeout: 30000,
