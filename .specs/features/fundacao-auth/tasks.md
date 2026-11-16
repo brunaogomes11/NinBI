@@ -969,8 +969,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: CFG-01 (Admin clica em "Configurações" e vê a página com a aba "Usuários" selecionada), CFG-02 (`SETTINGS_TABS` está na ordem Conexões, Usuários, LLM; ligando `available` das três num teste, as abas aparecem nessa ordem; nesta feature só "Usuários" aparece), CFG-03 (clicar numa aba muda a URL para `/configuracoes/<aba>`; renderizar de novo nessa URL abre a mesma aba)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes: CFG-01 (Admin clica em "Configurações" e vê a página com a aba "Usuários" selecionada), CFG-02 (`SETTINGS_TABS` está na ordem Conexões, Usuários, LLM; ligando `available` das três num teste, as abas aparecem nessa ordem; nesta feature só "Usuários" aparece), CFG-03 (clicar numa aba muda a URL para `/configuracoes/<aba>`; renderizar de novo nessa URL abre a mesma aba)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

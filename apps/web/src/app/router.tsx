@@ -3,7 +3,6 @@ import {
   RedirectIfAuthenticated,
   RequireAuth,
   RequirePasswordChanged,
-  RequirePermission,
   RequireSetupDone,
   RequireSetupPending,
 } from '@/features/auth/guards'
@@ -11,12 +10,11 @@ import { InitialPasswordPage } from '@/features/auth/InitialPasswordPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { SetupPage } from '@/features/auth/SetupPage'
 import { HomePage } from '@/features/home/HomePage'
+import {
+  SettingsIndexRedirect,
+  SettingsPage,
+} from '@/features/settings/SettingsPage'
 import { AppShell } from '@/features/shell/AppShell'
-
-// Marcadores até a página real de cada rota chegar nas tasks seguintes.
-function Placeholder({ name }: { name: string }) {
-  return <div>{name}</div>
-}
 
 export const appRoutes: RouteObject[] = [
   {
@@ -47,14 +45,10 @@ export const appRoutes: RouteObject[] = [
                 children: [
                   { path: '/', element: <HomePage /> },
                   {
-                    element: <RequirePermission permission="users.manage" />,
-                    children: [
-                      {
-                        path: '/configuracoes/usuarios',
-                        element: <Placeholder name="Usuários" />,
-                      },
-                    ],
+                    path: '/configuracoes',
+                    element: <SettingsIndexRedirect />,
                   },
+                  { path: '/configuracoes/:aba', element: <SettingsPage /> },
                 ],
               },
             ],
