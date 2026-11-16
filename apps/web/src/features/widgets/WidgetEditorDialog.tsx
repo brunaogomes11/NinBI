@@ -1,5 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { MESSAGES, type QueryResultDto, type WidgetDto } from '@ninbi/contracts'
+import {
+  MESSAGES,
+  type QueryResultDto,
+  type WidgetVisualization as Visualization,
+  WIDGET_VISUALIZATIONS,
+  type WidgetDto,
+} from '@ninbi/contracts'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -23,7 +29,15 @@ import {
 import { Input } from '@/components/ui/input'
 import { runQuery } from '@/features/dashboards/api'
 import { CypherEditor } from './CypherEditor'
+import {
+  emptyMapping,
+  type MappingDraft,
+  suggestMapping,
+  validateMapping,
+} from './mapping/suggest'
 import { ResultTable } from './ResultTable'
+import { type MappingError, VisualizationPanel } from './VisualizationPanel'
+import { WidgetVisualization } from './WidgetVisualization'
 
 const titleSchema = z.object({
   title: z
@@ -38,9 +52,13 @@ type TitleInput = z.input<typeof titleSchema>
 function Preview({
   result,
   error,
+  visualization,
+  mapping,
 }: {
-  result?: QueryResultDto
+  result?: QueryResultDto | null
   error?: Error | null
+  visualization: Visualization
+  mapping: MappingDraft
 }) {
   if (error) {
     return (
@@ -55,11 +73,37 @@ function Preview({
       <p className="text-muted-foreground text-sm">{MESSAGES.queryNoData}</p>
     )
   }
+  if (visualization === 'TABLE') {
+    return (
+      <div className="flex max-h-64 min-h-0 flex-col">
+        <ResultTable result={result} />
+      </div>
+    )
+  }
   return (
-    <div className="flex max-h-64 min-h-0 flex-col">
-      <ResultTable result={result} />
+    <div className="flex h-64 min-h-0 flex-col">
+      <WidgetVisualization
+        result={result}
+        visualization={visualization}
+        config={{ mapping }}
+      />
     </div>
   )
+}
+
+function initialVisualization(widget: WidgetDto): Visualization {
+  return (WIDGET_VISUALIZATIONS as readonly string[]).includes(
+    widget.visualization,
+  )
+    ? (widget.visualization as Visualization)
+    : 'TABLE'
+}
+
+function initialMapping(widget: WidgetDto, v: Visualization): MappingDraft {
+  const saved = widget.config.mapping
+  return saved && typeof saved === 'object'
+    ? { ...emptyMapping(v), ...(saved as MappingDraft) }
+    : emptyMapping(v)
 }
 
 /** Edita título e Cypher de um widget, com execução e prévia na conexão do rascunho (WDG-01 a WDG-07, WDG-10). */
@@ -73,22 +117,44 @@ export function WidgetEditorDialog({
   dashboardId: string
   connectionId: string
   widget: WidgetDto
-  onApply: (changes: { title: string; cypher: string | null }) => void
+  onApply: (changes: {
+    title: string
+    cypher: string | null
+    visualization: string
+    config: Record<string, unknown>
+  }) => void
   onClose: () => void
 }) {
   const [cypher, setCypher] = useState(widget.cypher ?? '')
+  const [visualization, setVisualization] = useState(
+    initialVisualization(widget),
+  )
+  const [mapping, setMapping] = useState(() =>
+    initialMapping(widget, initialVisualization(widget)),
+  )
+  const [result, setResult] = useState<QueryResultDto | null>(null)
+  const [mappingError, setMappingError] = useState<MappingError | null>(null)
   const form = useForm<TitleInput>({
     resolver: zodResolver(titleSchema),
     defaultValues: { title: widget.title },
   })
   const run = useMutation({
     mutationFn: () => runQuery(dashboardId, { cypher, connectionId }),
+    onSuccess: (data) => {
+      setResult(data)
+      // Visualização escolhida antes de executar: agora há colunas para sugerir.
+      if (
+        JSON.stringify(mapping) === JSON.stringify(emptyMapping(visualization))
+      ) {
+        setMapping(suggestMapping(visualization, data))
+      }
+    },
   })
   const empty = cypher.trim() === ''
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>Editar widget</DialogTitle>
         </DialogHeader>
@@ -96,9 +162,16 @@ export function WidgetEditorDialog({
           <form
             noValidate
             onSubmit={form.handleSubmit((values) => {
+              const problem = validateMapping(visualization, mapping)
+              if (problem) {
+                setMappingError(problem)
+                return
+              }
               onApply({
                 title: values.title.trim(),
                 cypher: empty ? null : cypher,
+                visualization,
+                config: visualization === 'TABLE' ? {} : { mapping },
               })
               onClose()
             })}
@@ -128,9 +201,25 @@ export function WidgetEditorDialog({
                 {run.isPending ? MESSAGES.running : 'Executar'}
               </Button>
             </div>
+            <VisualizationPanel
+              result={result}
+              visualization={visualization}
+              mapping={mapping}
+              error={mappingError}
+              onChange={(nextVisualization, nextMapping) => {
+                setVisualization(nextVisualization)
+                setMapping(nextMapping)
+                setMappingError(null)
+              }}
+            />
             <section aria-label="Prévia" className="flex min-w-0 flex-col">
               {!run.isPending && (
-                <Preview result={run.data} error={run.error} />
+                <Preview
+                  result={run.error ? undefined : result}
+                  error={run.error}
+                  visualization={visualization}
+                  mapping={mapping}
+                />
               )}
             </section>
             <DialogFooter>
