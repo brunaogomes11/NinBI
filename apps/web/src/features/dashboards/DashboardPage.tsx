@@ -18,6 +18,7 @@ import { ApiError } from '@/lib/api'
 import { useDashboard } from './api'
 import { DashboardGrid } from './DashboardGrid'
 import { DashboardTabsBar } from './DashboardTabsBar'
+import { DeleteDashboardDialog } from './DeleteDashboardDialog'
 
 function NotFound() {
   return (
@@ -61,6 +62,7 @@ function DashboardView({
   onNotFound: () => void
 }) {
   const queryClient = useQueryClient()
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const [selectedTabId, setSelectedTabId] = useState(dashboard.tabs[0]?.id)
   const activeTab =
     dashboard.tabs.find((tab) => tab.id === selectedTabId) ?? dashboard.tabs[0]
@@ -108,12 +110,20 @@ function DashboardView({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>Excluir</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => setDeleteOpen(true)}>
+                  Excluir
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
         </div>
       </div>
+      <DeleteDashboardDialog
+        dashboard={dashboard}
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        onNotFound={onNotFound}
+      />
       {activeTab && (
         <>
           <DashboardTabsBar

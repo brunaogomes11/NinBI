@@ -538,8 +538,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes com gesto: `DASH-10 Excluir pede confirmação com o nome do dashboard` (mostra o texto exato com "Vendas"; "Cancelar" fecha sem requisição), `DASH-11 confirmar a exclusão tira o dashboard da sidebar e abre a página inicial` (o `DELETE` sai, "Vendas" some da sidebar e a página inicial aparece)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: `DASH-10 Excluir pede confirmação com o nome do dashboard` (mostra o texto exato com "Vendas"; "Cancelar" fecha sem requisição), `DASH-11 confirmar a exclusão tira o dashboard da sidebar e abre a página inicial` (o `DELETE` sai, "Vendas" some da sidebar e a página inicial aparece)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

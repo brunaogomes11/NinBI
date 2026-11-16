@@ -95,3 +95,15 @@ export function useDashboard(id: string) {
       apiFetch<DashboardDto>(`/api/dashboards/${id}`, { signal }),
   })
 }
+
+/** Exclui o dashboard (e abas e widgets) e atualiza a sidebar. */
+export function useDeleteDashboard(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => apiFetch(`/api/dashboards/${id}`, { method: 'DELETE' }),
+    onSuccess: async () => {
+      queryClient.removeQueries({ queryKey: dashboardQueryKey(id) })
+      await queryClient.invalidateQueries({ queryKey: SIDEBAR_QUERY_KEY })
+    },
+  })
+}
