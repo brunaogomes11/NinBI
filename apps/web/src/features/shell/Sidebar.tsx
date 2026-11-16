@@ -2,6 +2,7 @@ import { Settings } from 'lucide-react'
 import { NavLink } from 'react-router'
 import { useSession } from '@/features/auth/useSession'
 import { visibleSettingsTabs } from '@/features/settings/settingsTabs'
+import { SidebarDashboards } from '@/features/sidebar/SidebarDashboards'
 import { cn } from '@/lib/utils'
 import { BrandMark } from './BrandMark'
 import { ThemeToggle } from './ThemeToggle'
@@ -27,8 +28,9 @@ export function Sidebar() {
     >
       <BrandMark className="px-2 pt-1" />
       <ThemeToggle />
-      {/* Os dashboards entram aqui nas próximas features. */}
-      <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto" />
+      <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto">
+        <SidebarDashboards />
+      </div>
       {showSettings && (
         <NavLink to="/configuracoes" className={sidebarItemClass}>
           <Settings className="size-4" aria-hidden="true" />

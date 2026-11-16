@@ -434,9 +434,9 @@ T28
 
 **Done when**:
 
-- [ ] Testes com gesto: `DASH-01 sidebar mostra os dashboards soltos e os grupos na ordem da API`, `DASH-02 sem dashboards a página inicial mostra Nenhum dashboard ainda` (e, com um dashboard, mostra "Escolha um dashboard na barra lateral"), `DASH-03 esqueleto na sidebar enquanto a lista carrega`, `DASH-04 erro na sidebar mostra Não foi possível carregar os dashboards e Tentar novamente recarrega`, `DASH-08 clicar no dashboard da sidebar marca o item ativo` (URL vira `/dashboards/<id>`; o link fica com `aria-current="page"` e a classe do gradiente), `DASH-09 Novo dashboard aparece só para Admin e Editor` (Visualizador não vê; os três veem "Novo grupo"), `SIDE-07 clicar no cabeçalho recolhe e expande o grupo` (os dashboards do grupo somem e voltam; remontar mantém recolhido), `SIDE-14 grupo sem dashboards mostra Grupo vazio`, `SIDE-15 nome longo é cortado com reticências e mostra o nome inteiro no title` (classe `truncate` e `title` igual ao nome, para dashboard e para grupo), `SIDE-16 lista de dashboards e grupos rola na vertical` (o contêiner da lista tem `overflow-y-auto`)
-- [ ] Testes SHELL-07 e de sidebar de `fundacao-auth` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: `DASH-01 sidebar mostra os dashboards soltos e os grupos na ordem da API`, `DASH-02 sem dashboards a página inicial mostra Nenhum dashboard ainda` (e, com um dashboard, mostra "Escolha um dashboard na barra lateral"), `DASH-03 esqueleto na sidebar enquanto a lista carrega`, `DASH-04 erro na sidebar mostra Não foi possível carregar os dashboards e Tentar novamente recarrega`, `DASH-08 clicar no dashboard da sidebar marca o item ativo` (URL vira `/dashboards/<id>`; o link fica com `aria-current="page"` e a classe do gradiente), `DASH-09 Novo dashboard aparece só para Admin e Editor` (Visualizador não vê; os três veem "Novo grupo"), `SIDE-07 clicar no cabeçalho recolhe e expande o grupo` (os dashboards do grupo somem e voltam; remontar mantém recolhido), `SIDE-14 grupo sem dashboards mostra Grupo vazio`, `SIDE-15 nome longo é cortado com reticências e mostra o nome inteiro no title` (classe `truncate` e `title` igual ao nome, para dashboard e para grupo), `SIDE-16 lista de dashboards e grupos rola na vertical` (o contêiner da lista tem `overflow-y-auto`)
+- [x] Testes SHELL-07 e de sidebar de `fundacao-auth` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

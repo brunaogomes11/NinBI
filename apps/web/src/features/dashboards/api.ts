@@ -1,4 +1,5 @@
-import type { QueryResultDto } from '@ninbi/contracts'
+import type { QueryResultDto, SidebarDto } from '@ninbi/contracts'
+import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 
 /** Executa o Cypher salvo de um widget, pelo id (quem só vê usa esta rota). */
@@ -23,5 +24,15 @@ export function runQuery(
     method: 'POST',
     body,
     signal,
+  })
+}
+
+export const SIDEBAR_QUERY_KEY = ['sidebar'] as const
+
+/** Dashboards e grupos da sidebar do usuário, na ordem que ele definiu. */
+export function useSidebar() {
+  return useQuery({
+    queryKey: SIDEBAR_QUERY_KEY,
+    queryFn: () => apiFetch<SidebarDto>('/api/sidebar'),
   })
 }
