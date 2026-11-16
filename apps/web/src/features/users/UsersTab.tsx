@@ -1,6 +1,7 @@
 import { MESSAGES, ROLE_LABELS, type UserDto } from '@ninbi/contracts'
 import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -15,8 +16,8 @@ import {
 } from '@/components/ui/table'
 import { TopBarAction } from '@/features/shell/TopBar'
 import { apiFetch } from '@/lib/api'
-
-export const USERS_QUERY_KEY = ['users'] as const
+import { NewUserDialog } from './NewUserDialog'
+import { USERS_QUERY_KEY } from './queryKeys'
 
 const SKELETON_ROWS = 5
 
@@ -31,6 +32,7 @@ function StatusBadge({ status }: { status: UserDto['status'] }) {
 }
 
 export function UsersTab() {
+  const [newUserOpen, setNewUserOpen] = useState(false)
   const users = useQuery({
     queryKey: USERS_QUERY_KEY,
     queryFn: () => apiFetch<UserDto[]>('/api/users'),
@@ -41,12 +43,14 @@ export function UsersTab() {
       <TopBarAction>
         <Button
           type="button"
+          onClick={() => setNewUserOpen(true)}
           className="bg-[image:var(--gradient-brand)] text-primary-foreground"
         >
           <Plus aria-hidden="true" />
           Novo usuário
         </Button>
       </TopBarAction>
+      <NewUserDialog open={newUserOpen} onOpenChange={setNewUserOpen} />
       {users.isError ? (
         <Card className="items-start gap-3 rounded-card p-6">
           <p role="alert" className="text-destructive">

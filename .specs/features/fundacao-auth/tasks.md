@@ -1011,8 +1011,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes com gesto: USR-04 (preencher, salvar, e o novo nome aparece na lista), USR-05 (409 mostra "Já existe um usuário com este e-mail" e o diálogo fica aberto), USR-12 (com a resposta pendente, "Salvar" está desabilitado), USR-14 (nome com 121 caracteres mostra a mensagem no campo e não envia)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: USR-04 (preencher, salvar, e o novo nome aparece na lista), USR-05 (409 mostra "Já existe um usuário com este e-mail" e o diálogo fica aberto), USR-12 (com a resposta pendente, "Salvar" está desabilitado), USR-14 (nome com 121 caracteres mostra a mensagem no campo e não envia)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
