@@ -119,8 +119,8 @@ T16
 
 **Done when**:
 
-- [ ] Testes em `packages/contracts/src/sharing.spec.ts`: `TEAM-04 nome da equipe vazio ou com mais de 40 caracteres` (vazio e só espaços dão "Informe o nome"; 41 caracteres dão "O nome pode ter até 40 caracteres"; 40 passa), `SHARE-10 Visualizador só recebe Pode ver nas opções` (`shareOptionsFor` de usuário `VIEWER` é `['view']`; de `EDITOR`, `ADMIN`, equipe e todos é `['view', 'edit']`), `MESSAGES.teamDeleteConfirm('Comercial', 3)` é "Excluir a equipe Comercial? 3 dashboards deixarão de estar compartilhados com ela.", `MESSAGES.sharedBy('Ana Souza')` é "Compartilhado por Ana Souza", `shareUpsertSchema` recusa `type` desconhecido e `USER` sem `userId`, `teamUpdateSchema` vazio é recusado, `memberIds` repetidos são recusados
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] Testes em `packages/contracts/src/sharing.spec.ts`: `TEAM-04 nome da equipe vazio ou com mais de 40 caracteres` (vazio e só espaços dão "Informe o nome"; 41 caracteres dão "O nome pode ter até 40 caracteres"; 40 passa), `SHARE-10 Visualizador só recebe Pode ver nas opções` (`shareOptionsFor` de usuário `VIEWER` é `['view']`; de `EDITOR`, `ADMIN`, equipe e todos é `['view', 'edit']`), `MESSAGES.teamDeleteConfirm('Comercial', 3)` é "Excluir a equipe Comercial? 3 dashboards deixarão de estar compartilhados com ela.", `MESSAGES.sharedBy('Ana Souza')` é "Compartilhado por Ana Souza", `shareUpsertSchema` recusa `type` desconhecido e `USER` sem `userId`, `teamUpdateSchema` vazio é recusado, `memberIds` repetidos são recusados
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick
@@ -620,7 +620,7 @@ Proof: run api | ✓ SHARE-18 apagar o dashboard apaga os compartilhamentos dele
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** none
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre 7e736fa - em andamento.
 **Walked:** dispensado por AD-023
 
 ---
