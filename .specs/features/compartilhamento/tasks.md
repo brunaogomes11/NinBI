@@ -139,9 +139,9 @@ T16
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/database/sharing-schema.spec.ts`: migrações aplicam no PGlite; `SHARE-18 apagar o dashboard apaga os compartilhamentos dele`; `TEAM-08 apagar a equipe apaga os compartilhamentos feitos com ela` (e as linhas de `team_members`); `SHARE-09 índice único impede duas linhas para o mesmo destinatário` (segundo `INSERT` com o mesmo `dashboard_id` e `recipient_key` viola o índice); `TEAM-04 índice único recusa nome de equipe repetido sem diferenciar maiúsculas` ("Comercial" e "comercial"); linha `USER` sem `user_id` e linha `EVERYONE` com `team_id` violam o check
-- [ ] `drizzle-kit generate` não gera diferença depois do commit
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/database/sharing-schema.spec.ts`: migrações aplicam no PGlite; `SHARE-18 apagar o dashboard apaga os compartilhamentos dele`; `TEAM-08 apagar a equipe apaga os compartilhamentos feitos com ela` (e as linhas de `team_members`); `SHARE-09 índice único impede duas linhas para o mesmo destinatário` (segundo `INSERT` com o mesmo `dashboard_id` e `recipient_key` viola o índice); `TEAM-04 índice único recusa nome de equipe repetido sem diferenciar maiúsculas` ("Comercial" e "comercial"); linha `USER` sem `user_id` e linha `EVERYONE` com `team_id` violam o check
+- [x] `drizzle-kit generate` não gera diferença depois do commit
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

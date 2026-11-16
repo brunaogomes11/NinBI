@@ -29,6 +29,12 @@ export const schemaElementKindEnum = pgEnum('schema_element_kind', [
   'LABEL',
   'RELATIONSHIP',
 ])
+export const shareRecipientTypeEnum = pgEnum('share_recipient_type', [
+  'USER',
+  'TEAM',
+  'EVERYONE',
+])
+export const sharePermissionEnum = pgEnum('share_permission', ['view', 'edit'])
 
 const timestamptz = (name: string) =>
   timestamp(name, { withTimezone: true, mode: 'date' })
@@ -205,9 +211,70 @@ export const sidebarLayouts = pgTable('sidebar_layouts', {
   updatedAt: timestamptz('updated_at').notNull(),
 })
 
+export const teams = pgTable(
+  'teams',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    name: varchar('name', { length: 40 }).notNull(),
+    createdAt: timestamptz('created_at').notNull().defaultNow(),
+    updatedAt: timestamptz('updated_at').notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('teams_name_lower_uq').on(sql`lower(${table.name})`)],
+)
+
+export const teamMembers = pgTable(
+  'team_members',
+  {
+    teamId: uuid('team_id')
+      .notNull()
+      .references(() => teams.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.teamId, table.userId] }),
+    index('team_members_user_id_idx').on(table.userId),
+  ],
+)
+
+export const dashboardShares = pgTable(
+  'dashboard_shares',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    dashboardId: uuid('dashboard_id')
+      .notNull()
+      .references(() => dashboards.id, { onDelete: 'cascade' }),
+    recipientType: shareRecipientTypeEnum('recipient_type').notNull(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    teamId: uuid('team_id').references(() => teams.id, { onDelete: 'cascade' }),
+    recipientKey: varchar('recipient_key', { length: 60 }).notNull(),
+    permission: sharePermissionEnum('permission').notNull(),
+    createdBy: uuid('created_by')
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamptz('created_at').notNull().defaultNow(),
+    updatedAt: timestamptz('updated_at').notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('dashboard_shares_recipient_uq').on(
+      table.dashboardId,
+      table.recipientKey,
+    ),
+    index('dashboard_shares_user_id_idx').on(table.userId),
+    index('dashboard_shares_team_id_idx').on(table.teamId),
+    check(
+      'dashboard_shares_recipient_ck',
+      sql`(${table.recipientType} = 'USER' and ${table.userId} is not null and ${table.teamId} is null) or (${table.recipientType} = 'TEAM' and ${table.teamId} is not null and ${table.userId} is null) or (${table.recipientType} = 'EVERYONE' and ${table.userId} is null and ${table.teamId} is null)`,
+    ),
+  ],
+)
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type SessionRow = typeof sessions.$inferSelect
 export type ConnectionRow = typeof connections.$inferSelect
 export type DashboardRow = typeof dashboards.$inferSelect
 export type WidgetRow = typeof widgets.$inferSelect
+export type TeamRow = typeof teams.$inferSelect
+export type DashboardShareRow = typeof dashboardShares.$inferSelect

@@ -21,6 +21,7 @@ describe('schema do banco', () => {
     expect(names).toEqual([
       'connection_schemas',
       'connections',
+      'dashboard_shares',
       'dashboard_tabs',
       'dashboards',
       'installation',
@@ -28,6 +29,8 @@ describe('schema do banco', () => {
       'schema_example_opt_outs',
       'sessions',
       'sidebar_layouts',
+      'team_members',
+      'teams',
       'users',
       'widgets',
     ])
