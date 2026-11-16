@@ -61,3 +61,29 @@ export function sidebarHandler(
 ): RequestHandler {
   return http.get('/api/sidebar', () => HttpResponse.json({ items }))
 }
+
+export interface SavedSidebarItem {
+  type: string
+  id: string
+  name?: string
+  items?: SavedSidebarItem[]
+}
+export interface SavedSidebar {
+  items: SavedSidebarItem[]
+}
+
+/**
+ * `PUT /api/sidebar`: guarda cada corpo recebido em `saved` e devolve o layout
+ * com os nomes (o nome de um dashboard é o próprio id; o de um grupo vem no corpo).
+ */
+export function sidebarSaveHandler(saved: SavedSidebar[]): RequestHandler {
+  const withNames = (item: SavedSidebarItem): SavedSidebarItem =>
+    item.type === 'group'
+      ? { ...item, items: (item.items ?? []).map(withNames) }
+      : { ...item, name: item.id }
+  return http.put('/api/sidebar', async ({ request }) => {
+    const body = (await request.json()) as SavedSidebar
+    saved.push(body)
+    return HttpResponse.json({ items: body.items.map(withNames) })
+  })
+}

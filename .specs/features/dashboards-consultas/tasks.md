@@ -476,8 +476,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes com gesto: `SIDE-01 Novo grupo cria um grupo no fim da sidebar` (digitar "Comercial" e salvar: o grupo aparece por último, com "Grupo vazio", e o `PUT` o contém), `SIDE-02 nome de grupo inválido mostra a mensagem no campo` (vazio dá "Informe o nome"; 41 caracteres dão "O nome pode ter até 40 caracteres"; nenhuma requisição sai), `SIDE-08 renomear o grupo mostra o novo nome` ("Comercial" vira "Vendas"), `SIDE-09 Excluir grupo solta os dashboards na posição do grupo` (os dois dashboards do grupo aparecem soltos onde o grupo estava; nenhum `DELETE` de dashboard sai)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: `SIDE-01 Novo grupo cria um grupo no fim da sidebar` (digitar "Comercial" e salvar: o grupo aparece por último, com "Grupo vazio", e o `PUT` o contém), `SIDE-02 nome de grupo inválido mostra a mensagem no campo` (vazio dá "Informe o nome"; 41 caracteres dão "O nome pode ter até 40 caracteres"; nenhuma requisição sai), `SIDE-08 renomear o grupo mostra o novo nome` ("Comercial" vira "Vendas"), `SIDE-09 Excluir grupo solta os dashboards na posição do grupo` (os dois dashboards do grupo aparecem soltos onde o grupo estava; nenhum `DELETE` de dashboard sai)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

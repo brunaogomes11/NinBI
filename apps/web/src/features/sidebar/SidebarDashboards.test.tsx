@@ -56,7 +56,9 @@ describe('SidebarDashboards', () => {
 
     await within(nav()).findByRole('link', { name: 'Beta' })
     const labels = Array.from(
-      nav().querySelectorAll('a[href^="/dashboards/"], button[aria-expanded]'),
+      nav().querySelectorAll(
+        'a[href^="/dashboards/"], button[aria-expanded]:not([aria-haspopup])',
+      ),
     ).map((element) => element.textContent)
     expect(labels).toEqual(['Beta', 'Comercial', 'Alfa', 'Gama'])
     expect(screen.getByRole('button', { name: 'Comercial' })).toHaveAttribute(

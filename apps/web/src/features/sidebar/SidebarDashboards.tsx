@@ -4,15 +4,34 @@ import {
   type SidebarDashboardNode,
   type SidebarGroupNode,
 } from '@ninbi/contracts'
-import { ChevronDown, ChevronRight, FolderPlus, Plus } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  FolderPlus,
+  MoreHorizontal,
+  Plus,
+} from 'lucide-react'
 import { type DragEvent, useRef, useState } from 'react'
 import { NavLink } from 'react-router'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSession } from '@/features/auth/useSession'
 import { useSaveSidebar, useSidebar } from '@/features/dashboards/api'
 import { sidebarItemClass } from '@/features/shell/Sidebar'
-import { type DropTarget, moveItem } from './layout'
+import { GroupNameDialog } from './GroupDialogs'
+import {
+  addGroup,
+  type DropTarget,
+  moveItem,
+  removeGroup,
+  renameGroup,
+} from './layout'
 
 export const COLLAPSED_STORAGE_KEY = 'ninbi-sidebar-collapsed'
 
@@ -74,29 +93,55 @@ function GroupSection({
   group,
   collapsed,
   onToggle,
+  onRename,
+  onRemove,
   dnd,
 }: {
   group: SidebarGroupNode
   collapsed: boolean
   onToggle: () => void
+  onRename: () => void
+  onRemove: () => void
   dnd: Dnd
 }) {
   const Chevron = collapsed ? ChevronRight : ChevronDown
   return (
     <div className="flex flex-col gap-1">
-      <button
-        type="button"
-        aria-expanded={!collapsed}
-        onClick={onToggle}
-        {...dnd.draggable(group.id)}
-        {...dnd.dropOn({ intoGroup: group.id })}
-        className="flex items-center gap-2 rounded-control px-3 py-2 text-left font-medium text-muted-foreground text-sm hover:bg-card-elevated hover:text-foreground"
-      >
-        <Chevron className="size-4 shrink-0" aria-hidden="true" />
-        <span title={group.name} className="min-w-0 truncate">
-          {group.name}
-        </span>
-      </button>
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          aria-expanded={!collapsed}
+          onClick={onToggle}
+          {...dnd.draggable(group.id)}
+          {...dnd.dropOn({ intoGroup: group.id })}
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-control px-3 py-2 text-left font-medium text-muted-foreground text-sm hover:bg-card-elevated hover:text-foreground"
+        >
+          <Chevron className="size-4 shrink-0" aria-hidden="true" />
+          <span title={group.name} className="min-w-0 truncate">
+            {group.name}
+          </span>
+        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={`Ações do grupo ${group.name}`}
+            >
+              <MoreHorizontal aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={onRename}>
+              Renomear grupo
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={onRemove}>
+              Excluir grupo
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       {!collapsed && (
         <div className="flex flex-col gap-1 pl-3">
           {group.items.length === 0 ? (
@@ -121,6 +166,9 @@ export function SidebarDashboards() {
   const save = useSaveSidebar()
   const [collapsed, setCollapsed] = useState<string[]>(readCollapsed)
   const dragged = useRef<string | null>(null)
+  const [groupDialog, setGroupDialog] = useState<
+    { mode: 'new' } | { mode: 'rename'; group: SidebarGroupNode } | null
+  >(null)
   const canCreate = !!user && can(user.role, 'dashboards.create')
 
   function toggle(groupId: string) {
@@ -156,6 +204,23 @@ export function SidebarDashboards() {
 
   return (
     <div className="flex min-h-full flex-col gap-1">
+      {groupDialog && (
+        <GroupNameDialog
+          title={groupDialog.mode === 'new' ? 'Novo grupo' : 'Renomear grupo'}
+          initialName={
+            groupDialog.mode === 'rename' ? groupDialog.group.name : ''
+          }
+          onClose={() => setGroupDialog(null)}
+          onSubmit={(name) => {
+            if (!sidebar.data) return
+            save.mutate(
+              groupDialog.mode === 'new'
+                ? addGroup(sidebar.data, crypto.randomUUID(), name)
+                : renameGroup(sidebar.data, groupDialog.group.id, name),
+            )
+          }}
+        />
+      )}
       <div className="flex flex-col gap-1 pb-2">
         {canCreate && (
           <Button type="button" variant="ghost" className="justify-start">
@@ -163,7 +228,12 @@ export function SidebarDashboards() {
             Novo dashboard
           </Button>
         )}
-        <Button type="button" variant="ghost" className="justify-start">
+        <Button
+          type="button"
+          variant="ghost"
+          className="justify-start"
+          onClick={() => setGroupDialog({ mode: 'new' })}
+        >
           <FolderPlus aria-hidden="true" />
           Novo grupo
         </Button>
@@ -197,6 +267,11 @@ export function SidebarDashboards() {
                 group={item}
                 collapsed={collapsed.includes(item.id)}
                 onToggle={() => toggle(item.id)}
+                onRename={() => setGroupDialog({ mode: 'rename', group: item })}
+                onRemove={() =>
+                  sidebar.data &&
+                  save.mutate(removeGroup(sidebar.data, item.id))
+                }
                 dnd={dnd}
               />
             ) : (
