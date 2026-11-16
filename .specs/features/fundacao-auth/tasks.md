@@ -767,8 +767,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes com MSW: resposta de erro vira `ApiError` com `code`, `message` e `fieldErrors`; 401 chama `onUnauthorized`; `HttpResponse.error()` vira `ApiError` com status 0 e "Não foi possível conectar ao servidor. Tente novamente."
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com MSW: resposta de erro vira `ApiError` com `code`, `message` e `fieldErrors`; 401 chama `onUnauthorized`; `HttpResponse.error()` vira `ApiError` com status 0 e "Não foi possível conectar ao servidor. Tente novamente."
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
