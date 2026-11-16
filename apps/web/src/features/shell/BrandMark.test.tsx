@@ -1,6 +1,7 @@
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { render } from '@testing-library/react'
+import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 import { ThemeProvider } from '@/theme/ThemeProvider'
 import { BrandMark } from './BrandMark'
@@ -39,13 +40,33 @@ describe('marca', () => {
     },
   )
 
-  it('SHELL-12 ícone da aba é o símbolo em estrela', () => {
+  it('SHELL-12 ícone da aba é o símbolo em estrela', async () => {
     const html = readFileSync(join(webDir, 'index.html'), 'utf8')
-
     expect(html).toMatch(
       /<link\s+rel="icon"\s+type="image\/png"\s+href="\/favicon\.png"\s*\/?>/,
     )
-    expect(existsSync(join(webDir, 'public', 'favicon.png'))).toBe(true)
+
+    // scripts/brand/crop-symbol.mjs: favicon = símbolo recortado (256x256) reduzido para 64x64.
+    const symbolPath = join(webDir, 'public', 'brand', 'ninbi-symbol.png')
+    const faviconPath = join(webDir, 'public', 'favicon.png')
+    const symbolMeta = await sharp(symbolPath).metadata()
+    const faviconMeta = await sharp(faviconPath).metadata()
+    expect([symbolMeta.format, symbolMeta.width, symbolMeta.height]).toEqual([
+      'png',
+      256,
+      256,
+    ])
+    expect([faviconMeta.format, faviconMeta.width, faviconMeta.height]).toEqual(
+      ['png', 64, 64],
+    )
+
+    const expected = await sharp(symbolPath)
+      .resize(64, 64)
+      .ensureAlpha()
+      .raw()
+      .toBuffer()
+    const actual = await sharp(faviconPath).ensureAlpha().raw().toBuffer()
+    expect(actual.equals(expected)).toBe(true)
   })
 
   it('SHELL-13 subtítulo da logo não aparece em nenhuma tela', () => {
