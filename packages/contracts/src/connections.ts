@@ -47,7 +47,8 @@ export interface ConnectionSchemaDto extends SchemaStateDto {
 const MAX_NAME = 80
 const MAX_TEXT = 120
 
-const URI_PATTERN = /^(neo4j|bolt)(\+s|\+ssc)?:\/\/[^\s/?#]+/i
+const URI_PATTERN =
+  /^(neo4j|bolt)(\+s|\+ssc)?:\/\/(\[[0-9a-f:.]+\]|[^\s/?#:[\]]+)(:\d+)?$/i
 
 const name = z
   .string()

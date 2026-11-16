@@ -40,7 +40,14 @@ describe('connection contracts', () => {
     ]) {
       expect(errorsOf(connectionCreateSchema, withUri(uri)), uri).toBeNull()
     }
-    for (const uri of ['http://h', 'h:7687', 'neo4j://', '']) {
+    for (const uri of [
+      'http://h',
+      'h:7687',
+      'neo4j://',
+      '',
+      'bolt://h junk',
+      'bolt://:7687',
+    ]) {
       expect(errorsOf(connectionCreateSchema, withUri(uri)), uri).toEqual({
         uri: 'URI inválida',
       })
