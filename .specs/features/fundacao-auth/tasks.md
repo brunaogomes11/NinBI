@@ -644,8 +644,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Teste com um diretório temporário contendo `index.html`: `GET /` e `GET /configuracoes/usuarios` devolvem o HTML; `GET /api/rota-inexistente` devolve 404 JSON, não o HTML
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste com um diretório temporário contendo `index.html`: `GET /` e `GET /configuracoes/usuarios` devolvem o HTML; `GET /api/rota-inexistente` devolve 404 JSON, não o HTML
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

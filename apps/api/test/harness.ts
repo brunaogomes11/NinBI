@@ -1,4 +1,5 @@
 import type { INestApplication, Type } from '@nestjs/common'
+import { AbstractLoader, ExpressLoader } from '@nestjs/serve-static'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { configureApp } from '../src/app.factory'
@@ -38,6 +39,9 @@ export async function createTestApp(options: TestAppOptions = {}) {
     .useValue(options.db ?? db)
     .overrideProvider(Clock)
     .useValue(clock)
+    // No módulo de teste o adaptador HTTP só existe depois do compile: sem isto o serve-static cai no loader nulo.
+    .overrideProvider(AbstractLoader)
+    .useClass(ExpressLoader)
     .compile()
   const app: INestApplication = configureApp(moduleRef.createNestApplication())
   await app.init()
