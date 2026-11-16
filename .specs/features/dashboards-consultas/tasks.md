@@ -267,8 +267,8 @@ T28
 
 **Done when**:
 
-- [ ] Teste: `DASH-14 excluir conexão usada responde 409 com o número de dashboards` (conexão com dois dashboards: 409 e "Esta conexão é usada por 2 dashboard(s)", a conexão continua); conexão sem dashboards continua dando 204
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Teste: `DASH-14 excluir conexão usada responde 409 com o número de dashboards` (conexão com dois dashboards: 409 e "Esta conexão é usada por 2 dashboard(s)", a conexão continua); conexão sem dashboards continua dando 204
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build

@@ -5,11 +5,11 @@ import {
   type ConnectionUpdate,
   MESSAGES,
 } from '@ninbi/contracts'
-import { eq, sql } from 'drizzle-orm'
+import { count, eq, sql } from 'drizzle-orm'
 import { AppError } from '../common/app-error'
 import { CryptoService } from '../crypto/crypto.service'
 import { type AppDatabase, DB } from '../database/database.module'
-import { connectionSchemas, connections } from '../database/schema'
+import { connectionSchemas, connections, dashboards } from '../database/schema'
 import {
   NEO4J_GATEWAY,
   type Neo4jConnectionConfig,
@@ -27,20 +27,33 @@ export const CONNECTION_VERIFY_TIMEOUT_MS = Symbol(
 export const DEFAULT_CONNECTION_VERIFY_TIMEOUT_MS = 10_000
 
 const UNIQUE_VIOLATION = '23505'
+const FOREIGN_KEY_VIOLATION = '23503'
 
 /** O driver (pg ou PGlite) pode embrulhar o erro original em `cause`. */
-function isUniqueViolation(error: unknown): boolean {
+function hasPostgresCode(error: unknown, code: string): boolean {
   let current: unknown = error
   for (let depth = 0; depth < 3 && current; depth++) {
     if (
       typeof current === 'object' &&
-      (current as { code?: unknown }).code === UNIQUE_VIOLATION
+      (current as { code?: unknown }).code === code
     ) {
       return true
     }
     current = (current as { cause?: unknown }).cause
   }
   return false
+}
+
+function isUniqueViolation(error: unknown): boolean {
+  return hasPostgresCode(error, UNIQUE_VIOLATION)
+}
+
+function isForeignKeyViolation(error: unknown): boolean {
+  return hasPostgresCode(error, FOREIGN_KEY_VIOLATION)
+}
+
+function connectionInUse(count: number): AppError {
+  return new AppError(409, 'CONNECTION_IN_USE', MESSAGES.connectionInUse(count))
 }
 
 function nameTaken(): AppError {
@@ -186,11 +199,30 @@ export class ConnectionsService {
   /** A cascata do banco apaga o schema guardado e as escolhas de exemplo (CONN-18). */
   async remove(id: string): Promise<void> {
     if (!isConnectionId(id)) throw connectionNotFound()
-    const deleted = await this.db
-      .delete(connections)
-      .where(eq(connections.id, id))
-      .returning()
+    const inUse = await this.countDashboards(id)
+    if (inUse > 0) throw connectionInUse(inUse)
+    let deleted: unknown[]
+    try {
+      deleted = await this.db
+        .delete(connections)
+        .where(eq(connections.id, id))
+        .returning()
+    } catch (error) {
+      // Um dashboard nasceu entre a contagem e a exclusão: a chave estrangeira segura.
+      if (isForeignKeyViolation(error)) {
+        throw connectionInUse(await this.countDashboards(id))
+      }
+      throw error
+    }
     if (deleted.length === 0) throw connectionNotFound()
+  }
+
+  private async countDashboards(connectionId: string): Promise<number> {
+    const [row] = await this.db
+      .select({ value: count() })
+      .from(dashboards)
+      .where(eq(dashboards.connectionId, connectionId))
+    return row?.value ?? 0
   }
 
   private async find(id: string) {
