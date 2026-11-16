@@ -330,8 +330,8 @@ T16
 
 **Done when**:
 
-- [ ] Testes com gesto: `TEAM-03 Nova equipe com nome e membros aparece na lista` (digitar "Comercial", marcar dois usuários e salvar: o `POST` leva o nome e os dois ids; a linha "Comercial" com 2 membros aparece), `TEAM-04 nome inválido ou repetido mostra a mensagem no campo Nome` (vazio dá "Informe o nome" e 41 caracteres dão "O nome pode ter até 40 caracteres", sem requisição; 400 da API com "Já existe uma equipe com este nome" aparece no campo), `TEAM-05 Editar equipe envia os membros marcados` (desmarcar um membro e salvar: o `PATCH` leva só o outro id e a linha mostra 1 membro), `TEAM-06 renomear a equipe mostra o novo nome na lista` ("Comercial" vira "Vendas")
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: `TEAM-03 Nova equipe com nome e membros aparece na lista` (digitar "Comercial", marcar dois usuários e salvar: o `POST` leva o nome e os dois ids; a linha "Comercial" com 2 membros aparece), `TEAM-04 nome inválido ou repetido mostra a mensagem no campo Nome` (vazio dá "Informe o nome" e 41 caracteres dão "O nome pode ter até 40 caracteres", sem requisição; 400 da API com "Já existe uma equipe com este nome" aparece no campo), `TEAM-05 Editar equipe envia os membros marcados` (desmarcar um membro e salvar: o `PATCH` leva só o outro id e a linha mostra 1 membro), `TEAM-06 renomear a equipe mostra o novo nome na lista` ("Comercial" vira "Vendas")
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

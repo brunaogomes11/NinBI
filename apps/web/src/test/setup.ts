@@ -11,6 +11,12 @@ beforeAll(() => {
   Element.prototype.setPointerCapture ??= () => {}
   Element.prototype.releasePointerCapture ??= () => {}
   Element.prototype.scrollIntoView ??= () => {}
+  // O Radix Checkbox, dentro de um formulário, mede o elemento com ResizeObserver.
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
 })
 
 // Pedido sem handler não é só um aviso no log: ele reprova o teste que o fez.

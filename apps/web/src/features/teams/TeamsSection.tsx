@@ -1,5 +1,6 @@
 import { MESSAGES, type TeamDto } from '@ninbi/contracts'
 import { MoreHorizontal, Plus } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import {
@@ -18,10 +19,17 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { useTeams } from './api'
+import { TeamDialog } from './TeamDialog'
 
 const SKELETON_ROWS = 3
 
-function TeamRowActions({ team }: { team: TeamDto }) {
+function TeamRowActions({
+  team,
+  onEdit,
+}: {
+  team: TeamDto
+  onEdit: () => void
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,7 +43,9 @@ function TeamRowActions({ team }: { team: TeamDto }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>{MESSAGES.editTeam}</DropdownMenuItem>
+        <DropdownMenuItem onSelect={onEdit}>
+          {MESSAGES.editTeam}
+        </DropdownMenuItem>
         <DropdownMenuItem>{MESSAGES.deleteTeam}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -44,6 +54,7 @@ function TeamRowActions({ team }: { team: TeamDto }) {
 
 export function TeamsSection() {
   const teams = useTeams()
+  const [dialog, setDialog] = useState<'new' | TeamDto | null>(null)
 
   return (
     <section aria-labelledby="teams-title" className="mt-8 flex flex-col gap-3">
@@ -51,7 +62,11 @@ export function TeamsSection() {
         <h2 id="teams-title" className="font-semibold text-lg">
           {MESSAGES.teamsTitle}
         </h2>
-        <Button type="button" variant="outline">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setDialog('new')}
+        >
           <Plus aria-hidden="true" />
           {MESSAGES.newTeam}
         </Button>
@@ -98,7 +113,10 @@ export function TeamsSection() {
                   <TableCell className="font-medium">{team.name}</TableCell>
                   <TableCell>{team.memberCount}</TableCell>
                   <TableCell>
-                    <TeamRowActions team={team} />
+                    <TeamRowActions
+                      team={team}
+                      onEdit={() => setDialog(team)}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
@@ -106,6 +124,12 @@ export function TeamsSection() {
           </Table>
         </Card>
       )}
+      {dialog ? (
+        <TeamDialog
+          team={dialog === 'new' ? undefined : dialog}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
     </section>
   )
 }
