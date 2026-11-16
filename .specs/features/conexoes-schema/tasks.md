@@ -657,8 +657,8 @@ Proof: run api | ✓ SCH-29 conexão excluída durante a leitura descarta o resu
 
 The feature's live state, written as it happens - a compaction gives no warning.
 
-**Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, sonnet) sobre fae0714 - em andamento.
+**Settled mid-build:** o `docker-compose.yml` de produção não traz valor padrão público para `NINBI_ENCRYPTION_KEY`: usa `${NINBI_ENCRYPTION_KEY:?Defina NINBI_ENCRYPTION_KEY}` (falha ao subir sem a chave) e o `.env.example` da raiz explica como gerar uma (decisão do orquestrador sob a delegação do usuário, corrige o design). `apps/api/.env.example`, os vitest da API e o smoke usam uma chave fixa de desenvolvimento.
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre fae0714 - returned (8f8f699).
 **Walked:** dispensado por AD-023
 
 ---
