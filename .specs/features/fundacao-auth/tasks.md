@@ -520,9 +520,9 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes rápidos: SETUP-02 (201, papel `ADMIN`, cookie, `me` responde), SETUP-03 (com usuário já existente, 409 `SETUP_ALREADY_DONE`), status `needsSetup` antes e depois
-- [ ] Teste de integração `test-int/setup.int.spec.ts`: SETUP-06 (dois `POST` simultâneos com `Promise.all`: um 201, um 409, um só usuário na tabela)
-- [ ] Gate check passes: `pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
+- [x] Testes rápidos: SETUP-02 (201, papel `ADMIN`, cookie, `me` responde), SETUP-03 (com usuário já existente, 409 `SETUP_ALREADY_DONE`), status `needsSetup` antes e depois
+- [x] Teste de integração `test-int/setup.int.spec.ts`: SETUP-06 (dois `POST` simultâneos com `Promise.all`: um 201, um 409, um só usuário na tabela)
+- [x] Gate check passes: `pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
 
 **Tests**: integration
 **Gate**: full
