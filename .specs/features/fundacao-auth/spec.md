@@ -376,6 +376,7 @@ A captura é de um app de trading. Só o visual vincula: shell, sidebar, cards, 
 | Verde-limão de destaque e fundo verde-escuro | Gradiente roxo → ciano da logo sobre fundo quase preto | y - AD-018 |
 | Logo do NinBI: subtítulo "BUSINESS INTELLIGENCE & AI" | Nada | y - AD-017 |
 | Logo do NinBI: palavra "NinBI" desenhada na imagem, com "BI" em gradiente ciano/azul | "NinBI" em texto real, com "BI" em ciano | y - AD-017 |
+| "BI" em ciano nos dois temas | "BI" em ciano no tema escuro e em teal escuro (`#08717e`) no claro, por contraste | y - AD-130 |
 | Logo do NinBI: fundo escuro, brilho e partículas em volta do símbolo | Só o símbolo recortado | y - AD-017 |
 | Itens da sidebar "Discover", "Assets", "Funds", "Economic Calendar", "Settings" | Os dashboards e grupos do usuário, e um item "Configurações" que abre a página com as abas "Conexões", "Usuários" e "LLM" | y - AD-013, AD-016 |
 | Alternador "Market / Trades" no topo da sidebar | Alternador de tema "Escuro / Claro" | y - AD-020 |

@@ -8,6 +8,23 @@ import { BrandMark } from './BrandMark'
 
 const webDir = join(__dirname, '..', '..', '..')
 
+const css = readFileSync(join(webDir, 'src', 'styles', 'theme.css'), 'utf8')
+
+function tokens(selector: ':root' | '.dark'): Record<string, string> {
+  const open = css.indexOf('{', css.indexOf(`\n${selector} {`))
+  const close = css.indexOf('\n}', open)
+  const result: Record<string, string> = {}
+  for (const m of css
+    .slice(open + 1, close)
+    .matchAll(/(--[\w-]+):\s*([^;]+);/g)) {
+    result[m[1]] = m[2].trim()
+  }
+  return result
+}
+
+// AD-130: BI é ciano no escuro e teal escuro no claro (contraste sobre fundo claro).
+const expectedBi = { dark: '#2ee6f0', light: '#08717e' } as const
+
 function walk(dir: string): string[] {
   return readdirSync(dir).flatMap((name) => {
     const full = join(dir, name)
@@ -36,6 +53,14 @@ describe('marca', () => {
       const bi = container.querySelector('span span')
       expect(bi).toHaveTextContent(/^BI$/)
       expect(bi).toHaveClass('text-accent-text')
+      expect(css).toMatch(/--color-accent-text:\s*var\(--accent-text\)/)
+      const resolved = tokens(theme === 'dark' ? '.dark' : ':root')[
+        '--accent-text'
+      ]
+      expect(resolved).toBe(expectedBi[theme as 'dark' | 'light'])
+      if (theme === 'dark') {
+        expect(resolved).toBe(tokens('.dark')['--brand-cyan'])
+      }
       expect(bi?.parentElement).toHaveTextContent(/^NinBI$/)
     },
   )

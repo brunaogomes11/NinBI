@@ -682,6 +682,14 @@
 - **Date**: 2026-11-16
 - **Status**: active
 
+### AD-130 (active)
+- **Decision**: O "BI" da logo é ciano no tema escuro (`#2ee6f0`, `--brand-cyan`) e teal escuro no tema claro (`#08717e`), ambos pelo token `--accent-text`. O teste de SHELL-11 afirma o valor resolvido de cada tema.
+- **Reason**: SHELL-02 e SHELL-11; o ciano puro não tem contraste suficiente sobre fundo claro. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: No tema claro o "BI" não tem o mesmo tom da logo escura.
+- **Scope**: fundacao-auth.
+- **Date**: 2026-11-16
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:
