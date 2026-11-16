@@ -349,8 +349,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/queries/queries.spec.ts`: `WDG-02 executa o Cypher enviado na conexão do dashboard` (o fake recebeu a URI da conexão do dashboard e o Cypher do corpo; a resposta traz `columns` e `rows`), `QRY-11 quem não pode editar recebe 403 ao executar texto` (compartilhamento `view` recebe 403 em `.../query`), `QRY-12 quem só vê executa o widget salvo pelo id` (compartilhamento `view` recebe 200 em `.../widgets/:wid/run` e o fake recebeu o Cypher salvo; o corpo não aceita `cypher`), `QRY-16 quem não alcança recebe 404 ao executar widget` (outro Editor recebe 404 nas duas rotas), `TBL-12 quem só vê recebe a mensagem genérica de erro` (fake rejeita com mensagem do Neo4j: quem só vê recebe "Não foi possível carregar este widget", o dono recebe a mensagem do Neo4j), `EDIT-10 quem edita executa o texto em outra conexão` (`connectionId` de outra conexão leva o fake à URI dela), widget de outro dashboard dá 404
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/queries/queries.spec.ts`: `WDG-02 executa o Cypher enviado na conexão do dashboard` (o fake recebeu a URI da conexão do dashboard e o Cypher do corpo; a resposta traz `columns` e `rows`), `QRY-11 quem não pode editar recebe 403 ao executar texto` (compartilhamento `view` recebe 403 em `.../query`), `QRY-12 quem só vê executa o widget salvo pelo id` (compartilhamento `view` recebe 200 em `.../widgets/:wid/run` e o fake recebeu o Cypher salvo; o corpo não aceita `cypher`), `QRY-16 quem não alcança recebe 404 ao executar widget` (outro Editor recebe 404 nas duas rotas), `TBL-12 quem só vê recebe a mensagem genérica de erro` (fake rejeita com mensagem do Neo4j: quem só vê recebe "Não foi possível carregar este widget", o dono recebe a mensagem do Neo4j), `EDIT-10 quem edita executa o texto em outra conexão` (`connectionId` de outra conexão leva o fake à URI dela), widget de outro dashboard dá 404
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
