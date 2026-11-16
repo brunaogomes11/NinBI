@@ -88,6 +88,28 @@ export class AuthService {
       .where(eq(users.id, userId))
   }
 
+  async setInitialPassword(userId: string, newPassword: string): Promise<void> {
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+    if (!user?.mustChangePassword) {
+      throw new AppError(
+        409,
+        'PASSWORD_NOT_TEMPORARY',
+        MESSAGES.passwordNotTemporary,
+      )
+    }
+    await this.db
+      .update(users)
+      .set({
+        passwordHash: await this.hasher.hash(newPassword),
+        mustChangePassword: false,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+  }
+
   private getDummyHash(): Promise<string> {
     this.dummyHash ??= this.hasher.hash('senha-ficticia-sem-usuario')
     return this.dummyHash

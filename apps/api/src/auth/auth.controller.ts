@@ -11,6 +11,8 @@ import {
 import {
   type ChangePasswordInput,
   changePasswordSchema,
+  type InitialPasswordInput,
+  initialPasswordSchema,
   type LoginInput,
   loginSchema,
   type SessionUserDto,
@@ -68,6 +70,16 @@ export class AuthController {
       body.currentPassword,
       body.newPassword,
     )
+  }
+
+  @Post('initial-password')
+  @HttpCode(204)
+  async initialPassword(
+    @CurrentUser() user: SessionUser,
+    @Body(new ZodValidationPipe(initialPasswordSchema))
+    body: InitialPasswordInput,
+  ): Promise<void> {
+    await this.auth.setInitialPassword(user.id, body.newPassword)
   }
 
   @Get('me')

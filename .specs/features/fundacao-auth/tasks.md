@@ -561,8 +561,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: USR-06 (usuário com senha provisória define a nova e, em seguida, acessa uma rota antes bloqueada), confirmação diferente dá 400, chamada sem senha provisória dá 409
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes: USR-06 (usuário com senha provisória define a nova e, em seguida, acessa uma rota antes bloqueada), confirmação diferente dá 400, chamada sem senha provisória dá 409
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build
