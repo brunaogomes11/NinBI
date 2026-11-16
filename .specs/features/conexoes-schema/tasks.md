@@ -453,8 +453,8 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes com gesto: SCH-15 (clicar no nome "Vendas" na aba Conexões abre a página com "Labels", "Tipos de relacionamento" e "Última leitura: 16/11/2026, 14:30"), SCH-07 (clicar em "Atualizar schema" envia o `POST`; quando o `GET` passa a `READY` com `readAt` novo, a data nova aparece), SCH-08 (com `status: 'READING'`, aparece "Lendo schema..." e o botão está desabilitado), SCH-09 (`FAILED` com `error` "Neo.ClientError.Security.Forbidden" mostra "Não foi possível ler o schema", a mensagem e os labels anteriores), SCH-19 (`READY` sem labels mostra "Este banco não tem dados"), SCH-20 (a página põe lista e tabela em colunas irmãs, cada uma com `overflow-y-auto`, e só a tabela tem cabeçalho `sticky`)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto: SCH-15 (clicar no nome "Vendas" na aba Conexões abre a página com "Labels", "Tipos de relacionamento" e "Última leitura: 16/11/2026, 14:30"), SCH-07 (clicar em "Atualizar schema" envia o `POST`; quando o `GET` passa a `READY` com `readAt` novo, a data nova aparece), SCH-08 (com `status: 'READING'`, aparece "Lendo schema..." e o botão está desabilitado), SCH-09 (`FAILED` com `error` "Neo.ClientError.Security.Forbidden" mostra "Não foi possível ler o schema", a mensagem e os labels anteriores), SCH-19 (`READY` sem labels mostra "Este banco não tem dados"), SCH-20 (a página põe lista e tabela em colunas irmãs, cada uma com `overflow-y-auto`, e só a tabela tem cabeçalho `sticky`)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build

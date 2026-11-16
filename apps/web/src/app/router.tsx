@@ -3,12 +3,14 @@ import {
   RedirectIfAuthenticated,
   RequireAuth,
   RequirePasswordChanged,
+  RequirePermission,
   RequireSetupDone,
   RequireSetupPending,
 } from '@/features/auth/guards'
 import { InitialPasswordPage } from '@/features/auth/InitialPasswordPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { SetupPage } from '@/features/auth/SetupPage'
+import { SchemaPage } from '@/features/connections/SchemaPage'
 import { HomePage } from '@/features/home/HomePage'
 import {
   SettingsIndexRedirect,
@@ -49,6 +51,17 @@ export const appRoutes: RouteObject[] = [
                     element: <SettingsIndexRedirect />,
                   },
                   { path: '/configuracoes/:aba', element: <SettingsPage /> },
+                  {
+                    element: (
+                      <RequirePermission permission="connections.read" />
+                    ),
+                    children: [
+                      {
+                        path: '/configuracoes/conexoes/:connectionId',
+                        element: <SchemaPage />,
+                      },
+                    ],
+                  },
                 ],
               },
             ],
