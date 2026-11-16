@@ -1,8 +1,20 @@
-import { Body, Controller, Get, HttpCode, Inject, Post } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common'
 import {
   type ConnectionCreate,
   type ConnectionDto,
+  type ConnectionUpdate,
   connectionCreateSchema,
+  connectionUpdateSchema,
 } from '@ninbi/contracts'
 import { RequirePermission } from '../auth/decorators'
 import { ZodValidationPipe } from '../common/zod.pipe'
@@ -29,5 +41,22 @@ export class ConnectionsController {
     body: ConnectionCreate,
   ): Promise<ConnectionDto> {
     return this.connections.create(body)
+  }
+
+  @RequirePermission('connections.manage')
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(connectionUpdateSchema))
+    body: ConnectionUpdate,
+  ): Promise<ConnectionDto> {
+    return this.connections.update(id, body)
+  }
+
+  @RequirePermission('connections.manage')
+  @Delete(':id')
+  @HttpCode(204)
+  remove(@Param('id') id: string): Promise<void> {
+    return this.connections.remove(id)
   }
 }

@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import {
   type ConnectionCreate,
   type ConnectionDto,
+  type ConnectionUpdate,
   MESSAGES,
 } from '@ninbi/contracts'
 import { eq, sql } from 'drizzle-orm'
@@ -16,6 +17,7 @@ import {
   Neo4jGatewayError,
   Neo4jTimeoutError,
 } from '../neo4j/neo4j.gateway'
+import { connectionNotFound, isConnectionId } from './connection-errors'
 
 /** Prazo do teste de conexão (CONN-09). */
 export const CONNECTION_VERIFY_TIMEOUT_MS = Symbol(
@@ -121,6 +123,79 @@ export class ConnectionsService {
       if (isUniqueViolation(error)) throw nameTaken()
       throw error
     }
+  }
+
+  /** Senha vazia ou ausente mantém a guardada (CONN-15); a conexão é testada de novo antes de gravar (CONN-16). */
+  async update(id: string, input: ConnectionUpdate): Promise<ConnectionDto> {
+    const current = await this.find(id)
+    const newPassword = input.password || null
+    let password: string
+    if (newPassword) {
+      password = newPassword
+    } else {
+      try {
+        password = this.crypto.decrypt(current.passwordEncrypted)
+      } catch {
+        throw new AppError(
+          422,
+          'NEO4J_UNAVAILABLE',
+          MESSAGES.connectionPasswordUndecryptable,
+        )
+      }
+    }
+
+    await this.verify({
+      uri: input.uri,
+      database: input.database,
+      username: input.username,
+      password,
+    })
+
+    try {
+      const [updated] = await this.db
+        .update(connections)
+        .set({
+          name: input.name,
+          uri: input.uri,
+          database: input.database,
+          username: input.username,
+          ...(newPassword
+            ? { passwordEncrypted: this.crypto.encrypt(newPassword) }
+            : {}),
+          updatedAt: sql`now()`,
+        })
+        .where(eq(connections.id, id))
+        .returning()
+      if (!updated) throw connectionNotFound()
+      const [schema] = await this.db
+        .select({ readAt: connectionSchemas.readAt })
+        .from(connectionSchemas)
+        .where(eq(connectionSchemas.connectionId, id))
+      return toConnectionDto(updated, schema?.readAt ?? null)
+    } catch (error) {
+      if (isUniqueViolation(error)) throw nameTaken()
+      throw error
+    }
+  }
+
+  /** A cascata do banco apaga o schema guardado e as escolhas de exemplo (CONN-18). */
+  async remove(id: string): Promise<void> {
+    if (!isConnectionId(id)) throw connectionNotFound()
+    const deleted = await this.db
+      .delete(connections)
+      .where(eq(connections.id, id))
+      .returning({ id: connections.id })
+    if (deleted.length === 0) throw connectionNotFound()
+  }
+
+  private async find(id: string) {
+    if (!isConnectionId(id)) throw connectionNotFound()
+    const [row] = await this.db
+      .select()
+      .from(connections)
+      .where(eq(connections.id, id))
+    if (!row) throw connectionNotFound()
+    return row
   }
 
   /** Testa a conexão no Neo4j; recusa e prazo viram 422 (CONN-06, CONN-08, CONN-09). */

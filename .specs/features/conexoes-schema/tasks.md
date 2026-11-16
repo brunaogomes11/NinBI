@@ -287,8 +287,8 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes: CONN-15 (`PATCH` com `password: ""` e sem `password`: `verify` recebe a senha original e `password_encrypted` decifra para ela), CONN-16 (`PATCH` mudando a URI com `verify` falhando: 422 e a linha continua com a URI antiga; passando: 200 e URI nova), CONN-18 (`DELETE` dá 204 e somem a conexão, `connection_schemas` e `schema_example_opt_outs` dela), CONN-19 (Editor e Visualizador recebem 403 no `PATCH` e no `DELETE`), CONN-14 (a resposta do `PATCH` não contém a senha), 404 para id inexistente
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: CONN-15 (`PATCH` com `password: ""` e sem `password`: `verify` recebe a senha original e `password_encrypted` decifra para ela), CONN-16 (`PATCH` mudando a URI com `verify` falhando: 422 e a linha continua com a URI antiga; passando: 200 e URI nova), CONN-18 (`DELETE` dá 204 e somem a conexão, `connection_schemas` e `schema_example_opt_outs` dela), CONN-19 (Editor e Visualizador recebem 403 no `PATCH` e no `DELETE`), CONN-14 (a resposta do `PATCH` não contém a senha), 404 para id inexistente
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
