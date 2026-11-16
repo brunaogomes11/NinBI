@@ -11,10 +11,17 @@ import { columnIndex, toNumber } from './columns'
 const cell = (result: QueryResultDto, row: ResultValue[], name: string) =>
   row[columnIndex(result, name)] ?? null
 
-const exists = (columns: (string | null)[]) =>
+const roles = (columns: (string | null)[], numeric: boolean) =>
   columns
     .filter((column): column is string => column !== null)
-    .map((column) => ({ column, numeric: false }))
+    .map((column) => ({ column, numeric }))
+
+const hasValues = (result: QueryResultDto, column: string | null) => {
+  const index = column === null ? -1 : columnIndex(result, column)
+  return (
+    index !== -1 && result.rows.some((row) => (row[index] ?? null) !== null)
+  )
+}
 
 export interface KpiData {
   value: string
@@ -28,13 +35,15 @@ export function buildKpi(
   mapping: WidgetMapping['KPI'],
 ): Built<KpiData> {
   if (result.rows.length === 0) return { ok: false, reason: 'empty' }
-  const failure = checkColumns(result, exists([mapping.value]))
+  const failure = checkColumns(result, [
+    ...roles([mapping.value], false),
+    // Variação nula é "sem variação" (KPI-04): só texto na coluna é VIZ-13.
+    ...roles([mapping.change], hasValues(result, mapping.change)),
+  ])
   if (failure) return failure
   const row = result.rows[0] ?? []
   const change =
-    mapping.change !== null && columnIndex(result, mapping.change) !== -1
-      ? toNumber(cell(result, row, mapping.change))
-      : null
+    mapping.change === null ? null : toNumber(cell(result, row, mapping.change))
   return {
     ok: true,
     data: {
@@ -58,10 +67,10 @@ export function buildList(
   mapping: WidgetMapping['LIST'],
 ): Built<ListItemData[]> {
   if (result.rows.length === 0) return { ok: false, reason: 'empty' }
-  const failure = checkColumns(
-    result,
-    exists([mapping.primary, mapping.secondary, ...mapping.values]),
-  )
+  const failure = checkColumns(result, [
+    ...roles([mapping.primary, mapping.secondary], false),
+    ...roles(mapping.values, true),
+  ])
   if (failure) return failure
   const data = result.rows.map((row) => ({
     primary: formatValue(cell(result, row, mapping.primary)),
@@ -91,7 +100,7 @@ export function buildMapPoints(
   if (result.rows.length === 0) return { ok: false, reason: 'empty' }
   const failure = checkColumns(
     result,
-    exists([mapping.lat, mapping.lon, mapping.label]),
+    roles([mapping.lat, mapping.lon, mapping.label], false),
   )
   if (failure) return failure
 

@@ -56,13 +56,39 @@ describe('simple-data', () => {
       direction: null,
       changeLabel: null,
     })
-    const semColuna = buildKpi(result(['saldo'], [[10]]), kpiMapping)
-    expect(semColuna.ok && semColuna.data.change).toBeNull()
     const semMapeamento = buildKpi(result(['saldo'], [[10]]), {
       value: 'saldo',
       change: null,
     })
     expect(semMapeamento.ok && semMapeamento.data.change).toBeNull()
+  })
+
+  it('VIZ-12 coluna de variação do KPI ausente dá A visualização não combina com o resultado', () => {
+    expect(buildKpi(result(['saldo'], [[10]]), kpiMapping)).toEqual({
+      ok: false,
+      reason: 'error',
+      message:
+        'A visualização não combina com o resultado: a coluna variacao não existe',
+    })
+  })
+
+  it('VIZ-13 coluna de variação do KPI só com texto e valores da lista só com texto dão A coluna não tem números', () => {
+    expect(kpiOf('x')).toEqual({
+      ok: false,
+      reason: 'error',
+      message: 'A coluna variacao não tem números',
+    })
+    expect(
+      buildList(result(['nome', 'total'], [['A', 'x']]), {
+        primary: 'nome',
+        secondary: null,
+        values: ['total'],
+      }),
+    ).toEqual({
+      ok: false,
+      reason: 'error',
+      message: 'A coluna total não tem números',
+    })
   })
 
   it('KPI-05 valor não numérico fica como texto', () => {
