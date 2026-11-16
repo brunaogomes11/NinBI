@@ -298,6 +298,78 @@
 - **Date**: 2026-11-16
 - **Status**: active
 
+### AD-038 (active)
+- **Decision**: A leitura do schema é assíncrona. O estado fica na linha da conexão (`schema_status`: `NEVER`, `READING`, `READY`, `FAILED`, com `schema_read_started_at` e `schema_error`). Um `UPDATE ... WHERE schema_status <> 'READING' ... RETURNING` faz o claim atômico; sem claim, a rota devolve o estado atual. `POST .../schema/refresh` responde 202 na hora, e o web consulta `GET .../schema` a cada 2 s enquanto `READING`. Um `READING` iniciado há mais de 150 s é tratado como órfão.
+- **Reason**: Uma requisição HTTP de até 120 s é frágil; o claim no PostgreSQL impede duas leituras ao mesmo tempo (SCH-11) mesmo entre abas e usuários. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: A tela faz polling; a leitura roda dentro do processo da API e se perde num restart (o estado órfão expira em 150 s).
+- **Scope**: conexoes-schema, ia-cypher e ia-dashboard (exigem `READY`).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-039 (active)
+- **Decision**: O cache do schema é um documento JSONB por conexão em `connection_schemas`, substituído inteiro a cada leitura. Todo exemplo é guardado como literal Cypher em texto (strings entre aspas, `date('...')`, `point({...})`, listas e mapas). As escolhas "Enviar exemplo à IA" ficam em `schema_example_opt_outs` (conexão, tipo do elemento, elemento, propriedade): a presença da linha desliga o envio; linhas de elementos ou propriedades que somem são apagadas na gravação. `SchemaQueryService.get(connectionId)` devolve `ConnectionSchemaDto` em ordem alfabética, com `sendExample` por propriedade.
+- **Reason**: O schema é lido e escrito inteiro; as escolhas do Admin precisam sobreviver à troca do documento (SCH-23, SCH-25, SCH-28). Um literal Cypher serve igual para a tela e para o prompt da IA (SCH-27, AD-005).
+- **Trade-off**: Consultar uma propriedade isolada exige ler o documento inteiro; strings aparecem com aspas na tela.
+- **Scope**: conexoes-schema, ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-040 (active)
+- **Decision**: `Neo4jGateway` (AD-032) tem `verify(cfg, { timeoutMs })` e `read(cfg, cypher, params, { timeoutMs, maxRows?, signal? })`. O driver real abre um driver por operação e o fecha no fim, com `defaultAccessMode: READ`, `session.executeRead` e `timeout` na transação; banco `null` usa o padrão do servidor. `read` devolve os valores nativos do `neo4j-driver`. Erros viram `Neo4jTimeoutError` ou `Neo4jGatewayError` com a mensagem original do Neo4j. Prazos: 10 s para verificar uma conexão e 120 s para a leitura inteira do schema.
+- **Reason**: Uma porta única e só de leitura para o Neo4j do usuário (SCH-12), simulável pelo `FakeNeo4jGateway` nos testes rápidos (AD-026).
+- **Trade-off**: Abrir um driver por operação custa uma conexão TCP e uma autenticação por consulta; `dashboards-consultas` pode acrescentar um cache de drivers sem mudar a interface.
+- **Scope**: conexoes-schema, dashboards-consultas, ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-041 (active)
+- **Decision**: Ao ligar a aba "Conexões" (`available: true` em `SETTINGS_TABS`), a task que liga a aba atualiza os testes de `fundacao-auth` ROLE-04 e CFG-02 para a nova expectativa: o Editor passa a ver "Configurações" com a aba "Conexões"; o Admin vê "Conexões" e "Usuários", nessa ordem; o Visualizador continua sem o item. A mudança cumpre AD-033 e não afrouxa nenhuma asserção.
+- **Reason**: AD-033 já previa que o Editor veria "Configurações" quando `conexoes-schema` ligasse a aba; sem registro, a troca de expectativa pareceria um teste alterado para passar.
+- **Trade-off**: Uma task desta feature toca testes de outra feature.
+- **Scope**: conexoes-schema, fundacao-auth (testes de sidebar e de configurações).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-042 (active)
+- **Decision**: A organização da sidebar é um documento JSONB por usuário em `sidebar_layouts`, trocado inteiro por `PUT /api/sidebar`; a última gravação vale. `GET /api/sidebar` monta a lista na leitura: tira os dashboards que o usuário não alcança mais ou que foram apagados e acrescenta no fim, soltos, os que ele alcança e ainda não estão no documento. A sidebar mostra os dashboards próprios e os compartilhados com o usuário; o Admin chega aos dos outros pela aba "Dashboards" de "Configurações" e pela URL, sem que eles entrem na sua sidebar. Ids de grupo são UUIDs gerados no navegador. Grupo aberto ou recolhido fica em `localStorage['ninbi-sidebar-collapsed']`.
+- **Reason**: Arrastar, criar, renomear e excluir grupo viram uma rota só (SIDE-03 a SIDE-09, SIDE-17); criar, apagar e compartilhar dashboards não precisam mexer na sidebar de ninguém (DASH-05, DASH-11). Pôr todos os dashboards da instalação na sidebar do Admin tornaria a aba "Dashboards" inútil. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Cada gesto regrava o documento inteiro; duas janelas não se mesclam (vale a última). O Admin não vê os dashboards dos outros na sidebar.
+- **Scope**: dashboards-consultas, compartilhamento (dashboards compartilhados entram na sidebar pela montagem).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-043 (active)
+- **Decision**: O dashboard é gravado inteiro por `PUT /api/dashboards/:id` (nome, conexão, abas, widgets e layout) com controle otimista por `dashboards.version`: `UPDATE ... WHERE version = $v`; versão velha responde 409 `DASHBOARD_VERSION_CONFLICT`. Ids de abas e widgets são UUIDs gerados no navegador e mantidos entre gravações; id de outro dashboard é recusado. Widgets guardam `visualization` (texto, padrão `'TABLE'`) e `config` (JSONB) para as features seguintes. Para quem não pode editar, o `DashboardDto` traz `cypher: null` e `hasQuery`.
+- **Reason**: "Salvar" grava tudo de uma vez (EDIT-02) e recusa quem salva sobre versão desatualizada (EDIT-04); quem só vê não enxerga Cypher (Assumptions da spec).
+- **Trade-off**: Cada gravação apaga e reinsere abas e widgets; o histórico de alterações não existe.
+- **Scope**: dashboards-consultas, widgets-graficos, ia-cypher, interatividade, ia-dashboard, compartilhamento (ACL-17).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-044 (active)
+- **Decision**: `DashboardAccessService` (`find`, `assert(user, id, 'view' | 'edit' | 'delete')`, `sidebarDashboardIds`) decide o acesso a todo dashboard: dono e Admin (`dashboards.all`) veem, editam e excluem; compartilhamento `edit` vê e edita; `view` só vê. Sem acesso, ou dashboard inexistente, responde 404 `DASHBOARD_NOT_FOUND`; alcança sem a permissão pedida, 403. Os compartilhamentos chegam por `DashboardShareResolver` (token `DASHBOARD_SHARE_RESOLVER`): `NoSharesResolver` nesta feature, trocado pela implementação de `compartilhamento`; os testes usam `FakeShareResolver`.
+- **Reason**: AD-014, AD-015 e AD-029; DASH-19, QRY-11 e QRY-12 precisam ser testáveis antes de existir o compartilhamento.
+- **Trade-off**: Uma consulta a mais por requisição de dashboard; `compartilhamento` só troca o provider.
+- **Scope**: dashboards-consultas, compartilhamento, widgets-graficos, ia-cypher, interatividade, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-045 (active)
+- **Decision**: Toda consulta ao Neo4j do usuário passa por `QueryService.run` e por `validateReadOnlyCypher` (`apps/api/src/queries/`). O validador ignora strings, comentários e identificadores entre crases, recusa nesta ordem: mais de 20.000 caracteres, mais de uma instrução, cláusula bloqueada; uma palavra logo depois de `.` ou `$` não é cláusula. Há duas rotas: `POST /api/dashboards/:id/query` (texto, só quem edita, com `connectionId` opcional) e `POST /api/dashboards/:id/widgets/:widgetId/run` (Cypher salvo, quem vê; erros do Neo4j viram "Não foi possível carregar este widget" para quem não edita). Limites por `NINBI_QUERY_TIMEOUT_MS` (padrão 30000) e `NINBI_QUERY_MAX_ROWS` (padrão 5000); o gateway lê `maxRows + 1` para saber se cortou. `Neo4jGatewayError` ganha `code?: string`. Resultados vão como `{ columns, rows: ResultValue[][], truncated, rowLimit }`, com inteiros fora de ±(2^53 − 1) em `{ kind: 'bigint' }` e nós, relacionamentos, listas e mapas em `{ kind: 'json' }`. Sem cache de drivers nem de resultados.
+- **Reason**: QRY-01 a QRY-16, TBL-06 e TBL-08; AD-012 pede testes da validação somente leitura. `ia-cypher` (AIQ-07) e `interatividade` (FLT-06) reaproveitam a mesma validação e os mesmos limites.
+- **Trade-off**: `RETURN n.set` passa e `{set: 1}` é recusado (o usuário usa crases); um dashboard com muitos widgets abre uma conexão por widget; sair da tela não cancela a transação no Neo4j antes do prazo.
+- **Scope**: dashboards-consultas, widgets-graficos, ia-cypher, interatividade, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-046 (active)
+- **Decision**: No web, a grade usa `react-grid-layout` (12 colunas, compactação vertical, largura medida por `ResizeObserver`); o arrastar da sidebar usa o drag and drop nativo do HTML5; o editor de Cypher é `react-simple-code-editor` com o realce do `prismjs` (gramática `cypher`). A página do dashboard fica em `/dashboards/:dashboardId` (`?editar=1` abre em edição); a aba ativa e o modo de edição são estado da página. A aba "Dashboards" (`dashboards`, permissão `dashboards.all`) entra em `SETTINGS_TABS` entre "Usuários" e "LLM", e a task que a liga atualiza o teste CFG-02 de `fundacao-auth` (Admin vê "Conexões", "Usuários" e "Dashboards", nessa ordem), como em AD-041.
+- **Reason**: Bibliotecas testáveis no jsdom (textarea real, `fireEvent` de arrastar, grade com largura fixa no teste); a spec abre sempre na primeira aba (DASH-08); DASH-20 pede a aba só para Admin.
+- **Trade-off**: O editor de Cypher não tem autocompletar; a aba ativa não sobrevive a recarregar a página.
+- **Scope**: dashboards-consultas, widgets-graficos, ia-cypher, ia-dashboard, fundacao-auth (teste CFG-02).
+- **Date**: 2026-11-16
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:
