@@ -235,8 +235,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Os 15 componentes existem em `apps/web/src/components/ui/`
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Os 15 componentes existem em `apps/web/src/components/ui/`
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: none
 **Gate**: build
