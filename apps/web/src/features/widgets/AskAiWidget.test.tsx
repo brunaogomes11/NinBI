@@ -62,7 +62,7 @@ const statusHandler = (configured: boolean) =>
 
 function open(
   handlers: RequestHandler[],
-  options: { path?: string; role?: 'ADMIN' | 'EDITOR' } = {},
+  options: { path?: string; role?: 'ADMIN' | 'EDITOR' | 'VIEWER' } = {},
 ) {
   const dashboard: DashboardDto = makeDashboard()
   return renderApp(options.path ?? '/dashboards/d-1?editar=1', {
@@ -239,6 +239,15 @@ describe('Pedir à IA no card do widget', () => {
       ).toBeInTheDocument()
       view.unmount()
     }
+
+    // Visualizador não usa a IA (AIQ-19): nenhum item "Pedir à IA", com ou sem menu do widget.
+    const viewer = open([statusHandler(true)], { role: 'VIEWER' })
+    await screen.findByRole('heading', { name: 'Vendas por loja' })
+    const menu = screen.queryByRole('button', { name: MENU })
+    if (menu) await viewer.user.click(menu)
+    expect(screen.queryByText(/Pedir à IA/)).toBeNull()
+    expect(screen.queryByRole('menuitem', { name: /Pedir à IA/ })).toBeNull()
+    viewer.unmount()
   })
 
   it('FIX-06 falha final abre o editor com o último Cypher e o erro', async () => {
