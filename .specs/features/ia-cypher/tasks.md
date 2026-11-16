@@ -183,10 +183,10 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/llm/chat-model.factory.spec.ts` (sem `invoke`, sem rede): `LLM-14 ChatModelFactory cria o modelo de cada provedor no backend` (OpenAI → `ChatOpenAI` com o modelo e `maxRetries` 0; Anthropic → `ChatAnthropic`; Google Gemini → `ChatGoogleGenerativeAI`; Ollama → `ChatOllama` com a URL base; Compatível com OpenAI → `ChatOpenAI` com `baseURL` igual à URL base)
-- [ ] Testes do fake em `apps/api/test/llm/scripted-chat-model.spec.ts`: o roteiro devolve textos na ordem e lança o erro roteirizado; `calls` guarda as mensagens; `'hang'` termina quando o `signal` aborta
-- [ ] Opções dos construtores conferidas contra os tipos instalados; diferenças do design marcadas com `SPEC_DEVIATION`
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/llm/chat-model.factory.spec.ts` (sem `invoke`, sem rede): `LLM-14 ChatModelFactory cria o modelo de cada provedor no backend` (OpenAI → `ChatOpenAI` com o modelo e `maxRetries` 0; Anthropic → `ChatAnthropic`; Google Gemini → `ChatGoogleGenerativeAI`; Ollama → `ChatOllama` com a URL base; Compatível com OpenAI → `ChatOpenAI` com `baseURL` igual à URL base)
+- [x] Testes do fake em `apps/api/test/llm/scripted-chat-model.spec.ts`: o roteiro devolve textos na ordem e lança o erro roteirizado; `calls` guarda as mensagens; `'hang'` termina quando o `signal` aborta
+- [x] Opções dos construtores conferidas contra os tipos instalados; diferenças do design marcadas com `SPEC_DEVIATION`
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick

@@ -7,8 +7,10 @@ import { AppModule } from '../src/app.module'
 import { Clock } from '../src/common/clock'
 import { DASHBOARD_SHARE_RESOLVER } from '../src/dashboard-access/dashboard-share-resolver'
 import { type AppDatabase, DB } from '../src/database/database.module'
+import { CHAT_MODEL_FACTORY } from '../src/llm/chat-model.factory'
 import { NEO4J_GATEWAY } from '../src/neo4j/neo4j.gateway'
 import { createTestDb } from './db'
+import { FakeChatModelFactory } from './fakes/fake-chat-model.factory'
 import { FakeNeo4jGateway } from './fakes/fake-neo4j.gateway'
 import { FakeShareResolver } from './fakes/fake-share-resolver'
 
@@ -34,6 +36,8 @@ export interface TestAppOptions {
   realShares?: boolean
   /** Controllers só de teste (rotas de sonda) somados ao AppModule. */
   controllers?: Type[]
+  /** Modelos de chat de teste; sem a opção, o app usa um `FakeChatModelFactory` vazio. */
+  chatModels?: FakeChatModelFactory
   /** Troca providers do app, por exemplo os prazos injetáveis, por valores curtos de teste. */
   overrides?: { provide: unknown; useValue: unknown }[]
 }
@@ -42,6 +46,7 @@ export async function createTestApp(options: TestAppOptions = {}) {
   const { db, client } = await createTestDb()
   const clock = new FakeClock()
   const neo4j = new FakeNeo4jGateway()
+  const chatModels = options.chatModels ?? new FakeChatModelFactory()
   const shares = options.shares ?? new FakeShareResolver()
   let builder = Test.createTestingModule({
     imports: [AppModule],
@@ -53,6 +58,8 @@ export async function createTestApp(options: TestAppOptions = {}) {
     .useValue(clock)
     .overrideProvider(NEO4J_GATEWAY)
     .useValue(neo4j)
+    .overrideProvider(CHAT_MODEL_FACTORY)
+    .useValue(chatModels)
     // No módulo de teste o adaptador HTTP só existe depois do compile: sem isto o serve-static cai no loader nulo.
     .overrideProvider(AbstractLoader)
     .useClass(ExpressLoader)
@@ -74,6 +81,7 @@ export async function createTestApp(options: TestAppOptions = {}) {
     db,
     clock,
     neo4j,
+    chatModels,
     shares,
     http: request.agent(app.getHttpServer()),
     close: async () => {
