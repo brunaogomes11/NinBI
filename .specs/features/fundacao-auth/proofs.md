@@ -1,6 +1,6 @@
 # fundacao-auth proofs
 
-**HEAD**: 6b2d938
+**HEAD**: e8a5a81
 **Tree**: clean
 **Shell**: C:/Program Files/Git\bin\bash.exe
 **Result**: 98 pass, 0 fail
@@ -116,31 +116,31 @@
  Container ninbi-smoke-neo4j-1 Stopped 
  Container ninbi-smoke-neo4j-1 Removing 
  Container ninbi-smoke-neo4j-1 Removed 
- Network ninbi-smoke_default Removing 
- Volume ninbi-smoke_ninbi-neo4j Removing 
  Volume ninbi-smoke_ninbi-pg Removing 
+ Volume ninbi-smoke_ninbi-neo4j Removing 
+ Network ninbi-smoke_default Removing 
  Volume ninbi-smoke_ninbi-neo4j Removed 
  Volume ninbi-smoke_ninbi-pg Removed 
  Network ninbi-smoke_default Removed 
  Image ninbi-smoke-neo4j-seed:latest Removing 
  Image ninbi-smoke-app:latest Removing 
- Image ninbi-smoke-app:latest Removed 
- Image ninbi-smoke-neo4j-seed:latest Removed
+ Image ninbi-smoke-neo4j-seed:latest Removed 
+ Image ninbi-smoke-app:latest Removed
 ```
 
 `Run api` - exit 0
 
 ```
- ✓ test/auth/session.guard.spec.ts > SessionGuard > USR-06 senha provisória bloqueia outras rotas e libera me 3139ms
- ✓ test/auth/session.service.spec.ts > SessionService > USR-07 revokeAllForUser derruba todas as sessões do usuário e só as dele 2456ms
- ✓ test/web/web.spec.ts > servir o web pela API > FND-01 serve o index.html do web em GET / 2865ms
- ✓ test/auth/auth.spec.ts > login, logout e sessão atual > AUTH-12 usuário desativado recebe E-mail ou senha incorretos 2628ms
- ✓ test/auth/auth.spec.ts > login, logout e sessão atual > AUTH-03 corpo inválido responde 400 com a mensagem no campo 1229ms
+ ✓ test/health/health.spec.ts > health > FND-04 health responde 503 com postgres down 2325ms
+ ✓ test/auth/session.guard.spec.ts > SessionGuard > USR-06 senha provisória bloqueia outras rotas e libera me 2053ms
+ ✓ test/web/web.spec.ts > servir o web pela API > FND-01 serve o index.html do web em GET / 2159ms
+ ✓ test/auth/auth.spec.ts > login, logout e sessão atual > AUTH-12 usuário desativado recebe E-mail ou senha incorretos 1672ms
+ ✓ test/auth/auth.spec.ts > login, logout e sessão atual > AUTH-03 corpo inválido responde 400 com a mensagem no campo 1344ms
 
  Test Files  17 passed (17)
       Tests  69 passed (69)
-   Start at  06:26:10
-   Duration  35.29s (tests 82%, import 17%)
+   Start at  06:39:11
+   Duration  37.79s (tests 83%, import 16%, transform 1%)
 
 $ vitest run --reporter=verbose
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
@@ -152,16 +152,16 @@ Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
 
 ```
       Tests  3 passed (3)
-   Start at  06:26:51
-   Duration  5.20s (import 66%, tests 28%, transform 5%)
+   Start at  06:39:56
+   Duration  5.41s (import 64%, tests 26%, transform 10%)
 
 $ node scripts/docker.mjs up
- Container ninbi-dev-postgres-1 Running 
  Container ninbi-dev-neo4j-1 Running 
- Container ninbi-dev-postgres-1 Waiting 
+ Container ninbi-dev-postgres-1 Running 
  Container ninbi-dev-neo4j-1 Waiting 
- Container ninbi-dev-postgres-1 Healthy 
+ Container ninbi-dev-postgres-1 Waiting 
  Container ninbi-dev-neo4j-1 Healthy 
+ Container ninbi-dev-postgres-1 Healthy 
 $ vitest run --config vitest.int.config.ts --reporter=verbose
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
   - ESM syntax in a file loaded as CommonJS (vitest.int.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
@@ -171,17 +171,17 @@ Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
 `Run web` - exit 0
 
 ```
- ✓ src/features/shell/Sidebar.test.tsx > Sidebar > ROLE-04 só Admin vê Configurações na sidebar (ADMIN) 45ms
- ✓ src/features/shell/Sidebar.test.tsx > Sidebar > ROLE-04 só Admin vê Configurações na sidebar (EDITOR) 91ms
- ✓ src/features/shell/Sidebar.test.tsx > Sidebar > ROLE-04 só Admin vê Configurações na sidebar (VIEWER) 93ms
- ✓ src/features/shell/Sidebar.test.tsx > Sidebar > CFG-04 Configurações é o último item da sidebar fora da área que rola 34ms
+ ✓ src/features/shell/AppShell.test.tsx > AppShell > SHELL-10 sidebar fixa e só a área de conteúdo rola 64ms
+ ✓ src/features/users/UsersTab.test.tsx > UsersTab > USR-01 aba Usuários mostra nome, e-mail, papel e situação 326ms
+ ✓ src/features/users/UsersTab.test.tsx > UsersTab > USR-02 linhas de esqueleto durante o carregamento 114ms
+ ✓ src/features/users/UsersTab.test.tsx > UsersTab > USR-03 erro mostra a mensagem e Tentar novamente recarrega 195ms
 
  Test Files  17 passed (17)
       Tests  70 passed (70)
-   Start at  06:26:59
-   Duration  18.46s (environment 34%, import 31%, tests 16%, setup 14%, transform 5%)
+   Start at  06:40:05
+   Duration  24.03s (import 34%, environment 31%, setup 16%, tests 14%, transform 4%)
 
-Environment  jsdom was created 17 times · 61.69s total, 34% of tracked time
+Environment  jsdom was created 17 times · 77.18s total, 31% of tracked time
              create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
              learn more: https://vitest.dev/guide/improving-performance#test-environments
 
@@ -194,16 +194,16 @@ $ vitest run --reporter=verbose
  ✓ src/schemas.spec.ts > newUserSchema > USR-14 e-mail com 121 caracteres é recusado no campo e 120 passa 0ms
  ✓ src/schemas.spec.ts > newUserSchema > USR-04 nome vazio, e-mail mal formado, papel inválido e senha curta 0ms
  ✓ src/schemas.spec.ts > newUserSchema > USR-04 dados válidos passam, com os três papéis 0ms
- ✓ src/schemas.spec.ts > changePasswordSchema > PWD-03 nova senha com menos de 8 caracteres 0ms
+ ✓ src/schemas.spec.ts > changePasswordSchema > PWD-03 nova senha com menos de 8 caracteres 1ms
  ✓ src/schemas.spec.ts > changePasswordSchema > PWD-01 senha atual vazia é recusada e dados válidos passam 0ms
- ✓ src/schemas.spec.ts > initialPasswordSchema > USR-06 confirmação diferente e senha curta na senha definitiva 0ms
+ ✓ src/schemas.spec.ts > initialPasswordSchema > USR-06 confirmação diferente e senha curta na senha definitiva 1ms
  ✓ src/schemas.spec.ts > resetPasswordSchema e changeRoleSchema > USR-07 senha provisória curta é recusada e válida passa 0ms
  ✓ src/schemas.spec.ts > resetPasswordSchema e changeRoleSchema > ROLE-05 papel inválido é recusado e papel válido passa 0ms
 
  Test Files  2 passed (2)
       Tests  43 passed (43)
-   Start at  06:27:19
-   Duration  319ms (import 47%, transform 40%, tests 8%, worker 4%)
+   Start at  06:40:30
+   Duration  359ms (import 51%, transform 35%, tests 9%, worker 5%)
 
 $ vitest run --reporter=verbose
 ```
