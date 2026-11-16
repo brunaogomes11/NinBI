@@ -847,8 +847,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes com gesto: AUTH-01 (abre a página inicial), AUTH-02 ("E-mail ou senha incorretos", continua no login), AUTH-03 (e-mail vazio, "ana@" e senha vazia mostram a mensagem no campo e nenhuma requisição sai), AUTH-04 (429 mostra "Muitas tentativas. Tente novamente em 15 minutos."), AUTH-05 (com a resposta pendente, o botão "Entrar" está desabilitado), AUTH-08 (abrir `/configuracoes/usuarios` sem sessão, entrar, e a página aberta é a de Usuários), AUTH-13 (erro de rede mostra "Não foi possível conectar ao servidor. Tente novamente."), SHELL-14
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto: AUTH-01 (abre a página inicial), AUTH-02 ("E-mail ou senha incorretos", continua no login), AUTH-03 (e-mail vazio, "ana@" e senha vazia mostram a mensagem no campo e nenhuma requisição sai), AUTH-04 (429 mostra "Muitas tentativas. Tente novamente em 15 minutos."), AUTH-05 (com a resposta pendente, o botão "Entrar" está desabilitado), AUTH-08 (abrir `/configuracoes/usuarios` sem sessão, entrar, e a página aberta é a de Usuários), AUTH-13 (erro de rede mostra "Não foi possível conectar ao servidor. Tente novamente."), SHELL-14
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build

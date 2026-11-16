@@ -33,7 +33,9 @@ describe('roteador e guardas', () => {
     })
 
     await waitFor(() => expect(currentUrl(router)).toBe('/entrar'))
-    expect(screen.getByText('Entrar')).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Entrar' }),
+    ).toBeInTheDocument()
   })
 
   it('AUTH-08 sem sessão a página protegida vai para o login guardando voltar', async () => {

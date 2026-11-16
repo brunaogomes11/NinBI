@@ -7,6 +7,7 @@ import {
   RequireSetupDone,
   RequireSetupPending,
 } from '@/features/auth/guards'
+import { LoginPage } from '@/features/auth/LoginPage'
 import { SetupPage } from '@/features/auth/SetupPage'
 
 // Marcadores até a página real de cada rota chegar nas tasks seguintes.
@@ -26,7 +27,7 @@ export const appRoutes: RouteObject[] = [
       {
         path: '/entrar',
         element: <RedirectIfAuthenticated />,
-        children: [{ index: true, element: <Placeholder name="Entrar" /> }],
+        children: [{ index: true, element: <LoginPage /> }],
       },
       {
         element: <RequireAuth />,
