@@ -320,8 +320,8 @@ T15 → T16
 
 **Done when**:
 
-- [ ] Testes em `KpiView.test.tsx` (resultado de `RETURN 4999.95 AS saldo, 20 AS variacao`): `KPI-02 variação positiva mostra chip com seta para cima e o valor em %` ("4.999,95" e o chip com o ícone "alta" e "20%"; variação 0 também mostra "alta"), `KPI-03 variação negativa mostra chip com seta para baixo` (-5 mostra o ícone "queda" e "5%", com a classe `text-destructive`), `KPI-04 sem variação ou variação nula não mostra chip`, `KPI-05 valor não numérico aparece como texto` (`'Centro'` aparece como "Centro")
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `KpiView.test.tsx` (resultado de `RETURN 4999.95 AS saldo, 20 AS variacao`): `KPI-02 variação positiva mostra chip com seta para cima e o valor em %` ("4.999,95" e o chip com o ícone "alta" e "20%"; variação 0 também mostra "alta"), `KPI-03 variação negativa mostra chip com seta para baixo` (-5 mostra o ícone "queda" e "5%", com a classe `text-destructive`), `KPI-04 sem variação ou variação nula não mostra chip`, `KPI-05 valor não numérico aparece como texto` (`'Centro'` aparece como "Centro")
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
