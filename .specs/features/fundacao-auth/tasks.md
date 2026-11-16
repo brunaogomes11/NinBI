@@ -418,8 +418,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: sessão usada há 6 dias e 23 h resolve; há 7 dias e 1 min não resolve; o uso renova o prazo; o banco não guarda o token em texto; `revokeAllForUser` derruba todas
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes: sessão usada há 6 dias e 23 h resolve; há 7 dias e 1 min não resolve; o uso renova o prazo; o banco não guarda o token em texto; `revokeAllForUser` derruba todas
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build
