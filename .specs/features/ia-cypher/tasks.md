@@ -290,8 +290,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/ai/widget-reply.spec.ts`: `FIX-05 resposta sem Cypher não é aceita` (texto livre, JSON sem `cypher`, `cypher` vazio e `cypher` numérico dão `{ ok: false }`; JSON dentro de cerca ```` ```json ```` e com texto antes e depois é aceito; bloco ```` ```cypher ```` sozinho é aceito), `AIQ-20 visualização desconhecida vira Tabela` (`"GRAPH"` e ausente dão `TABLE` com `mapping: null`; `"bar"` vira `BAR`), mapeamento de `BAR` sem `x` vira `null`, título com 120 caracteres é cortado em 80, título vazio fica com o título atual
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/ai/widget-reply.spec.ts`: `FIX-05 resposta sem Cypher não é aceita` (texto livre, JSON sem `cypher`, `cypher` vazio e `cypher` numérico dão `{ ok: false }`; JSON dentro de cerca ```` ```json ```` e com texto antes e depois é aceito; bloco ```` ```cypher ```` sozinho é aceito), `AIQ-20 visualização desconhecida vira Tabela` (`"GRAPH"` e ausente dão `TABLE` com `mapping: null`; `"bar"` vira `BAR`), mapeamento de `BAR` sem `x` vira `null`, título com 120 caracteres é cortado em 80, título vazio fica com o título atual
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
