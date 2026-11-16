@@ -1,12 +1,15 @@
 import { readFileSync } from 'node:fs'
-import { MESSAGES } from '@ninbi/contracts'
+import { MESSAGES, type QueryResultDto } from '@ninbi/contracts'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import L from 'leaflet'
 import { HttpResponse, http } from 'msw'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { useState } from 'react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockElementSize } from '@/test/element-size'
 import { makeQueryResult } from '@/test/fixtures/dashboards'
 import { renderApp } from '@/test/renderApp'
 import { buildMapPoints } from '../mapping/simple-data'
+import { WidgetVisualization } from '../WidgetVisualization'
 import { MapView } from './MapView'
 
 let restore: () => void
@@ -52,6 +55,28 @@ async function tilesDrawn(container: HTMLElement) {
     expect(
       container.querySelectorAll('img.leaflet-tile').length,
     ).toBeGreaterThan(0),
+  )
+}
+
+function Card({
+  result,
+  config,
+}: {
+  result: QueryResultDto
+  config: Record<string, unknown>
+}) {
+  const [count, setCount] = useState(0)
+  return (
+    <div>
+      <button type="button" onClick={() => setCount(count + 1)}>
+        Redesenhar {count}
+      </button>
+      <WidgetVisualization
+        result={result}
+        visualization="MAP"
+        config={config}
+      />
+    </div>
   )
 }
 
@@ -159,5 +184,27 @@ describe('MapView', () => {
     ])
     expect(await screen.findByText(MESSAGES.mapTilesFailed)).toBeInTheDocument()
     expect(markers(container)).toHaveLength(3)
+  })
+
+  it('MAP-05 re-render com os mesmos dados não reenquadra o mapa', async () => {
+    const fitBounds = vi.spyOn(L.Map.prototype, 'fitBounds')
+    const result = makeQueryResult({
+      columns: ['loja', 'lat', 'lon'],
+      rows: STORES,
+    })
+    const config = { mapping: { lat: 'lat', lon: 'lon', label: 'loja' } }
+    const { container, user } = renderApp('/', {
+      routes: [
+        { path: '/', element: <Card result={result} config={config} /> },
+      ],
+    })
+    await waitFor(() => expect(markers(container)).toHaveLength(3))
+    const calls = fitBounds.mock.calls.length
+    expect(calls).toBeGreaterThan(0)
+
+    await user.click(screen.getByRole('button', { name: 'Redesenhar 0' }))
+    await screen.findByRole('button', { name: 'Redesenhar 1' })
+    expect(fitBounds.mock.calls.length).toBe(calls)
+    fitBounds.mockRestore()
   })
 })

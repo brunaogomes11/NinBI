@@ -4,7 +4,7 @@ import {
   type WidgetVisualization as Visualization,
   type WidgetMapping,
 } from '@ninbi/contracts'
-import type { ReactNode } from 'react'
+import { type ReactNode, useMemo } from 'react'
 import { CartesianChartView } from './charts/CartesianChartView'
 import { PieChartView } from './charts/PieChartView'
 import { RadarChartView, RadialChartView } from './charts/PolarChartViews'
@@ -17,12 +17,7 @@ import {
   buildCategories,
   buildRadar,
 } from './mapping/chart-data'
-import {
-  buildKpi,
-  buildList,
-  buildMapPoints,
-  type MapPoint,
-} from './mapping/simple-data'
+import { buildKpi, buildList, buildMapPoints } from './mapping/simple-data'
 import { validateMapping } from './mapping/suggest'
 import { ResultTable } from './ResultTable'
 
@@ -74,7 +69,18 @@ function Drawn<T>({
   return <Fill>{children(built.data, built.notice)}</Fill>
 }
 
-function MapBody({ built }: { built: Built<MapPoint[]> }) {
+/** Os pontos só mudam com o resultado ou o mapeamento; assim o mapa não reenquadra a cada render (MAP-05). */
+function MapBody({
+  result,
+  mapping,
+}: {
+  result: QueryResultDto
+  mapping: WidgetMapping['MAP']
+}) {
+  const built = useMemo(
+    () => buildMapPoints(result, mapping),
+    [result, mapping],
+  )
   return (
     <Drawn built={built}>
       {(points, notice) => <MapView points={points} notice={notice} />}
@@ -157,9 +163,7 @@ export function WidgetVisualization({
       )
     case 'MAP':
       return (
-        <MapBody
-          built={buildMapPoints(result, mapping as WidgetMapping['MAP'])}
-        />
+        <MapBody result={result} mapping={mapping as WidgetMapping['MAP']} />
       )
   }
 }
