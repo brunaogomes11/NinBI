@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useChangeShare, useRemoveShare, useShares } from './api'
+import { ShareSearch } from './ShareSearch'
 
 const SKELETON_ROWS = 3
 
@@ -110,6 +111,7 @@ export function ShareDialog({
   const [failed, setFailed] = useState(false)
   const busy = change.isPending || remove.isPending
   const showError = failed || shares.isError
+  const setFailedOnError = (ok: boolean) => setFailed(!ok)
   const settle = {
     onSuccess: () => setFailed(false),
     onError: () => setFailed(true),
@@ -126,7 +128,9 @@ export function ShareDialog({
             {MESSAGES.shareOwner(shares.data.ownerName)}
           </p>
         )}
-        <div data-testid="share-search" />
+        <div data-testid="share-search">
+          <ShareSearch dashboardId={dashboardId} onResult={setFailedOnError} />
+        </div>
         {showError && (
           <div className="flex items-center gap-3">
             <p role="alert" className="text-destructive text-sm">
@@ -161,7 +165,7 @@ export function ShareDialog({
               {MESSAGES.shareEmpty}
             </p>
           ) : (
-            <ul className="divide-y">
+            <ul aria-label="Compartilhamentos" className="divide-y">
               {shares.data?.shares.map((share) => (
                 <ShareRow
                   key={share.id}

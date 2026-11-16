@@ -392,8 +392,8 @@ T16
 
 **Done when**:
 
-- [ ] Testes com gesto em `ShareSearch.test.tsx`: `SHARE-04 digitar na busca lista usuários, equipes e Todos da instalação` (digitar "ana": a requisição leva `q=ana`; aparecem "Todos da instalação", "Banana" e "Ana Souza" com o e-mail), `SHARE-05 busca sem resultado mostra Nenhum usuário ou equipe encontrado`, `SHARE-06 Adicionar grava o compartilhamento e mostra a linha` (escolher "Pode editar" para "Ana Souza" e adicionar: o `POST` leva `{ recipient: { type: 'USER', userId }, permission: 'edit' }`; a linha aparece na lista e o campo fica vazio), `SHARE-09 adicionar destinatário que já está na lista atualiza a linha` (adicionar "Comercial" com "Pode editar" quando a lista já tem "Comercial" com "Pode ver": continua uma linha "Comercial", agora com "Pode editar"), `SHARE-10 Visualizador só tem a opção Pode ver` (no resultado da busca e na linha da lista), `SHARE-14 falha ao adicionar mantém a lista e mostra a mensagem`
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `ShareSearch.test.tsx`: `SHARE-04 digitar na busca lista usuários, equipes e Todos da instalação` (digitar "ana": a requisição leva `q=ana`; aparecem "Todos da instalação", "Banana" e "Ana Souza" com o e-mail), `SHARE-05 busca sem resultado mostra Nenhum usuário ou equipe encontrado`, `SHARE-06 Adicionar grava o compartilhamento e mostra a linha` (escolher "Pode editar" para "Ana Souza" e adicionar: o `POST` leva `{ recipient: { type: 'USER', userId }, permission: 'edit' }`; a linha aparece na lista e o campo fica vazio), `SHARE-09 adicionar destinatário que já está na lista atualiza a linha` (adicionar "Comercial" com "Pode editar" quando a lista já tem "Comercial" com "Pode ver": continua uma linha "Comercial", agora com "Pode editar"), `SHARE-10 Visualizador só tem a opção Pode ver` (no resultado da busca e na linha da lista), `SHARE-14 falha ao adicionar mantém a lista e mostra a mensagem`
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

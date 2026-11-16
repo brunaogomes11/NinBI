@@ -80,7 +80,7 @@ export function useRemoveShare(dashboardId: string) {
   )
 }
 
-/** Candidatos a destinatário; `q` só vai à API depois de `SEARCH_DELAY_MS` sem digitar. */
+/** Candidatos a destinatário; `q` só vai à API depois de `SEARCH_DELAY_MS` sem digitar e só quando não está vazio. */
 export function useShareCandidates(dashboardId: string, q: string) {
   const [delayed, setDelayed] = useState(q)
   useEffect(() => {
@@ -93,6 +93,7 @@ export function useShareCandidates(dashboardId: string, q: string) {
       apiFetch<ShareCandidatesDto>(
         `/api/dashboards/${dashboardId}/share-candidates?q=${encodeURIComponent(delayed)}`,
       ),
+    enabled: q.trim() !== '' && delayed.trim() !== '',
     placeholderData: keepPreviousData,
   })
 }

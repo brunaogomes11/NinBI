@@ -181,6 +181,11 @@ describe('ShareDialog', () => {
     expect(list).toHaveClass('overflow-y-auto')
     const search = screen.getByTestId('share-search')
     expect(list.contains(search)).toBe(false)
+    expect(
+      within(search).getByRole('searchbox', {
+        name: MESSAGES.shareSearchLabel,
+      }),
+    ).toBeInTheDocument()
     expect(search.compareDocumentPosition(list)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     )
