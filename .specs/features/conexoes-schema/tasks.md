@@ -393,8 +393,8 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes com gesto: SCH-15 (os dois grupos mostram os nomes na ordem do DTO), clicar em "Pedido" chama `onSelect` com `{ kind: 'LABEL', name: 'Pedido' }` e marca o item, SCH-20 (o contêiner da lista tem `overflow-y-auto`)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: SCH-15 (os dois grupos mostram os nomes na ordem do DTO), clicar em "Pedido" chama `onSelect` com `{ kind: 'LABEL', name: 'Pedido' }` e marca o item, SCH-20 (o contêiner da lista tem `overflow-y-auto`)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
