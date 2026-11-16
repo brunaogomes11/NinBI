@@ -370,6 +370,318 @@
 - **Date**: 2026-11-16
 - **Status**: active
 
+### AD-047 (active)
+- **Decision**: Equipes e compartilhamentos ficam em três tabelas: `teams` (nome até 40, único por `lower(name)`), `team_members` (chave `(team_id, user_id)`) e `dashboard_shares` (`recipient_type` `USER`, `TEAM` ou `EVERYONE`; `user_id` ou `team_id`; `permission` `view` ou `edit`; `recipient_key` `user:<id>`, `team:<id>` ou `everyone`, único por dashboard). Apagar dashboard ou equipe apaga os compartilhamentos em cascata; usuários só são desativados, e as linhas deles ficam.
+- **Reason**: `ON CONFLICT (dashboard_id, recipient_key) DO UPDATE` dá uma linha por destinatário e faz a última gravação valer (SHARE-09, SHARE-17) sem índices parciais; as chaves estrangeiras cumprem TEAM-08 e SHARE-18. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: `recipient_key` repete o que `user_id`/`team_id` já dizem; um check mantém os dois coerentes.
+- **Scope**: compartilhamento.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-048 (active)
+- **Decision**: `DbShareResolver` substitui o `NoSharesResolver` no token `DASHBOARD_SHARE_RESOLVER` (AD-044), que é apagado. A permissão é calculada no SQL a cada requisição, sem cache: a mais alta entre compartilhamento direto, equipes de que o usuário é membro e `EVERYONE`. O `DashboardAccessService` limita o papel Visualizador a "pode ver", ganha `canShare` e `assert(..., 'share')` (dono ou `dashboards.all`, como `delete`), e responde à falta de `edit` com 403 `DASHBOARD_EDIT_FORBIDDEN` "Você não tem mais permissão para editar este dashboard". `DashboardDto.permissions` ganha `share`; a task que o acrescenta atualiza o teste DASH-18 de `dashboards-consultas` para a nova expectativa, sem afrouxar asserções.
+- **Reason**: ACL-01, ACL-02, ACL-13, ACL-14, ACL-15, SHARE-01; TEAM-05, SHARE-07 e SHARE-08 valem na próxima requisição. O limite do Visualizador no serviço, e não no dado, corta a edição de quem vira Visualizador sem reescrever compartilhamentos. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Uma consulta com subconsulta de equipes por requisição de dashboard; um compartilhamento `edit` gravado para quem depois vira Visualizador fica no banco e só não vale.
+- **Scope**: compartilhamento, dashboards-consultas (acesso e DTO), widgets-graficos, ia-cypher, interatividade, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-049 (active)
+- **Decision**: Os compartilhamentos de um dashboard ficam em `GET`, `POST` (cria ou atualiza pelo destinatário), `PATCH /:shareId` e `DELETE /:shareId` sob `/api/dashboards/:id/shares`, e a busca em `GET /api/dashboards/:id/share-candidates?q=`. Toda rota passa por `assert(user, id, 'share')`: quem não alcança o dashboard recebe 404 `DASHBOARD_NOT_FOUND`, e quem alcança sem ser dono nem Admin, 403. Toda mutação devolve o `DashboardSharesDto` inteiro. A API recusa com 400 o dono como destinatário, usuário inexistente ou desativado, equipe inexistente e "Pode editar" para um Visualizador.
+- **Reason**: SHARE-12 pede 403 para quem não é dono nem Admin; o 404 para quem nem alcança segue AD-044 e não revela que o dashboard existe. A lista inteira na resposta deixa o web trocar o cache de uma vez e manter a lista anterior em erro (SHARE-14). Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Um usuário sem alcance recebe 404, não o 403 literal de SHARE-12; cada mutação devolve a lista toda.
+- **Scope**: compartilhamento.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-050 (active)
+- **Decision**: As rotas de equipe (`GET`, `POST /api/teams`, `PATCH` e `DELETE /api/teams/:id`) usam a permissão existente `users.manage`; nenhuma permissão global nova é criada. `PATCH` com `memberIds` troca a lista inteira de membros. `TeamDto` traz `memberCount`, `members` e `shareCount` (dashboards compartilhados com a equipe, para a confirmação de TEAM-07). Nome repetido sem diferenciar maiúsculas responde 400 em `fieldErrors.name` com "Já existe uma equipe com este nome".
+- **Reason**: As equipes ficam na aba "Usuários", que já é só do Admin (AD-016); TEAM-09 pede 403 para Editor e Visualizador. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Gerenciar usuários e gerenciar equipes não podem ser separados por papel.
+- **Scope**: compartilhamento.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-051 (active)
+- **Decision**: Refina AD-042: `SidebarDto` ganha `shared`, a seção "Compartilhados comigo", com os dashboards compartilhados com o usuário que ainda não estão no documento dele, em ordem de criação; os próprios que faltam continuam no fim, soltos. Arrastar um item de "Compartilhados comigo" para a sidebar o grava no documento (`moveItem` insere o que não está no layout), e ele sai da seção. O `GET /api/sidebar` tira do documento gravado os ids que o usuário não alcança mais e o regrava. A task que faz isso atualiza o teste DASH-01 de `dashboards-consultas` (o compartilhado fora do layout passa a vir em `shared`).
+- **Reason**: ACL-04, ACL-05, ACL-09, ACL-10 e a decisão delegada da spec: "Aparece sozinho na seção fixa 'Compartilhados comigo'". Podar o documento faz um novo compartilhamento do mesmo dashboard voltar à seção, e não ao grupo antigo.
+- **Trade-off**: O `GET` da sidebar pode gravar; a seção não aceita receber itens arrastados de volta.
+- **Scope**: compartilhamento, dashboards-consultas (sidebar).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-052 (active)
+- **Decision**: A busca de destinatários roda no backend: usuários ativos, sem o dono, com nome ou e-mail `ILIKE %q%`; equipes com nome `ILIKE %q%`; `%`, `_` e `\` escapados; até 20 de cada, em ordem de nome; "Todos da instalação" sempre oferecido. O web atrasa a busca 250 ms. A lista de compartilhamentos sai na ordem "Todos da instalação", equipes, usuários, cada grupo por nome em `pt-BR`.
+- **Reason**: Filtrar é regra e roda numa camada testada (SHARE-04, SHARE-05, SHARE-11); o web não recebe a lista inteira de usuários. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: A busca não ignora acentos ("Joao" não acha "João"): `unaccent` exigiria extensão no PostgreSQL e no PGlite.
+- **Scope**: compartilhamento.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-053 (active)
+- **Decision**: Cada criação, mudança e remoção de compartilhamento gera uma linha em `Logger('Share')`: `share action=<created|updated|removed> by=<userId> dashboard=<id> recipient=<user:<id>|team:<id>|everyone> permission=<view|edit>`; `created` ou `updated` sai de `RETURNING (xmax = 0)`. Excluir equipe gera `team deleted by=<id> team=<id> shares=<n>` em `Logger('Team')`.
+- **Reason**: ACL-11, no mesmo formato chave=valor dos logs de HTTP e de consulta. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: O log usa ids, não nomes: quem audita cruza com o banco.
+- **Scope**: compartilhamento.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-060 (active)
+- **Decision**: As visualizações de widget são `TABLE`, `LIST`, `AREA`, `BAR`, `LINE`, `PIE`, `RADAR`, `RADIAL`, `KPI` e `MAP` (`WIDGET_VISUALIZATIONS` em `packages/contracts/src/widget-config.ts`, rótulos "Tabela" a "Mapa" na ordem de VIZ-01). `widgets.config` guarda `{ mapping }`, com as colunas referidas pelo nome do `RETURN` e um formato por visualização (`x`/`series`/`stacked`/`horizontal`; `category`/`value`/`donut`; `axis`/`series`; `value`/`change`; `lat`/`lon`/`label`; `primary`/`secondary`/`values`); `TABLE` usa `{}`. O `dashboardSaveSchema` aceita só essas visualizações e valida o `config` pela visualização, com "Configuração da visualização inválida". O painel não confere se a coluna existe no resultado: o card avisa (VIZ-12, VIZ-20).
+- **Reason**: VIZ-15; `ia-cypher`, `ia-dashboard` e `interatividade` leem e escrevem o mesmo formato, e um nome de coluna sobrevive a reordenar o `RETURN`. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Renomear uma coluna no Cypher quebra o mapeamento até o Editor refazê-lo; uma visualização nova exige mudar o contrato.
+- **Scope**: widgets-graficos, ia-cypher, interatividade, ia-dashboard, dashboards-consultas (contrato do widget).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-061 (active)
+- **Decision**: Os gráficos usam o componente `chart` do shadcn (Recharts), instalado pelo CLI. O resultado vira dados de gráfico só em funções puras de `apps/web/src/features/widgets/mapping/` (`suggest.ts`, `chart-data.ts`, `simple-data.ts`, `columns.ts`); os componentes só desenham. As séries usam chaves seguras `s0..sN` (categorias `c0..cN`) com o nome da coluna como rótulo e a cor `var(--chart-((i % 5) + 1))`; área de uma série usa o gradiente `--brand-purple` → `--brand-cyan`. O intervalo dos rótulos do eixo X é calculado por `tickInterval` (7 px por caractere + 16 px). Os testes do web fixam o tamanho dos elementos com `mockElementSize` (`src/test/element-size.ts`), e a dica é provada pelo conteúdo de `NinbiTooltip`.
+- **Reason**: Pedido "os gráficos todos do shadcn" e AD-018/AD-031; AD-012 pede o mapeamento coberto por testes unitários; o shadcn transforma a chave da série em variável CSS, e nomes de coluna podem ter espaço e acento; o jsdom não mede texto nem elementos. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: O gesto de passar o cursor sobre o gráfico não é provado no jsdom; o corte de rótulos é uma estimativa, não uma medida do texto.
+- **Scope**: widgets-graficos, interatividade, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-062 (active)
+- **Decision**: Refina AD-022: o mapa usa Leaflet com `react-leaflet` e tiles raster. A URL vem de `NINBI_MAP_TILE_URL` (padrão `https://tile.openstreetmap.org/{z}/{x}/{y}.png`; precisa ter `{z}`, `{x}` e `{y}`, senão o app não sobe) e a atribuição de `NINBI_MAP_ATTRIBUTION` (padrão `© OpenStreetMap`), entregues ao web por `GET /api/map-config` a qualquer usuário logado. O tema escuro escurece os tiles com um filtro CSS em `.dark .ninbi-map-tiles` (`theme.css`). A camada nasce com `crossOrigin: 'anonymous'` para a exportação PNG de `interatividade`. Os controles de zoom ficam em português.
+- **Reason**: MapLibre exige WebGL, que o jsdom não tem; a URL é da instalação e só existe em tempo de execução, não no build do Vite (AD-001, AD-024). Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: O mapa escuro é uma inversão de cores, não um estilo desenhado; o servidor público do OpenStreetMap limita uso pesado, e instalações grandes precisam trocar a URL.
+- **Scope**: widgets-graficos, interatividade (exportar PNG do mapa), ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-063 (active)
+- **Decision**: Uma coluna é numérica quando tem ao menos um valor não nulo e todos os não nulos são números ou `{ kind: 'bigint' }`. Papéis numéricos são `series` (área, barras, linha, radar) e `value` (pizza, radial): coluna ausente dá a mensagem de VIZ-12 e coluna sem números a de VIZ-13. O valor do KPI, os valores da lista e as coordenadas do mapa não são papéis numéricos (KPI-05, LIST-01, MAP-03/MAP-04). Nos gráficos, `bigint` vira `Number`. Formatos em `apps/web/src/lib/format.ts`: números com até duas casas (`1.234,56`), texto que começa com `AAAA-MM-DD` vira `DD/MM/AAAA` sem conversão de fuso, `bigint` com todos os dígitos, booleano "Sim"/"Não", nulo "—". A mensagem de MAP-03 com uma linha só fica no singular: "1 linha sem coordenadas válidas".
+- **Reason**: A spec deixou ao design o que é coluna numérica e como datas do Neo4j (texto pelo `toString()` do driver, AD-045) viram `dd/MM/aaaa` (VIZ-17). Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Números guardados como texto no Neo4j não contam como numéricos; inteiros acima de 2^53 perdem precisão só no desenho.
+- **Scope**: widgets-graficos, interatividade, ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-080 (active)
+- **Decision**: A configuração do LLM é uma linha única em `llm_settings` (`id = 1`): provedor (`OPENAI`, `ANTHROPIC`, `GOOGLE`, `OLLAMA`, `OPENAI_COMPATIBLE`), modelo, URL base, chave cifrada pelo `CryptoService` (AD-032) e os 4 últimos caracteres da chave em coluna própria. Rotas `GET`, `PUT` e `DELETE /api/llm-config` e `POST /api/llm-config/test`, todas com `llm.manage`; nenhum DTO tem a chave. Chave vazia no `PUT` mantém a guardada; OpenAI, Anthropic e Google Gemini exigem chave informada ou guardada; Ollama e "Compatível com OpenAI" exigem URL base. "Testar" usa os valores do formulário (com a chave guardada quando vem vazia) e manda só "Responda apenas: ok". `GET /api/ai/status` (`ai.use`) devolve só `{ configured }`.
+- **Reason**: LLM-03 a LLM-13 e AIQ-16; os 4 últimos caracteres aparecem na tela sem decifrar a chave a cada leitura. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: 4 caracteres da chave ficam legíveis no banco; "Testar" não prova a configuração já salva quando o formulário foi alterado.
+- **Scope**: ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-081 (active)
+- **Decision**: Refina AD-032. Toda chamada ao provedor passa por `LlmClient.call(snapshot, mensagens, { userId, purpose, attempt, signal })`, que cria o modelo pelo `ChatModelFactory` (token `CHAT_MODEL_FACTORY`; `ChatOpenAI`, `ChatAnthropic`, `ChatGoogleGenerativeAI`, `ChatOllama`, e `ChatOpenAI` com `baseURL` para "Compatível com OpenAI"; `maxRetries: 0`, `temperature: 0`), aplica 60 s por `AbortSignal` (token `LLM_CALL_TIMEOUT_MS`), classifica o erro em `AI_PROVIDER_AUTH`, `AI_PROVIDER_RATE_LIMIT`, `AI_PROVIDER_TIMEOUT`, `AI_PROVIDER_CONTEXT` ou `AI_PROVIDER_FAILED` (status HTTP, `lc_error_code`, código e texto de contexto excedido) e grava `ai call purpose=<widget|test> user=<id> provider=<p> model=<m> attempt=<n|-> durationMs=<n> result=<...>` em `Logger('Ai')`, sem chave, mensagens nem schema. Nos testes, `FakeChatModelFactory` cria um `ScriptedChatModel` (estende `SimpleChatModel`) com roteiro `texto | Error | 'hang'` que guarda as mensagens recebidas; `createTestApp({ chatModels })` registra o fake. Nenhum teste chama provedor real; o `FakeListChatModel` de AD-032 não é usado porque não guarda as mensagens nem lança erro.
+- **Reason**: AIQ-21 a AIQ-27 e LLM-09/LLM-10 precisam de prazo, cancelamento e erros reproduzíveis; AIQ-06 precisa inspecionar o que foi enviado. `ia-dashboard` reaproveita o mesmo cliente.
+- **Trade-off**: A classificação depende do formato de erro de cada SDK, que muda entre versões; o que não casa vira "Erro do provedor de IA: <mensagem>". Sem nova tentativa automática, uma falha passageira do provedor exige reenviar o pedido.
+- **Scope**: ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-082 (active)
+- **Decision**: A IA responde com um objeto JSON em texto, `{ cypher, visualization, mapping, title }`, sem `withStructuredOutput` nem tool calling. `parseWidgetReply` aceita cercas de código, o primeiro objeto JSON balanceado e, na falta dele, um bloco `cypher`; sem Cypher, a resposta conta como tentativa que falhou. `normalizeWidgetReply`: visualização fora de `WIDGET_VISUALIZATIONS` vira `TABLE`; mapeamento que não passa em `widgetMappingSchemas` vira `null`; título com `trim`, até 80, vazio fica com o título atual. O prompt de sistema lista as 10 visualizações e o formato do mapeamento de cada uma (AD-060).
+- **Reason**: AD-006 proíbe depender de recurso de um provedor só; Ollama e "Compatível com OpenAI" não garantem saída estruturada. FIX-05 e AIQ-20.
+- **Trade-off**: Modelos fracos gastam tentativas com JSON malformado.
+- **Scope**: ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-083 (active)
+- **Decision**: A geração por widget é `POST /api/dashboards/:id/ai/widget` (`ai.use` e `assert(user, id, 'edit')`) com corpo `{ prompt, widgetId, connectionId?, widget: { title, cypher, visualization, config } }` tirado do rascunho. Erros anteriores à geração (403, 404, 400, 409 `LLM_NOT_CONFIGURED`, 409 `SCHEMA_NOT_READ`) saem em JSON; depois a resposta é 200 `application/x-ndjson` com uma linha por evento: `attempt`, e um final entre `done` (com o resultado da consulta), `failed`, `provider_error` e `stopped`. Fechar a requisição aborta o `AbortSignal` passado ao `LlmClient` e ao `QueryService`. Nada é gravado no servidor: o web aplica `done` no rascunho.
+- **Reason**: AIQ-12 pede o contador ao vivo; AIQ-13 e AIQ-28 pedem cancelamento; FIX-07 e a spec mandam o resultado para o rascunho. Uma requisição só dispensa job e polling.
+- **Trade-off**: Proxies que bufferizam a resposta escondem o contador até o fim (a resposta leva `X-Accel-Buffering: no`); o supertest não prova o fechamento no meio, que é provado no service.
+- **Scope**: ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-084 (active)
+- **Decision**: São até 4 chamadas por pedido (1 geração + 3 correções). A correção leva a resposta anterior e o erro: a mensagem inteira para recusas da validação (`QUERY_TOO_LONG`, `QUERY_MULTIPLE_STATEMENTS`, `QUERY_WRITE_BLOCKED`), `QUERY_TIMEOUT`, resposta sem Cypher e `QUERY_FAILED` com código `Neo.ClientError.Statement.SyntaxError` ou `...SemanticError`; para outro `QUERY_FAILED`, só "Erro de execução no Neo4j: <código>". Erro do provedor para a geração sem nova tentativa. `NEO4J_UNAVAILABLE` também para, sem correção, com a mensagem do `QueryService`, e o widget fica como estava.
+- **Reason**: FIX-02 a FIX-04; mensagens de execução podem carregar valores do banco (AD-005). Corrigir o Cypher não traz o banco de volta, e gastaria 3 chamadas do provedor. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: A IA corrige erros de execução sem a mensagem, às cegas; códigos de sintaxe fora dos dois listados vão sem mensagem.
+- **Scope**: ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-085 (active)
+- **Decision**: "Schema lido" (AIQ-17) é existir documento em `connection_schemas` para a conexão, em qualquer `schema_status`: durante uma leitura (`READING`) ou depois de uma falha (`FAILED`) a IA usa o documento anterior. O schema vai ao prompt por `serializeSchema`, na ordem do `SchemaQueryService` (AD-039): `(:Label)` e `[:TIPO]` com os pares `(:Origem)-[:TIPO]->(:Destino)`, e cada propriedade como `- nome: TIPO1 | TIPO2 = <literal Cypher inteiro>`, sem `= ...` quando `sendExample` é falso ou não há exemplo.
+- **Reason**: A leitura é assíncrona (AD-038) e uma falha mantém o schema anterior (SCH-09); bloquear a IA nesses estados não protege nada. AIQ-03, AIQ-04, AD-005.
+- **Trade-off**: A IA pode trabalhar com um schema desatualizado enquanto a releitura não termina.
+- **Scope**: ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-086 (active)
+- **Decision**: No web, a geração de cada widget vive em `useAiGenerations`, criado pelo `DashboardPage` no modo de edição: um `AbortController` por widget, aborto de todas ao sair da edição ou da página, descarte do resultado quando o widget saiu do rascunho. `done` aplica título, Cypher, visualização e config por `updateWidget` e semeia o cache da prévia (`['query', dashboardId, connectionId, cypher]`) com o resultado, sem reexecutar. O mapeamento é resolvido no navegador por `resolveAiMapping`: nulo, inválido ou com coluna ausente vira `suggestMapping` de `widgets-graficos`; sugestão ainda incompleta vira `TABLE` com `{}`. `failed` abre o `WidgetEditorDialog` com o último Cypher e o erro. "Pedir à IA" fica no menu do card; para o widget recém-criado por "Novo widget", a descrição aparece no topo do editor. A aba `llm` entra em `SETTINGS_TABS` com `available: true`, e a task que a liga atualiza o teste CFG-02 de `fundacao-auth` (o Admin vê "Conexões", "Usuários", "Dashboards" e "LLM", nessa ordem), como em AD-041 e AD-046.
+- **Reason**: AIQ-02, AIQ-09 a AIQ-13, AIQ-28 a AIQ-30, FIX-06 e FIX-07; a sugestão de mapeamento já é pura e testada no web (AD-060 a AD-063), e um mapeamento incompleto seria recusado no `PUT` do dashboard. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Recarregar a página durante a geração perde o resultado; uma task desta feature toca um teste de `fundacao-auth`.
+- **Scope**: ia-cypher, ia-dashboard, fundacao-auth (teste CFG-02).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-087 (active)
+- **Decision**: `QueryService.run` (AD-045) aceita `signal?: AbortSignal`, repassado ao `Neo4jGateway.read`, e o `AppError` de `QUERY_FAILED` ganha `neo4jCode?: string`, que o `AppErrorFilter` não serializa.
+- **Reason**: AIQ-13 e AIQ-28 pedem que cancelar chegue ao Neo4j; FIX-04 decide pelo código, sem ler a mensagem.
+- **Trade-off**: Uma propriedade a mais no erro, visível só no servidor.
+- **Scope**: dashboards-consultas (QueryService), ia-cypher, ia-dashboard, interatividade.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-100 (active)
+- **Decision**: Os filtros globais ficam em `dashboards.filters` (JSONB, padrão `[]`) e o intervalo padrão de atualização em `dashboards.refresh_interval_sec` (padrão `0`), gravados pelo mesmo `PUT /api/dashboards/:id` de AD-043. O contrato é `packages/contracts/src/filters.ts`: cada filtro tem `id` (UUID do navegador), `label` (1 a 40), `parameter` (`^[A-Za-z][A-Za-z0-9_]*$`, até 40), `type` (`SINGLE_SELECT`, `MULTI_SELECT`, `TEXT`, `NUMBER`, `DATE`, `DATE_RANGE`), `options` (`STATIC` com 1 a 1.000 valores, ou `QUERY` com Cypher; só nos tipos de seleção) e `defaultValue` no formato do tipo. Os nomes de parâmetro de todos os filtros, contando `<p>_inicio` e `<p>_fim` do intervalo, são únicos no dashboard. Intervalos aceitos: 0, 10, 30, 60, 300, 900 e 3600 s. Quem não pode editar recebe `options.cypher: null`.
+- **Reason**: FLT-01 a FLT-05, FLT-17 e RFR-03; os filtros são lidos e gravados com o dashboard. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Um filtro não é consultável isoladamente; parâmetro só com letras ASCII.
+- **Scope**: interatividade, ia-dashboard (gera e altera filtros no rascunho).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-101 (active)
+- **Decision**: Os valores de parâmetro viajam em JSON como escalar, lista, `null` ou `{ kind: 'date', value: 'AAAA-MM-DD' }` (`queryParamsSchema`). A API os converte em `toCypherParams` (`apps/api/src/queries/cypher-params.ts`) antes do `Neo4jGateway`: data vira `neo4j.types.Date`, inteiro seguro vira `neo4j.int`, decimal fica `Float`. Filtro vazio vai como `null`, seleção múltipla como lista, intervalo como `<p>_inicio` e `<p>_fim`. A rota do widget salvo mantém só os nomes de parâmetro dos filtros salvos e descarta o resto (FLT-28); a rota de texto do editor aceita qualquer nome.
+- **Reason**: FLT-11 a FLT-13 e FLT-28: JSON não tem tipo de data, e o driver JS envia todo número como `Float`. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Filtro "Data" contra propriedade `DateTime` exige `date(n.x)` no Cypher.
+- **Scope**: interatividade, dashboards-consultas (QueryService e rotas de execução).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-102 (active)
+- **Decision**: O tokenizador de Cypher e `extractParameterNames` saem de `apps/api/src/queries/read-only-cypher.ts` para `packages/contracts/src/cypher-tokens.ts`, sem mudar o comportamento. `WidgetDto.parameters` traz, para todo usuário, os `$parametros` do Cypher do widget. No web, a chave do TanStack Query de cada widget leva só os parâmetros que ele usa (`relevantParams`): mudar um filtro executa só os widgets afetados, a aba aberta depois executa com os valores atuais, e a chave anterior é cancelada.
+- **Reason**: FLT-09, FLT-10 e FLT-27; quem só vê recebe `cypher: null` (AD-043) e mesmo assim precisa saber quais widgets usam cada parâmetro. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Um arquivo de `dashboards-consultas` muda de pacote; o cache de `ia-cypher` passa a ter `params` na chave.
+- **Scope**: interatividade, dashboards-consultas (validador), ia-cypher (cache), ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-103 (active)
+- **Decision**: As opções de filtros "Consulta Cypher" vêm de `POST /api/dashboards/:id/filters/:filterId/options` (consulta salva, `assert('view')`, erros mascarados para quem não edita) e de `POST /api/dashboards/:id/filter-options` (Cypher do rascunho, `assert('edit')`), ambos por `QueryService.run` com os parâmetros `null`. A regra `optionsFromResult` roda na API: primeira coluna, sem nulos, `bigint` e `json` como texto, sem repetidos na ordem da primeira aparição, os primeiros 1.000, com `truncated`.
+- **Reason**: FLT-06, FLT-23, FLT-24, FLT-29 e FLT-30; quem só vê não recebe o Cypher, e o rascunho tem filtros ainda não salvos. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Duas rotas para a mesma regra; opções não dependem de outros filtros (sem filtros em cascata).
+- **Scope**: interatividade.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-104 (active)
+- **Decision**: Refina AD-060: o `config` de toda visualização menos `KPI` aceita `crossFilter: { filterId, column }` ao lado do `mapping` (`TABLE` aceita `{}` ou `{ crossFilter }`). O filtro precisa existir no dashboard e ser `SINGLE_SELECT`, `TEXT`, `NUMBER` ou `DATE`; senão o `PUT` recusa com "Filtro do clique inválido". Remover o filtro no rascunho tira o `crossFilter` dos widgets. A seleção é por valor: o destaque marca as linhas cuja célula na coluna, convertida pelo tipo do filtro, é igual ao valor; clicar de novo deixa o filtro `null`. Elementos clicáveis levam `data-row-index`.
+- **Reason**: XFL-01 a XFL-09; o vínculo por id sobrevive a renomear o parâmetro, e a seleção por valor sobrevive a uma nova execução. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Duas linhas com o mesmo valor ficam destacadas juntas; clicar esvazia o filtro em vez de voltar ao padrão.
+- **Scope**: interatividade, widgets-graficos (views e construtores ganham `rowIndex`), ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-105 (active)
+- **Decision**: Valores dos filtros, seleção por clique e intervalo escolhido em visualização vivem só em memória, num reducer por página do dashboard (`filter-session.tsx`); abrir o dashboard parte dos valores padrão e do intervalo salvo. A barra de filtros fica num slot novo da TopBar (`useTopBarFilters`, mesmo mecanismo de `useTopBarAction`), no espaço dos chips de AD-020, com `flex-wrap`. Datas usam `<input type="date">` nativo.
+- **Reason**: FLT-07, FLT-08, FLT-15, FLT-21, FLT-31 e RFR-04; nada é guardado entre sessões (Out of Scope). Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Recarregar a página perde os valores; o seletor de data é o do navegador, não um calendário do tema.
+- **Scope**: interatividade, fundacao-auth (TopBar).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-106 (active)
+- **Decision**: O auto-refresh é um `setTimeout` por página (`useAutoRefresh`): desligado com intervalo 0 ou em edição; ao vencer com a aba do navegador oculta, espera o `visibilitychange` e executa uma vez; ao vencer visível, chama `refetchQueries` em cada chave de widget da aba ativa com `cancelRefetch: false`, o que pula execução em andamento; mudar um filtro reinicia a contagem. O card mostra esqueleto só sem dados; falha com dados anteriores mantém os dados e mostra "Não foi possível atualizar às HH:mm". "Atualizado às HH:mm:ss" aparece quando as execuções da aba ativa terminam, por qualquer motivo.
+- **Reason**: RFR-02 e RFR-05 a RFR-12, com o cache e o cancelamento do TanStack Query que o web já usa. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: As abas inativas não atualizam; cada aba aberta do navegador faz as próprias execuções.
+- **Scope**: interatividade, dashboards-consultas (WidgetCard).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-107 (active)
+- **Decision**: O CSV é gerado no navegador (`toCsv`): `﻿`, `;` e `\r\n`; número com vírgula decimal, sem separador de milhar e sem arredondar; `bigint` com todos os dígitos; texto que começa com `AAAA-MM-DD` vira `DD/MM/AAAA` (sem a hora); booleano "Sim"/"Não"; nulo vazio; `json` como texto. Texto e cabeçalho que começam com `=`, `+`, `-` ou `@` ganham `'`; depois, campo com `;`, aspas ou quebra de linha vai entre aspas com as aspas dobradas. O nome do arquivo troca por `-` tudo que não é letra Unicode, dígito ou `-`, com a data local.
+- **Reason**: EXP-02 a EXP-05 e EXP-07; o resultado inteiro (até 5.000 linhas) já está no navegador. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: A hora de um `DateTime` não sai no CSV; o nome do arquivo pode ter acentos.
+- **Scope**: interatividade.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-108 (active)
+- **Decision**: O PNG é gerado com `html-to-image` (`toPng`) sobre o elemento do card, com `pixelRatio = 2 × devicePixelRatio` e sem os elementos marcados `data-export-ignore` (o botão do menu). O mapa depende do `crossOrigin: 'anonymous'` dos tiles (AD-062); qualquer falha vira o toast "Não foi possível exportar a imagem". "Exportar CSV" e "Exportar PNG" ficam habilitados sempre que o card mostra dados, inclusive dados mantidos depois de uma atualização que falhou.
+- **Reason**: EXP-01, EXP-06 e EXP-08: a imagem é o card "como está na tela", no tema atual. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Servidor de tiles sem CORS impede o PNG do mapa; fidelidade de fontes e gradientes depende do navegador e não é provada no jsdom.
+- **Scope**: interatividade.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-109 (active)
+- **Decision**: `aiWidgetRequestSchema` ganha `filters: { label, parameter, type }[]`; o zod descarta qualquer outra chave, e nenhum valor de filtro chega ao provedor. `buildWidgetMessages` lista cada filtro como `- <rótulo>: $<parâmetro> (<tipo>)`, com `_inicio` e `_fim` no intervalo. O web envia os filtros do rascunho, e o resultado da IA só semeia o cache quando o Cypher gerado não usa parâmetro de filtro; senão o widget executa com os valores atuais.
+- **Reason**: FLT-20 e AD-005; a semente de `ia-cypher` foi executada com parâmetros `null` e mostraria outro resultado. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Um widget gerado com parâmetro executa duas vezes (na geração e com os filtros).
+- **Scope**: interatividade, ia-cypher, ia-dashboard (CHAT-05, CHAT-06).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-120 (active)
+- **Decision**: A conversa do assistente fica em `assistant_messages` (`id`, `seq` identity, `dashboard_id` com `ON DELETE CASCADE`, `user_id`, `role` `USER`/`ASSISTANT`, `text`, `details` JSONB com mudanças, não aplicados, criados, com erro e descartados, `created_at`), lida em ordem de `seq`. As rotas `GET`, `DELETE` e `POST /api/dashboards/:id/assistant/messages` exigem `ai.use` e `assert(user, id, 'edit')` e só tocam as mensagens do próprio usuário. Erro do provedor não é gravado: a mensagem do usuário fica, e "Tentar novamente" reenvia com `retryOf`, que reaproveita a mensagem quando ela é a mais recente do usuário e não tem resposta.
+- **Reason**: HIST-01 a HIST-06, CHAT-17, CHAT-21; `seq` dá ordem estável com o mesmo `created_at`. Quem perde a edição deixa de ver a conversa, que volta com o acesso. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Reabrir o dashboard não mostra pedidos que falharam, só a mensagem sem resposta.
+- **Scope**: ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-121 (active)
+- **Decision**: Cada mensagem ao assistente é uma requisição com resposta NDJSON, no padrão de AD-083: erros anteriores ao pedido em JSON (400, 403, 404, 409 `LLM_NOT_CONFIGURED`, 409 `SCHEMA_NOT_READ`), depois os eventos `accepted`, `planned`, `widget` (índice, total, tentativa), e um final entre `done` (resposta gravada e ações resolvidas), `provider_error` e `error`. O servidor grava a resposta só imediatamente antes de emitir `done`, depois de conferir o `signal`. O web aplica todas as ações de uma vez no `done`; cancelar, sair ou falhar não aplicam nada.
+- **Reason**: GEN-08 pede o progresso ao vivo; GEN-09, CHAT-14 e CHAT-22 pedem desfazer o que o pedido já aplicou, o que vira "nada foi aplicado" quando a aplicação é atômica (Assumption da spec: "cada pedido é aplicado inteiro ou não é"). Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: O usuário só vê os widgets no fim do pedido; um cancelamento entre a gravação e o `done` deixa na conversa uma resposta não aplicada.
+- **Scope**: ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-122 (active)
+- **Decision**: O assistente faz uma chamada de plano que devolve um objeto JSON em texto, `{ reply, actions }` (sem tool calling, como AD-082), com 12 ações: `create_tab`, `rename_tab`, `remove_tab`, `create_widget`, `update_widget`, `remove_widget`, `move_widget`, `resize_widget`, `create_filter`, `update_filter`, `remove_filter`, `rename_dashboard`. `create_widget` e `update_widget` com `prompt` geram o widget pelo laço de `ia-cypher` (até 4 chamadas, AD-084), com o widget atual e os filtros como contexto; `update_widget` sem `prompt` não chama o LLM e executa o Cypher atual uma vez para devolver o resultado. Texto sem JSON vira resposta sem ações. Widget que esgota as correções, ou com o Neo4j inacessível, entra com o último Cypher (ou `null`), `TABLE` e a mensagem de erro; erro do provedor em qualquer chamada encerra o pedido.
+- **Reason**: GEN-05 e CHAT-08 pedem a validação, a execução e a autocorreção de `ia-cypher`; a spec conta até 4 chamadas por widget; AD-006 proíbe depender de recurso de um provedor só. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Até 81 chamadas num pedido de 20 widgets; o plano não vê o resultado das consultas e descreve os widgets às cegas.
+- **Scope**: ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-123 (active)
+- **Decision**: O prompt do plano cita abas, widgets e filtros por refs curtas na ordem do rascunho (`t1`, `w1`, `f1`), e `create_tab` pode declarar uma `ref` usada pelas ações seguintes. `resolveActions` (puro, na API) simula as ações em ordem: tipo fora da lista, dados inválidos, ref inexistente ou remoção da última aba viram "Não aplicado: ..." na resposta; os 20 primeiros `create_widget` ficam e o resto é contado como descartado; filtros passam pelos schemas de `interatividade` e a consulta de opções por `validateReadOnlyCypher`; cada ação aceita gera uma descrição em português. Os ids de abas, widgets e filtros criados pela IA são UUIDs gerados no servidor, o que refina AD-043 ("gerados no navegador"): o `PUT` continua aceitando qualquer UUID que não seja de outro dashboard. Posição e tamanho saem de `placeWidget`: `w` e `h` de 2 a 12, `x + w ≤ 12`, descendo `y` até não sobrepor.
+- **Reason**: CHAT-07, CHAT-23, CHAT-24, GEN-04, GEN-12; o LLM erra menos com `w3` do que com um UUID, e a resposta gravada precisa das recusas, então a validação roda no servidor. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: O servidor confia na estrutura do rascunho que o navegador envia; uma ação aceita no servidor ainda é ignorada no web se o usuário mudou o rascunho durante o pedido.
+- **Scope**: ia-dashboard, dashboards-consultas (ids no `PUT`).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-124 (active)
+- **Decision**: O pedido do plano leva: regras e ações na mensagem de sistema, o schema por `serializeSchema` (AD-085), as 20 mensagens anteriores do usuário nesse dashboard (texto e descrições das mudanças, nunca resultados), e por fim o rascunho e a mensagem nova. O rascunho vem do navegador recortado por `assistantDraftSchema` (`z.object`, que descarta o resto): nome, conexão, abas, widgets com título, Cypher, visualização, mapeamento e layout, e filtros só com id, rótulo, parâmetro e tipo. Valores e opções de filtros, resultados e `crossFilter` nunca chegam ao servidor do assistente. O `LlmClient` registra o plano com `purpose=assistant`.
+- **Reason**: CHAT-05, CHAT-06 e AD-005: o recorte no schema garante a regra sem depender da tela. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: A IA não vê o valor padrão nem as opções dos filtros que vai alterar.
+- **Scope**: ia-dashboard, ia-cypher (`purpose` do log).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-125 (active)
+- **Decision**: "Descrever para a IA" é uma opção do `NewDashboardDialog` (só com `ai.use`; desabilitada sem provedor) com "Nome", "Conexão" e "Descrição". "Criar" usa o `POST /api/dashboards` de sempre (dono é quem pede, aba "Aba 1", fim da sidebar por AD-042) e navega para `/dashboards/<id>?editar=1` com `state: { assistantPrompt }`; a página abre o painel, envia a descrição como primeira mensagem uma única vez e limpa o estado. A geração inteira é um pedido comum ao assistente num dashboard vazio; o prompt manda renomear e usar a aba vazia `t1`.
+- **Reason**: GEN-01, GEN-02, GEN-14 e a Assumption "Dois caminhos para a mesma capacidade, sem tela nova"; o estado da navegação não põe a descrição na URL. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Recarregar a página durante a geração perde o pedido; o dashboard fica criado e vazio.
+- **Scope**: ia-dashboard, dashboards-consultas (`NewDashboardDialog`, `DashboardPage`).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-126 (active)
+- **Decision**: "Desfazer" é uma foto em memória do rascunho anterior à resposta mais recente que trouxe ações. O botão aparece nessa resposta só enquanto o rascunho atual é o mesmo objeto que a resposta produziu: qualquer mudança manual, "Salvar", "Descartar" ou recarregar a página o tiram. Desfazer põe de volta a foto.
+- **Reason**: CHAT-10, CHAT-11, CHAT-26, HIST-09 e a Assumption "Só a alteração mais recente da IA pode ser desfeita"; restaurar a foto depois de outras mudanças apagaria trabalho do usuário sem aviso. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Arrastar um widget logo depois da resposta já tira o "Desfazer".
+- **Scope**: ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-127 (active)
+- **Decision**: O painel do assistente é um `aside` de largura fixa (`w-96`) à direita da grade, no mesmo contêiner `flex`, com a grade em `min-w-0 flex-1`, fora da área das abas. O botão "Assistente" fica no cabeçalho do dashboard, só para `ai.use` com `permissions.edit`. Aberto ou fechado fica em `localStorage['ninbi-assistant-open']`, um valor por navegador para todos os dashboards, lido e escrito com try/catch. Enquanto um pedido roda, "Pedir à IA" fica desabilitado em todos os widgets.
+- **Reason**: CHAT-01 a CHAT-03, CHAT-18, CHAT-25, CHAT-30 e a Assumption "À direita; a grade usa a largura que sobra"; a grade de AD-046 já mede o próprio contêiner. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Em telas estreitas a grade fica com pouca largura; o painel não é redimensionável.
+- **Scope**: ia-dashboard, ia-cypher (`useAiGenerations` bloqueado).
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-128 (active)
+- **Decision**: Cada pedido ao assistente gera uma linha em `Logger('Assistant')`: `assistant request user=<id> dashboard=<id> actions=<n> widgetErrors=<n> durationMs=<n> result=<ok|provider_error|cancelled|error>`, sem o texto das mensagens, o Cypher nem o schema. As chamadas ao provedor continuam com a linha `ai call` de AD-081.
+- **Reason**: CHAT-29, no formato chave=valor dos logs de HTTP, consulta e compartilhamento. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Quem audita cruza ids com o banco.
+- **Scope**: ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-129 (active)
+- **Decision**: `AiWidgetService` ganha `generate(input)`, o laço de AD-084 sem HTTP (snapshot, schema, conexão, widget, `prompt`, `filters`, `purpose`, `signal`, `onAttempt`), que devolve `done`, `failed`, `stopped` ou `provider_error`; `run` de `ia-cypher` passa a delegar a ele sem mudar o comportamento. `LlmClient` aceita `purpose: 'assistant'`.
+- **Reason**: GEN-05 e CHAT-08; uma só implementação do laço para o prompt rápido e para o assistente. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Uma task de `ia-dashboard` refatora um service de `ia-cypher`, cujos testes precisam continuar verdes.
+- **Scope**: ia-dashboard, ia-cypher.
+- **Date**: 2026-11-16
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:
