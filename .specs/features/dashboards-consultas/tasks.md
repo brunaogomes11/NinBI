@@ -163,9 +163,9 @@ T28
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/database/dashboards-schema.spec.ts`: migrações aplicam no PGlite; DASH-11 (apagar o dashboard apaga as abas e os widgets dele); `DASH-14 chave estrangeira impede apagar conexão usada` (apagar a conexão de um dashboard viola a chave estrangeira); GRID-06 (um widget guarda `x`, `y`, `w`, `h` e `tab_id`); dashboard novo nasce com `version = 1`; `widgets.visualization` padrão `'TABLE'` e `config` padrão `{}`
-- [ ] `drizzle-kit generate` não gera diferença depois do commit
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/database/dashboards-schema.spec.ts`: migrações aplicam no PGlite; DASH-11 (apagar o dashboard apaga as abas e os widgets dele); `DASH-14 chave estrangeira impede apagar conexão usada` (apagar a conexão de um dashboard viola a chave estrangeira); GRID-06 (um widget guarda `x`, `y`, `w`, `h` e `tab_id`); dashboard novo nasce com `version = 1`; `widgets.visualization` padrão `'TABLE'` e `config` padrão `{}`
+- [x] `drizzle-kit generate` não gera diferença depois do commit
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build
