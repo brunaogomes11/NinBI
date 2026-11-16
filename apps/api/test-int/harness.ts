@@ -10,6 +10,8 @@ import { AppModule } from '../src/app.module'
 import { DB } from '../src/database/database.module'
 import { MIGRATIONS_FOLDER } from '../src/database/migrate'
 import * as schema from '../src/database/schema'
+import { NEO4J_GATEWAY } from '../src/neo4j/neo4j.gateway'
+import { FakeNeo4jGateway } from '../test/fakes/fake-neo4j.gateway'
 
 const ADMIN_URL = 'postgres://ninbi:ninbi@localhost:55432/postgres'
 
@@ -30,9 +32,12 @@ export async function createIntApp() {
   const db = drizzle(pool, { schema })
   await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER })
 
+  const neo4j = new FakeNeo4jGateway()
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(DB)
     .useValue(db)
+    .overrideProvider(NEO4J_GATEWAY)
+    .useValue(neo4j)
     .compile()
   const app: INestApplication = configureApp(moduleRef.createNestApplication())
   await app.init()
@@ -41,6 +46,8 @@ export async function createIntApp() {
     app,
     db,
     pool,
+    /** Neo4j falso: o PostgreSQL é real, o Neo4j do usuário não. */
+    neo4j,
     http: request.agent(app.getHttpServer()),
     /** Cliente sem cookie, para envios simultâneos independentes. */
     anonymous: () => request(app.getHttpServer()),
