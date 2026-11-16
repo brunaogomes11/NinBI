@@ -69,6 +69,50 @@ describe('validateReadOnlyCypher', () => {
     }
   })
 
+  it('QRY-04 palavra bloqueada como chave de mapa, alias ou lista é aceita', () => {
+    const accepted = [
+      'RETURN {set: 1} AS m',
+      'RETURN {a: 1, create: 2} AS m',
+      'WITH 1 AS set RETURN set',
+      'MATCH (t) WHERE t.id IN transactions RETURN t',
+      'MATCH (set) RETURN set.nome',
+      'MATCH (n) WHERE n.id IN $ids AND set > 1 RETURN n',
+      'MATCH (n:Create)-[:DELETE|MERGE]->(m) RETURN n',
+      'MATCH (n) RETURN n {.set, .remove}',
+      'MATCH (n) RETURN n.a AS delete, n.b AS merge',
+    ]
+    for (const cypher of accepted) {
+      expect(validateReadOnlyCypher(cypher), cypher).toEqual({ ok: true })
+    }
+  })
+
+  it('QRY-02 escrita em posição de cláusula continua recusada em subconsulta, depois de número e de fecha-chave', () => {
+    const blocked: [string, string][] = [
+      ['CALL { CREATE (n) } RETURN 1', 'CREATE'],
+      ['CALL (x) { MERGE (n) } RETURN 1', 'MERGE'],
+      ['MATCH (n) WHERE n.a = 1. CREATE (m) RETURN m', 'CREATE'],
+      ['MATCH (n) WHERE n.a = 1.5 SET n.b = 2', 'SET'],
+      ["MATCH (n) WHERE n.a = 'x' DELETE n", 'DELETE'],
+      ['MATCH (n) WHERE EXISTS { MATCH (n) } SET n.a = 1', 'SET'],
+      [
+        'CALL { MATCH (n) RETURN n } IN TRANSACTIONS OF 10 ROWS',
+        'IN TRANSACTIONS',
+      ],
+      [
+        'CALL { MATCH (n) RETURN n } IN 3 CONCURRENT TRANSACTIONS',
+        'IN TRANSACTIONS',
+      ],
+      ['UNWIND [1] AS x CREATE (n)', 'CREATE'],
+    ]
+    for (const [cypher, clause] of blocked) {
+      expect(validateReadOnlyCypher(cypher), cypher).toMatchObject({
+        ok: false,
+        code: 'QUERY_WRITE_BLOCKED',
+        clause,
+      })
+    }
+  })
+
   it('QRY-05 mais de uma instrução é recusada', () => {
     expect(validateReadOnlyCypher('RETURN 1; RETURN 2')).toMatchObject({
       ok: false,
