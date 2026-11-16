@@ -12,6 +12,7 @@ import { QueriesModule } from './queries/queries.module'
 import { SchemaModule } from './schema/schema.module'
 import { SetupModule } from './setup/setup.module'
 import { SidebarModule } from './sidebar/sidebar.module'
+import { TeamsModule } from './teams/teams.module'
 import { UsersModule } from './users/users.module'
 import { WebModule } from './web/web.module'
 
@@ -30,6 +31,7 @@ import { WebModule } from './web/web.module'
     SchemaModule,
     SetupModule,
     SidebarModule,
+    TeamsModule,
     UsersModule,
     WebModule,
   ],
