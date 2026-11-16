@@ -680,8 +680,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes com gesto: `WDG-08 Remover widget pede confirmação com o título` ("Remover o widget Vendas por loja?"; "Cancelar" mantém o widget), `WDG-09 confirmar a remoção tira o widget do rascunho` (o card some e o `PUT` do "Salvar" não o contém); fora da edição o menu não aparece
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto: `WDG-08 Remover widget pede confirmação com o título` ("Remover o widget Vendas por loja?"; "Cancelar" mantém o widget), `WDG-09 confirmar a remoção tira o widget do rascunho` (o card some e o `PUT` do "Salvar" não o contém); fora da edição o menu não aparece
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build

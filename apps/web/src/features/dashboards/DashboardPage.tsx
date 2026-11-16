@@ -44,6 +44,7 @@ import {
   addWidget,
   type DashboardDraft,
   removeTab,
+  removeWidget,
   renameTab,
   setConnection,
   setLayout,
@@ -278,6 +279,11 @@ function DashboardView({
                     onLayoutChange: (layouts) =>
                       editor.change((current) =>
                         setLayout(current, shownTab.id, layouts),
+                      ),
+                    onEditWidget: setEditingWidgetId,
+                    onRemoveWidget: (widgetId) =>
+                      editor.change((current) =>
+                        removeWidget(current, shownTab.id, widgetId),
                       ),
                     onAddWidget: () => {
                       const id = crypto.randomUUID()

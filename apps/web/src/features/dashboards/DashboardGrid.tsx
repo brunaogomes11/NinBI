@@ -32,6 +32,8 @@ function toLayoutItem(widget: WidgetDto): LayoutItem {
 export interface GridEdit extends WidgetEditSource {
   onLayoutChange: (layouts: Record<string, WidgetLayout>) => void
   onAddWidget: () => void
+  onEditWidget: (widgetId: string) => void
+  onRemoveWidget: (widgetId: string) => void
 }
 
 /** Os widgets de uma aba numa grade de 12 colunas; arrastar e redimensionar só em edição (GRID-04). */
@@ -96,7 +98,13 @@ export function DashboardGrid({
                 dashboardId={dashboardId}
                 version={version}
                 widget={widget}
-                edit={edit}
+                edit={
+                  edit && {
+                    connectionId: edit.connectionId,
+                    onEdit: () => edit.onEditWidget(widget.id),
+                    onRemove: () => edit.onRemoveWidget(widget.id),
+                  }
+                }
               />
             </div>
           ))}
