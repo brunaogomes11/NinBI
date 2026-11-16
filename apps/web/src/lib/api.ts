@@ -31,6 +31,11 @@ export function onUnauthorized(handler: UnauthorizedHandler): () => void {
   }
 }
 
+/** Avisa quem reage a um 401, para chamadas que não passam por `apiFetch` (leitura em stream). */
+export function notifyUnauthorizedHandler(): void {
+  unauthorizedHandler?.()
+}
+
 export interface ApiFetchInit extends Omit<RequestInit, 'body'> {
   /** Corpo da requisição, enviado como JSON. */
   body?: unknown

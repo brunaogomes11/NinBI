@@ -436,8 +436,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `ai-api.test.ts` com MSW e `ReadableStream`: `AIQ-12 leitura do NDJSON entrega cada tentativa na ordem` (linhas partidas no meio entre dois pedaços chegam inteiras; `onEvent` recebe `attempt` 1, `attempt` 2 e `done`; a função devolve `done`), 409 vira `ApiError` com `code` e `message`, corpo sem evento final lança a mensagem genérica, abortar o `signal` rejeita com `AbortError`
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `ai-api.test.ts` com MSW e `ReadableStream`: `AIQ-12 leitura do NDJSON entrega cada tentativa na ordem` (linhas partidas no meio entre dois pedaços chegam inteiras; `onEvent` recebe `attempt` 1, `attempt` 2 e `done`; a função devolve `done`), 409 vira `ApiError` com `code` e `message`, corpo sem evento final lança a mensagem genérica, abortar o `signal` rejeita com `AbortError`
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
