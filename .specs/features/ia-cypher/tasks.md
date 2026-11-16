@@ -416,8 +416,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `resolve-mapping.test.ts`: `AIQ-30 mapeamento com coluna ausente vira a sugestão automática` (`BAR` com `x: 'mes'` e resultado com colunas `categoria`, `total`: devolve `x: 'categoria'`, `series: ['total']`), mapeamento válido com colunas presentes fica como veio, mapeamento `null` vira a sugestão, `PIE` com resultado sem coluna numérica vira `{ visualization: 'TABLE', config: {} }`, `TABLE` dá `config: {}`
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `resolve-mapping.test.ts`: `AIQ-30 mapeamento com coluna ausente vira a sugestão automática` (`BAR` com `x: 'mes'` e resultado com colunas `categoria`, `total`: devolve `x: 'categoria'`, `series: ['total']`), mapeamento válido com colunas presentes fica como veio, mapeamento `null` vira a sugestão, `PIE` com resultado sem coluna numérica vira `{ visualization: 'TABLE', config: {} }`, `TABLE` dá `config: {}`
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
