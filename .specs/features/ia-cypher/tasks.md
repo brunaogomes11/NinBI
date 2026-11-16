@@ -735,7 +735,7 @@ Proof: run api | ✓ FIX-10 várias instruções contam como falha de validaçã
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, sonnet) sobre 587ea49 - em andamento.
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre 587ea49 - returned (aaf313d). Lote 2 (T8-T14) - returned (30a749e). Lote 3 (T15-T20) - returned (14b3668; parte da T20 foi commitada por outra sessão em ce6be2a). Verifier (haiku) sobre 14b3668 - returned: FAIL, 5 findings + 1 extra fechados (73af014..19405b6; AD-134). Round 2: 91 pass / 0 fail em f8589dc; `validate_verification.py` exit 0. Feature encerrada.
 **Walked:** dispensado por AD-023
 
 ---
