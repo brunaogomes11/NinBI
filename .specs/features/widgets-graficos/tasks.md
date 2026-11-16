@@ -177,8 +177,8 @@ T15 → T16
 
 **Done when**:
 
-- [ ] Testes em `apps/web/src/lib/format.test.ts`: `VIZ-17 números no formato 1.234,56 e datas em dd/MM/aaaa` (`1234.56` → "1.234,56"; `4999.95` → "4.999,95"; `20` → "20"; `0.125` → "0,13"; `-5` → "-5"; `'2024-02-05'` → "05/02/2024"; `'2024-02-05T23:30:00Z'` → "05/02/2024"; `{ kind: 'bigint', value: '9007199254740993' }` → "9.007.199.254.740.993"; `null` → "—"; `true` → "Sim"; `'Centro'` fica "Centro"); testes de `formatDateTime` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `apps/web/src/lib/format.test.ts`: `VIZ-17 números no formato 1.234,56 e datas em dd/MM/aaaa` (`1234.56` → "1.234,56"; `4999.95` → "4.999,95"; `20` → "20"; `0.125` → "0,13"; `-5` → "-5"; `'2024-02-05'` → "05/02/2024"; `'2024-02-05T23:30:00Z'` → "05/02/2024"; `{ kind: 'bigint', value: '9007199254740993' }` → "9.007.199.254.740.993"; `null` → "—"; `true` → "Sim"; `'Centro'` fica "Centro"); testes de `formatDateTime` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
