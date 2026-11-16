@@ -91,6 +91,20 @@ describe('simple-data', () => {
     })
   })
 
+  it('KPI-02 variação que arredonda para zero não leva seta e mostra 0%', () => {
+    for (const change of [-0.001, 0.004]) {
+      const built = kpiOf(change)
+      expect(
+        built.ok && [built.data.direction, built.data.changeLabel],
+      ).toEqual(['flat', '0%'])
+    }
+    const small = kpiOf(-0.01)
+    expect(small.ok && [small.data.direction, small.data.changeLabel]).toEqual([
+      'down',
+      '0,01%',
+    ])
+  })
+
   it('KPI-05 valor não numérico fica como texto', () => {
     const built = kpiOf(null, 'Centro')
     expect(built.ok && built.data.value).toBe('Centro')

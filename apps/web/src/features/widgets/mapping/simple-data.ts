@@ -26,8 +26,16 @@ const hasValues = (result: QueryResultDto, column: string | null) => {
 export interface KpiData {
   value: string
   change: number | null
-  direction: 'up' | 'down' | null
+  direction: 'up' | 'down' | 'flat' | null
   changeLabel: string | null
+}
+
+/** O sinal vem do valor como exibido: -0,001 mostra "0%" e não leva seta (0 exato segue "alta"). */
+function directionOf(change: number | null): KpiData['direction'] {
+  if (change === null) return null
+  if (change === 0) return 'up'
+  if (formatNumber(Math.abs(change)) === '0') return 'flat'
+  return change > 0 ? 'up' : 'down'
 }
 
 export function buildKpi(
@@ -49,7 +57,7 @@ export function buildKpi(
     data: {
       value: formatValue(cell(result, row, mapping.value)),
       change,
-      direction: change === null ? null : change >= 0 ? 'up' : 'down',
+      direction: directionOf(change),
       changeLabel:
         change === null ? null : `${formatNumber(Math.abs(change))}%`,
     },

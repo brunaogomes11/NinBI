@@ -6,6 +6,7 @@ import type { KpiData } from './mapping/simple-data'
 /** Valor em destaque e, quando há variação, o chip com seta e porcentagem (KPI-01 a KPI-05). */
 export function KpiView({ data }: { data: KpiData }) {
   const up = data.direction === 'up'
+  const flat = data.direction === 'flat'
   return (
     <div className="flex h-full min-h-0 flex-col justify-center gap-2">
       <p className="truncate text-3xl font-semibold tabular-nums">
@@ -17,14 +18,13 @@ export function KpiView({ data }: { data: KpiData }) {
           data-direction={data.direction}
           className={cn(
             'gap-1 px-2 py-1',
-            up
-              ? 'bg-primary/15 text-accent-text'
-              : 'bg-destructive/15 text-destructive',
+            flat && 'bg-muted text-muted-foreground',
+            up && 'bg-primary/15 text-accent-text',
+            data.direction === 'down' && 'bg-destructive/15 text-destructive',
           )}
         >
-          {up ? (
-            <ArrowUp role="img" aria-label="alta" />
-          ) : (
+          {up && <ArrowUp role="img" aria-label="alta" />}
+          {data.direction === 'down' && (
             <ArrowDown role="img" aria-label="queda" />
           )}
           {data.changeLabel}

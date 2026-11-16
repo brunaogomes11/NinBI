@@ -36,6 +36,13 @@ describe('KpiView', () => {
     expect(screen.getByText('5%')).toHaveClass('text-destructive')
   })
 
+  it('KPI-03 variação que arredonda para zero mostra 0% sem seta', () => {
+    draw(-0.001)
+    expect(screen.getByText('0%')).toBeInTheDocument()
+    expect(screen.queryByLabelText('alta')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('queda')).not.toBeInTheDocument()
+  })
+
   it('KPI-04 sem variação ou variação nula não mostra chip', () => {
     const none = draw(undefined)
     expect(screen.getByText('4.999,95')).toBeInTheDocument()
