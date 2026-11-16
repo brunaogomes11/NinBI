@@ -340,8 +340,8 @@ T15 → T16
 
 **Done when**:
 
-- [ ] Testes em `ListView.test.tsx` (resultado de `RETURN nome, categoria, total, variacao`): `LIST-01 lista mostra texto principal e até dois valores na ordem` (uma `li` por linha, na ordem; nome à esquerda; "1.234,56" e "12" à direita), `LIST-02 texto secundário aparece abaixo do principal em tom apagado` (a categoria vem depois do nome, com `text-muted-foreground`), `LIST-03 linhas rolam dentro do card com o título fixo` (a `ul` tem `overflow-y-auto`; o título do card fica fora dela), `LIST-04 texto longo é cortado com reticências` (texto principal e secundário com `truncate` e `title` igual ao texto inteiro)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `ListView.test.tsx` (resultado de `RETURN nome, categoria, total, variacao`): `LIST-01 lista mostra texto principal e até dois valores na ordem` (uma `li` por linha, na ordem; nome à esquerda; "1.234,56" e "12" à direita), `LIST-02 texto secundário aparece abaixo do principal em tom apagado` (a categoria vem depois do nome, com `text-muted-foreground`), `LIST-03 linhas rolam dentro do card com o título fixo` (a `ul` tem `overflow-y-auto`; o título do card fica fora dela), `LIST-04 texto longo é cortado com reticências` (texto principal e secundário com `truncate` e `title` igual ao texto inteiro)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
