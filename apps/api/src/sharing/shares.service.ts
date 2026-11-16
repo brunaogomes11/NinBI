@@ -7,11 +7,13 @@ import {
   type ShareUpsertInput,
 } from '@ninbi/contracts'
 import { and, eq, sql } from 'drizzle-orm'
+import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { SessionUser } from '../auth/session.service'
 import { AppError } from '../common/app-error'
 import { Clock } from '../common/clock'
 import { DashboardAccessService } from '../dashboard-access/dashboard-access.service'
 import { type AppDatabase, DB } from '../database/database.module'
+import type * as schema from '../database/schema'
 import { dashboardShares, teams, users } from '../database/schema'
 
 const UUID_PATTERN =
@@ -79,7 +81,9 @@ export class SharesService {
       recipientKey = 'everyone'
     }
 
-    const [written] = await this.db
+    // A união NodePg | PGlite não aceita `.returning({...})`; os dois têm a mesma API.
+    const db = this.db as NodePgDatabase<typeof schema>
+    const [written] = await db
       .insert(dashboardShares)
       .values({
         dashboardId: access.dashboardId,
@@ -163,7 +167,7 @@ export class SharesService {
       .select({ role: users.role, status: users.status })
       .from(users)
       .where(eq(users.id, userId))
-    if (!target || target.status !== 'ACTIVE') {
+    if (target?.status !== 'ACTIVE') {
       throw badRecipient(MESSAGES.userNotFound)
     }
     if (target.role === 'VIEWER' && permission === 'edit') {

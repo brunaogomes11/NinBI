@@ -244,8 +244,8 @@ T16
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/sharing/share-candidates.spec.ts`: `SHARE-04 busca lista usuários ativos por nome ou e-mail, equipes e Todos da instalação` (`q=ana` acha "Ana Souza" pelo nome e "Bruno" pelo e-mail `bruno.ana@x.com`, sem diferenciar maiúsculas; não traz o usuário desativado "Ana Lima"; traz a equipe "Banana"; `everyone: true`), `SHARE-05 busca sem resultado devolve listas vazias` (`q=zzz`: `users` e `teams` vazios), `SHARE-11 dono fica fora da busca` (o nome do dono casa com `q` e não volta; um Admin que busca no dashboard de outro também não vê o dono), `q=%` não casa com tudo, mais de 20 usuários devolvem 20, compartilhamento `edit` recebe 403
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/sharing/share-candidates.spec.ts`: `SHARE-04 busca lista usuários ativos por nome ou e-mail, equipes e Todos da instalação` (`q=ana` acha "Ana Souza" pelo nome e "Bruno" pelo e-mail `bruno.ana@x.com`, sem diferenciar maiúsculas; não traz o usuário desativado "Ana Lima"; traz a equipe "Banana"; `everyone: true`), `SHARE-05 busca sem resultado devolve listas vazias` (`q=zzz`: `users` e `teams` vazios), `SHARE-11 dono fica fora da busca` (o nome do dono casa com `q` e não volta; um Admin que busca no dashboard de outro também não vê o dono), `q=%` não casa com tudo, mais de 20 usuários devolvem 20, compartilhamento `edit` recebe 403
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build

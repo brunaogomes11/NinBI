@@ -112,12 +112,10 @@ describe('compartilhamentos do dashboard', () => {
     ).toEqual(['USER'])
     expect((await ana.agent.get(t.url)).status).toBe(200)
 
-    const viaTeam = await t.owner.agent
-      .post(t.sharesUrl)
-      .send({
-        recipient: { type: 'TEAM', teamId: team.id },
-        permission: 'view',
-      })
+    const viaTeam = await t.owner.agent.post(t.sharesUrl).send({
+      recipient: { type: 'TEAM', teamId: team.id },
+      permission: 'view',
+    })
     expect(viaTeam.status).toBe(200)
     expect(
       (viaTeam.body as DashboardSharesDto).shares.map((s) => s.recipient.type),
