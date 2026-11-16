@@ -705,8 +705,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Teste `apps/api/test/infra/license.spec.ts` confere que `LICENSE` existe na raiz, começa com "GNU AFFERO GENERAL PUBLIC LICENSE", contém "Version 3, 19 November 2007" e "END OF TERMS AND CONDITIONS"
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Teste `apps/api/test/infra/license.spec.ts` confere que `LICENSE` existe na raiz, começa com "GNU AFFERO GENERAL PUBLIC LICENSE", contém "Version 3, 19 November 2007" e "END OF TERMS AND CONDITIONS"
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
