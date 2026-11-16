@@ -1,4 +1,11 @@
 import { z } from 'zod'
+import {
+  CROSS_FILTER_TYPES,
+  type DashboardFilter,
+  dashboardFiltersSchema,
+  queryParamsSchema,
+  REFRESH_INTERVALS,
+} from './filters'
 import { MESSAGES } from './messages'
 import { WIDGET_VISUALIZATIONS, widgetConfigSchema } from './widget-config'
 
@@ -20,6 +27,8 @@ export interface WidgetDto {
   visualization: string
   config: Record<string, unknown>
   layout: WidgetLayout
+  /** Nomes de `$parametros` do Cypher; calculado no servidor para todo usuário. */
+  parameters: string[]
 }
 
 export interface DashboardTabDto {
@@ -39,6 +48,8 @@ export interface DashboardDto {
   connectionName: string
   permissions: { edit: boolean; delete: boolean; share: boolean }
   tabs: DashboardTabDto[]
+  filters: DashboardFilter[]
+  refreshIntervalSec: number
 }
 
 export interface DashboardSummaryDto {
@@ -151,12 +162,49 @@ const tabSchema = z.object({
   widgets: z.array(widgetSchema),
 })
 
-export const dashboardSaveSchema = z.object({
-  version: z.number().int().min(1),
-  name: dashboardName,
-  connectionId,
-  tabs: z.array(tabSchema).min(1),
-})
+const refreshIntervalSchema = z.union(
+  REFRESH_INTERVALS.map((s) => z.literal(s)) as unknown as [
+    z.ZodLiteral<number>,
+    z.ZodLiteral<number>,
+    ...z.ZodLiteral<number>[],
+  ],
+)
+
+export const dashboardSaveSchema = z
+  .object({
+    version: z.number().int().min(1),
+    name: dashboardName,
+    connectionId,
+    tabs: z.array(tabSchema).min(1),
+    filters: dashboardFiltersSchema.default([]),
+    refreshIntervalSec: refreshIntervalSchema.default(0),
+  })
+  .superRefine((dashboard, ctx) => {
+    const byId = new Map(dashboard.filters.map((f) => [f.id, f]))
+    dashboard.tabs.forEach((tab, ti) => {
+      tab.widgets.forEach((widget, wi) => {
+        const cross = widget.config.crossFilter
+        if (cross === undefined) return
+        const filterId =
+          typeof cross === 'object' && cross !== null
+            ? (cross as { filterId?: unknown }).filterId
+            : undefined
+        const filter =
+          typeof filterId === 'string' ? byId.get(filterId) : undefined
+        const valid =
+          widget.visualization !== 'KPI' &&
+          filter !== undefined &&
+          CROSS_FILTER_TYPES.includes(filter.type)
+        if (!valid) {
+          ctx.addIssue({
+            code: 'custom',
+            message: MESSAGES.crossFilterInvalid,
+            path: ['tabs', ti, 'widgets', wi, 'config', 'crossFilter'],
+          })
+        }
+      })
+    })
+  })
 
 const sidebarDashboardSchema = z.object({
   type: z.literal('dashboard'),
@@ -202,11 +250,11 @@ export const queryRunSchema = z.object({
     .min(1, MESSAGES.validationError)
     .max(MAX_CYPHER_LENGTH, MESSAGES.cypherTooLong),
   connectionId: z.uuid().optional(),
-  params: z.record(z.string(), z.unknown()).optional(),
+  params: queryParamsSchema.optional(),
 })
 
 export const widgetRunSchema = z.object({
-  params: z.record(z.string(), z.unknown()).optional(),
+  params: queryParamsSchema.optional(),
 })
 
 export type DashboardCreateInput = z.input<typeof dashboardCreateSchema>

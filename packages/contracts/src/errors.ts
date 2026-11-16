@@ -31,6 +31,7 @@ export const ERROR_CODES = [
   'LLM_NOT_CONFIGURED',
   'LLM_PROVIDER_ERROR',
   'SCHEMA_NOT_READ',
+  'FILTER_NOT_FOUND',
   'INTERNAL_ERROR',
 ] as const
 

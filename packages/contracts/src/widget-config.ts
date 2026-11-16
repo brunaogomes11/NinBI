@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { type CrossFilterConfig, crossFilterSchema } from './filters'
 
 export const WIDGET_VISUALIZATIONS = [
   'TABLE',
@@ -44,8 +45,12 @@ export type WidgetMapping = {
 
 export type WidgetConfig<V extends WidgetVisualization = WidgetVisualization> =
   V extends 'TABLE'
-    ? Record<string, never> | { mapping?: undefined }
-    : { mapping: WidgetMapping[V] }
+    ?
+        | Record<string, never>
+        | { mapping?: undefined; crossFilter?: CrossFilterConfig }
+    : V extends 'KPI'
+      ? { mapping: WidgetMapping[V] }
+      : { mapping: WidgetMapping[V]; crossFilter?: CrossFilterConfig }
 
 const col = z.string().min(1).max(200)
 const series = z.array(col).min(1)
@@ -75,8 +80,13 @@ export const widgetMappingSchemas: {
 }
 
 export function widgetConfigSchema(v: WidgetVisualization): z.ZodType {
-  if (v === 'TABLE') return z.object({})
-  return z.object({ mapping: widgetMappingSchemas[v] })
+  if (v === 'TABLE')
+    return z.object({ crossFilter: crossFilterSchema.optional() })
+  if (v === 'KPI') return z.object({ mapping: widgetMappingSchemas[v] })
+  return z.object({
+    mapping: widgetMappingSchemas[v],
+    crossFilter: crossFilterSchema.optional(),
+  })
 }
 
 export const MAPPING_FIELD_LABELS = {

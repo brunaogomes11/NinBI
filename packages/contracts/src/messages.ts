@@ -145,4 +145,24 @@ export const MESSAGES = {
   aiProviderContext:
     'O schema desta conexão não cabe no modelo configurado. Desligue exemplos longos em Conexões ou use um modelo com contexto maior.',
   aiProviderFailed: (message: string) => `Erro do provedor de IA: ${message}`,
+  filterLabelRequired: 'Informe o rótulo',
+  filterLabelTooLong: 'O rótulo pode ter até 40 caracteres',
+  filterParameterRequired: 'Informe o parâmetro',
+  filterParameterInvalid:
+    'O parâmetro começa com uma letra e usa só letras, dígitos e _',
+  filterParameterTooLong: 'O parâmetro pode ter até 40 caracteres',
+  filterParameterTaken: 'Este parâmetro já é usado por outro filtro',
+  filterOptionsRequired: 'Informe ao menos uma opção',
+  filterOptionsTooMany: 'A lista pode ter até 1.000 opções',
+  filterOptionsQueryRequired: 'Informe a consulta das opções',
+  filterDefaultInvalid: 'Valor padrão inválido',
+  filterOptionsFailed: 'Não foi possível carregar as opções',
+  filterDateRangeInverted: 'A data inicial é maior que a final',
+  filterNumberInvalid: 'Digite um número',
+  filterRemoveConfirm: (label: string, count: number) =>
+    `Remover o filtro ${label}? ${count} widgets usam o parâmetro.`,
+  crossFilterInvalid: 'Filtro do clique inválido',
+  refreshFailedAt: (hhmm: string) => `Não foi possível atualizar às ${hhmm}`,
+  updatedAt: (hhmmss: string) => `Atualizado às ${hhmmss}`,
+  exportImageFailed: 'Não foi possível exportar a imagem',
 } as const
