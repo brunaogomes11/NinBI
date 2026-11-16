@@ -37,7 +37,10 @@ describe('InitialPasswordPage', () => {
       expect(router.state.location.pathname).toBe('/definir-senha'),
     )
 
-    await user.type(screen.getByLabelText('Nova senha'), 'senha-nova-123')
+    await user.type(
+      await screen.findByLabelText('Nova senha'),
+      'senha-nova-123',
+    )
     await user.type(screen.getByLabelText('Confirmar senha'), 'senha-nova-123')
     await user.click(screen.getByRole('button', { name: 'Salvar' }))
 
