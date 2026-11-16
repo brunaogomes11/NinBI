@@ -1299,7 +1299,7 @@ Proof: run web | ✓ PWD-03 nova senha curta mostra a mensagem e não envia
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, haiku) - base 84fcd81+design - em andamento. O `**Build**` não existe antes da T1 (repo vazio): o orquestrador executa o lote 1 de scaffolding antes de `validate_tasks.py --execute`, que roda ao fim do lote 1.
+**Dispatched:** lote 1 (T1-T7, haiku) - returned (a677f94); `validate_tasks.py --execute` exit 0 após o lote 1. Lote 2 (T8-T14, sonnet) - em andamento. O `**Build**` não existe antes da T1 (repo vazio): o orquestrador executa o lote 1 de scaffolding antes de `validate_tasks.py --execute`, que roda ao fim do lote 1.
 **Walked:** dispensado por AD-023
 
 ---
