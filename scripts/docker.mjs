@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { existsSync } from 'node:fs'
+import { closeSync, existsSync, openSync } from 'node:fs'
 import { delimiter, dirname, isAbsolute, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -43,7 +43,7 @@ if (!docker) {
   process.exit(1)
 }
 
-function compose(args) {
+function compose(args, stdin = 'inherit') {
   // The docker CLI calls docker-credential-desktop from its own folder, so that folder must be on PATH.
   const env = { ...process.env }
   if (isAbsolute(docker)) {
@@ -55,7 +55,7 @@ function compose(args) {
   const result = spawnSync(docker, ['compose', '-f', composeFile, ...args], {
     cwd: root,
     env,
-    stdio: 'inherit',
+    stdio: [stdin, 'inherit', 'inherit'],
   })
   if (result.status !== 0) process.exit(result.status ?? 1)
 }
@@ -64,7 +64,28 @@ const command = process.argv[2]
 
 if (command === 'up') {
   compose(['up', '-d', '--wait', 'postgres', 'neo4j'])
-  if (existsSync(seedFile)) compose(['run', '--rm', 'neo4j-seed'])
+  if (existsSync(seedFile)) {
+    // O seed é idempotente (marcador NinbiSeed). Vai por stdin no neo4j que já está de pé:
+    // evita o bind mount do serviço neo4j-seed, que trava em alguns Docker Desktop.
+    const fd = openSync(seedFile, 'r')
+    try {
+      compose(
+        [
+          'exec',
+          '-T',
+          'neo4j',
+          'cypher-shell',
+          '-u',
+          'neo4j',
+          '-p',
+          'ninbi-dev-password',
+        ],
+        fd,
+      )
+    } finally {
+      closeSync(fd)
+    }
+  }
 } else if (command === 'down') {
   compose(['stop'])
 } else {

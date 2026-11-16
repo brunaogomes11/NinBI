@@ -664,8 +664,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Teste `test-int/neo4j-seed.int.spec.ts`: depois de `pnpm infra:up`, as contagens são 12/6/60/200/2.000, toda loja tem latitude e longitude numéricas, `data` é `Date`; executar as instruções do arquivo de novo pelo driver não muda nenhuma contagem
-- [ ] Gate check passes: `pnpm infra:up && pnpm --filter @ninbi/api test:int`
+- [x] Teste `test-int/neo4j-seed.int.spec.ts`: depois de `pnpm infra:up`, as contagens são 12/6/60/200/2.000, toda loja tem latitude e longitude numéricas, `data` é `Date`; executar as instruções do arquivo de novo pelo driver não muda nenhuma contagem
+- [x] Gate check passes: `pnpm infra:up && pnpm --filter @ninbi/api test:int`
 
 **Tests**: integration
 **Gate**: full
