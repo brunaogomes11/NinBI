@@ -66,7 +66,7 @@ Contagem: 50 `yes`, 1 `no`.
 
 | Finding | Evidence | Fix | Closed |
 | --- | --- | --- | --- |
-| C10: a prova web de URI inválida não prende a mensagem ao campo URI; uma mensagem fora do campo passaria | `apps/web/src/features/connections/ConnectionFormDialog.test.tsx:153-162` usa só `findByText('URI inválida')` e `posts` vazio; a asserção de campo existe em `ConnectionFormDialog.test.tsx:184-186` para o nome (CONN-11) e falta para a URI | Na mesma prova, acrescentar `expect(screen.getByLabelText('URI')).toHaveAccessibleDescription('URI inválida')`, como CONN-11 faz para o nome | |
+| C10: a prova web de URI inválida não prende a mensagem ao campo URI; uma mensagem fora do campo passaria | `apps/web/src/features/connections/ConnectionFormDialog.test.tsx:153-162` usa só `findByText('URI inválida')` e `posts` vazio; a asserção de campo existe em `ConnectionFormDialog.test.tsx:184-186` para o nome (CONN-11) e falta para a URI | Na mesma prova, acrescentar `expect(screen.getByLabelText('URI')).toHaveAccessibleDescription('URI inválida')`, como CONN-11 faz para o nome | 7d06281 - C10 |
 
 ## Observações (não são findings)
 
