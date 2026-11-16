@@ -413,8 +413,8 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes: SCH-16 (cabeçalhos "Propriedade", "Tipos", "Exemplo"; a linha `codigo` mostra `String, Long` e `'P-0001'`), SCH-17 (`CONTEM` mostra `(:Pedido)-[:CONTEM]->(:Produto)`), SCH-18 (propriedade com `example: null` mostra "sem exemplo"), SCH-20 (contêiner com `overflow-y-auto`; `thead` com `sticky` e `top-0`), SCH-21 (exemplo de 5.000 caracteres está numa célula com `truncate` e `title` igual ao valor inteiro), SCH-27 (`date('2024-02-05')`, `point({srid: 4326, x: -46.63, y: -23.55})`, `[1, 2]` e `{nome: 'Ana'}` aparecem exatamente assim)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes: SCH-16 (cabeçalhos "Propriedade", "Tipos", "Exemplo"; a linha `codigo` mostra `String, Long` e `'P-0001'`), SCH-17 (`CONTEM` mostra `(:Pedido)-[:CONTEM]->(:Produto)`), SCH-18 (propriedade com `example: null` mostra "sem exemplo"), SCH-20 (contêiner com `overflow-y-auto`; `thead` com `sticky` e `top-0`), SCH-21 (exemplo de 5.000 caracteres está numa célula com `truncate` e `title` igual ao valor inteiro), SCH-27 (`date('2024-02-05')`, `point({srid: 4326, x: -46.63, y: -23.55})`, `[1, 2]` e `{nome: 'Ana'}` aparecem exatamente assim)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
