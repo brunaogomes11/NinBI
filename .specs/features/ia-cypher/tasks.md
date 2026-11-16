@@ -394,8 +394,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes com gesto em `LlmTestAndRemove.test.tsx`: `LLM-09 Testar mostra Provedor respondendo` (o `POST .../test` leva provedor, modelo e URL do formulário), `LLM-10 Testar com falha mostra a mensagem do provedor` (422 com "Incorrect API key provided" aparece), `LLM-11 Remover configuração pede confirmação` (o texto exato; "Cancelar" fecha sem requisição), `LLM-12 confirmar a remoção limpa o formulário` (o `DELETE` sai; "Modelo" fica vazio e "Remover configuração" some)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto em `LlmTestAndRemove.test.tsx`: `LLM-09 Testar mostra Provedor respondendo` (o `POST .../test` leva provedor, modelo e URL do formulário), `LLM-10 Testar com falha mostra a mensagem do provedor` (422 com "Incorrect API key provided" aparece), `LLM-11 Remover configuração pede confirmação` (o texto exato; "Cancelar" fecha sem requisição), `LLM-12 confirmar a remoção limpa o formulário` (o `DELETE` sai; "Modelo" fica vazio e "Remover configuração" some)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build

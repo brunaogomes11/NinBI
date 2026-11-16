@@ -1,6 +1,6 @@
 import { LLM_PROVIDER_LABELS, LLM_PROVIDERS, MESSAGES } from '@ninbi/contracts'
 import { screen, waitFor } from '@testing-library/react'
-import { HttpResponse, http } from 'msw'
+import { HttpResponse, http, type RequestHandler } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { llmConfigHandler, makeLlmSettings } from '@/test/fixtures/llm'
 import {
@@ -10,7 +10,7 @@ import {
   setupStatusHandler,
 } from '@/test/renderApp'
 
-function openLlmTab(extra: ReturnType<typeof http.get>[] = []) {
+function openLlmTab(extra: RequestHandler[] = []) {
   return renderApp('/configuracoes/llm', {
     handlers: [
       setupStatusHandler(false),

@@ -8,7 +8,7 @@ import {
   MESSAGES,
   PROVIDERS_REQUIRING_KEY,
 } from '@ninbi/contracts'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -31,7 +31,8 @@ import {
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ApiError } from '@/lib/api'
-import { useLlmSettings, useSaveLlmSettings } from './api'
+import { useLlmSettings, useSaveLlmSettings, useTestLlmSettings } from './api'
+import { RemoveLlmDialog } from './RemoveLlmDialog'
 
 function defaultsFor(settings: LlmSettingsResponse): LlmSettingsInput {
   return settings.configured
@@ -69,6 +70,8 @@ function LlmSettingsForm({ settings }: { settings: LlmSettingsResponse }) {
     defaultValues: defaultsFor(settings),
   })
   const save = useSaveLlmSettings()
+  const test = useTestLlmSettings()
+  const [removeOpen, setRemoveOpen] = useState(false)
   const last4 = settings.configured ? settings.apiKeyLast4 : null
 
   function submit(values: LlmSettingsInput) {
@@ -84,6 +87,11 @@ function LlmSettingsForm({ settings }: { settings: LlmSettingsResponse }) {
         form.setError('root', { message: error.message })
       },
     })
+  }
+
+  function runTest(values: LlmSettingsInput) {
+    test.reset()
+    test.mutate(values)
   }
 
   return (
@@ -174,6 +182,16 @@ function LlmSettingsForm({ settings }: { settings: LlmSettingsResponse }) {
             {form.formState.errors.root.message}
           </p>
         )}
+        {test.isSuccess && (
+          <p role="status" className="text-sm">
+            {MESSAGES.llmProviderOk}
+          </p>
+        )}
+        {test.isError && (
+          <p role="alert" className="text-destructive text-sm">
+            {test.error.message}
+          </p>
+        )}
         <div className="flex gap-2">
           <Button
             type="submit"
@@ -182,8 +200,26 @@ function LlmSettingsForm({ settings }: { settings: LlmSettingsResponse }) {
           >
             Salvar
           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={test.isPending}
+            onClick={form.handleSubmit(runTest)}
+          >
+            {test.isPending ? 'Testando...' : 'Testar'}
+          </Button>
+          {settings.configured && (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setRemoveOpen(true)}
+            >
+              Remover configuração
+            </Button>
+          )}
         </div>
       </form>
+      <RemoveLlmDialog open={removeOpen} onOpenChange={setRemoveOpen} />
     </Form>
   )
 }
