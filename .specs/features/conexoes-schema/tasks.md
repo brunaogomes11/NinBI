@@ -658,7 +658,7 @@ Proof: run api | ✓ SCH-29 conexão excluída durante a leitura descarta o resu
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** o `docker-compose.yml` de produção não traz valor padrão público para `NINBI_ENCRYPTION_KEY`: usa `${NINBI_ENCRYPTION_KEY:?Defina NINBI_ENCRYPTION_KEY}` (falha ao subir sem a chave) e o `.env.example` da raiz explica como gerar uma (decisão do orquestrador sob a delegação do usuário, corrige o design). `apps/api/.env.example`, os vitest da API e o smoke usam uma chave fixa de desenvolvimento.
-**Dispatched:** lote 1 (T1-T7, sonnet) sobre fae0714 - returned (8f8f699).
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre fae0714 - returned (8f8f699). Lote 2 (T8-T13) - returned (469c6d4). Lote 3 (T14-T17) - returned (f7049cf). Verifier (haiku) sobre f7049cf - returned: FAIL, 1 finding (C10) fechado em 7d06281; extra 56a8e38 (URI ancorada). Round 2: 87 pass / 0 fail em 7d01d17; `validate_verification.py` exit 0. Feature encerrada.
 **Walked:** dispensado por AD-023
 
 ---
