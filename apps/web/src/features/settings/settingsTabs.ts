@@ -22,6 +22,12 @@ export const SETTINGS_TABS: SettingsTab[] = [
     permission: 'users.manage',
     available: true,
   },
+  {
+    id: 'dashboards',
+    label: 'Dashboards',
+    permission: 'dashboards.all',
+    available: true,
+  },
   { id: 'llm', label: 'LLM', permission: 'llm.manage', available: false },
 ]
 

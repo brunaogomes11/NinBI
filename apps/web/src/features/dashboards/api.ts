@@ -2,6 +2,7 @@ import {
   type DashboardCreateInput,
   type DashboardDto,
   type DashboardSaveInput,
+  type DashboardSummaryDto,
   MESSAGES,
   type QueryResultDto,
   type SidebarDto,
@@ -97,6 +98,16 @@ export function useDashboard(id: string) {
   })
 }
 
+export const ALL_DASHBOARDS_QUERY_KEY = ['dashboards', 'all'] as const
+
+/** Todos os dashboards, para quem tem `dashboards.all` (aba "Dashboards" das Configurações). */
+export function useAllDashboards() {
+  return useQuery({
+    queryKey: ALL_DASHBOARDS_QUERY_KEY,
+    queryFn: () => apiFetch<DashboardSummaryDto[]>('/api/dashboards'),
+  })
+}
+
 /** Grava o dashboard inteiro (nome, conexão, abas, widgets, layout) com a versão lida. */
 export function useSaveDashboard(id: string) {
   const queryClient = useQueryClient()
@@ -108,6 +119,7 @@ export function useSaveDashboard(id: string) {
       }),
     onSuccess: (saved) => {
       queryClient.setQueryData(dashboardQueryKey(id), saved)
+      void queryClient.invalidateQueries({ queryKey: ALL_DASHBOARDS_QUERY_KEY })
       return queryClient.invalidateQueries({ queryKey: SIDEBAR_QUERY_KEY })
     },
   })
@@ -120,6 +132,7 @@ export function useDeleteDashboard(id: string) {
     mutationFn: () => apiFetch(`/api/dashboards/${id}`, { method: 'DELETE' }),
     onSuccess: async () => {
       queryClient.removeQueries({ queryKey: dashboardQueryKey(id) })
+      void queryClient.invalidateQueries({ queryKey: ALL_DASHBOARDS_QUERY_KEY })
       await queryClient.invalidateQueries({ queryKey: SIDEBAR_QUERY_KEY })
     },
   })

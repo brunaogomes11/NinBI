@@ -702,9 +702,9 @@ T28
 
 **Done when**:
 
-- [ ] Testes com gesto: `DASH-20 aba Dashboards mostra nome, dono, conexão e última alteração` (Admin abre "Configurações" › "Dashboards" e vê "Vendas", "Ana Souza", "Varejo" e "16/11/2026, 14:30" para `2026-11-16T17:30:00Z`, na ordem da resposta), `DASH-21 clicar no dashboard da aba Dashboards abre o dashboard com Editar` (dashboard de outro dono com `permissions.edit` verdadeiro mostra "Editar"), `DASH-22 Visualizador em configuracoes dashboards vê a página de permissão` (`/configuracoes/dashboards` como Visualizador mostra "Você não tem permissão para acessar esta página"; Editor também)
-- [ ] Teste CFG-02 de `fundacao-auth` atualizado e verde
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto: `DASH-20 aba Dashboards mostra nome, dono, conexão e última alteração` (Admin abre "Configurações" › "Dashboards" e vê "Vendas", "Ana Souza", "Varejo" e "16/11/2026, 14:30" para `2026-11-16T17:30:00Z`, na ordem da resposta), `DASH-21 clicar no dashboard da aba Dashboards abre o dashboard com Editar` (dashboard de outro dono com `permissions.edit` verdadeiro mostra "Editar"), `DASH-22 Visualizador em configuracoes dashboards vê a página de permissão` (`/configuracoes/dashboards` como Visualizador mostra "Você não tem permissão para acessar esta página"; Editor também)
+- [x] Teste CFG-02 de `fundacao-auth` atualizado e verde
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build

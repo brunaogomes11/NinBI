@@ -58,18 +58,19 @@ describe('SettingsPage', () => {
     expect(router.state.location.pathname).toBe('/configuracoes/conexoes')
   })
 
-  it('CFG-02 abas na ordem Conexões, Usuários, LLM', async () => {
+  it('CFG-02 abas na ordem Conexões, Usuários, Dashboards, LLM', async () => {
     expect(SETTINGS_TABS.map((tab) => tab.label)).toEqual([
       'Conexões',
       'Usuários',
+      'Dashboards',
       'LLM',
     ])
 
-    // Com "Conexões" ligada (AD-041): o Admin vê Conexões e Usuários; o Editor, só Conexões.
+    // Com "Conexões" e "Dashboards" ligadas (AD-041, AD-046): o Admin vê Conexões, Usuários e Dashboards; o Editor, só Conexões.
     const admin = openSettings('/configuracoes/conexoes')
     expect(
       (await screen.findAllByRole('tab')).map((tab) => tab.textContent),
-    ).toEqual(['Conexões', 'Usuários'])
+    ).toEqual(['Conexões', 'Usuários', 'Dashboards'])
     admin.unmount()
 
     const editor = openSettings('/configuracoes/conexoes', 'EDITOR')
@@ -84,6 +85,7 @@ describe('SettingsPage', () => {
     expect(tabs.map((tab) => tab.textContent)).toEqual([
       'Conexões',
       'Usuários',
+      'Dashboards',
       'LLM',
     ])
   })

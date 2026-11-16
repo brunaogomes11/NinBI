@@ -1170,7 +1170,7 @@ Proof: run web | ✓ ROLE-05 trocar o papel mostra o novo papel na linha
 Proof: run web | ✓ CFG-01 clicar em Configurações mostra a página com a aba Usuários
 
 **C32** - As abas seguem a ordem "Conexões", "Usuários", "LLM", cada uma quando sua feature existe (CFG-02, AC 2)
-Proof: run web | ✓ CFG-02 abas na ordem Conexões, Usuários, LLM
+Proof: run web | ✓ CFG-02 abas na ordem Conexões, Usuários, Dashboards, LLM
 
 **C33** - A aba clicada aparece e continua aberta ao recarregar (CFG-03, AC 3)
 Proof: run web | ✓ CFG-03 aba escolhida fica na URL e continua aberta ao recarregar

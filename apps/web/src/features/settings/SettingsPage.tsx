@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ForbiddenPage } from '@/features/auth/ForbiddenPage'
 import { useSession } from '@/features/auth/useSession'
 import { ConnectionsTab } from '@/features/connections/ConnectionsTab'
+import { DashboardsTab } from '@/features/dashboards/DashboardsTab'
 import { UsersTab } from '@/features/users/UsersTab'
 import { visibleSettingsTabs } from './settingsTabs'
 
@@ -11,6 +12,7 @@ import { visibleSettingsTabs } from './settingsTabs'
 const TAB_CONTENT: Record<string, ComponentType> = {
   conexoes: ConnectionsTab,
   usuarios: UsersTab,
+  dashboards: DashboardsTab,
 }
 
 /** `/configuracoes` abre a primeira aba que o papel vê. */
