@@ -1,17 +1,21 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Inject,
   Param,
   Post,
+  Put,
 } from '@nestjs/common'
 import {
   type DashboardCreateInput,
   type DashboardDto,
+  type DashboardSaveInput,
   type DashboardSummaryDto,
   dashboardCreateSchema,
+  dashboardSaveSchema,
 } from '@ninbi/contracts'
 import { CurrentUser, RequirePermission } from '../auth/decorators'
 import type { SessionUser } from '../auth/session.service'
@@ -47,5 +51,24 @@ export class DashboardsController {
     @Param('id') id: string,
   ): Promise<DashboardDto> {
     return this.dashboards.get(user, id)
+  }
+
+  @Put(':id')
+  save(
+    @CurrentUser() user: SessionUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(dashboardSaveSchema))
+    body: DashboardSaveInput,
+  ): Promise<DashboardDto> {
+    return this.dashboards.save(user, id, body)
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  remove(
+    @CurrentUser() user: SessionUser,
+    @Param('id') id: string,
+  ): Promise<void> {
+    return this.dashboards.remove(user, id)
   }
 }

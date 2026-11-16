@@ -2,12 +2,14 @@ import { randomUUID } from 'node:crypto'
 import { Inject, Injectable } from '@nestjs/common'
 import {
   type DashboardDto,
+  type DashboardSaveInput,
   type DashboardSummaryDto,
   MESSAGES,
 } from '@ninbi/contracts'
-import { asc, eq } from 'drizzle-orm'
+import { and, asc, eq, inArray, ne } from 'drizzle-orm'
 import type { SessionUser } from '../auth/session.service'
 import { AppError } from '../common/app-error'
+import { Clock } from '../common/clock'
 import {
   type DashboardAccess,
   DashboardAccessService,
@@ -24,27 +26,27 @@ import {
 
 const DEFAULT_TAB_NAME = 'Aba 1'
 
+/** Ids de aba ou widget repetidos, ou que já pertencem a outro dashboard. */
+function invalidIds(): AppError {
+  return new AppError(400, 'VALIDATION_ERROR', MESSAGES.validationError, {
+    tabs: MESSAGES.validationError,
+  })
+}
+
 @Injectable()
 export class DashboardsService {
   constructor(
     @Inject(DB) private readonly db: AppDatabase,
     @Inject(DashboardAccessService)
     private readonly access: DashboardAccessService,
+    @Inject(Clock) private readonly clock: Clock,
   ) {}
 
   async create(
     user: SessionUser,
     input: { name: string; connectionId: string },
   ): Promise<DashboardDto> {
-    const [connection] = await this.db
-      .select({ id: connections.id })
-      .from(connections)
-      .where(eq(connections.id, input.connectionId))
-    if (!connection) {
-      throw new AppError(400, 'VALIDATION_ERROR', MESSAGES.validationError, {
-        connectionId: MESSAGES.connectionNotFound,
-      })
-    }
+    await this.assertConnectionExists(input.connectionId)
     const id = await this.db.transaction(async (tx) => {
       const [row] = await tx
         .insert(dashboards)
@@ -71,6 +73,111 @@ export class DashboardsService {
     return this.load(access.dashboardId, access)
   }
 
+  async save(
+    user: SessionUser,
+    dashboardId: string,
+    input: DashboardSaveInput,
+  ): Promise<DashboardDto> {
+    const access = await this.access.assert(user, dashboardId, 'edit')
+    await this.assertConnectionExists(input.connectionId)
+
+    await this.db.transaction(async (tx) => {
+      const [updated] = await tx
+        .update(dashboards)
+        .set({
+          name: input.name,
+          connectionId: input.connectionId,
+          version: input.version + 1,
+          updatedAt: this.clock.now(),
+        })
+        .where(
+          and(
+            eq(dashboards.id, access.dashboardId),
+            eq(dashboards.version, input.version),
+          ),
+        )
+        .returning()
+      if (!updated) {
+        const [still] = await tx
+          .select({ id: dashboards.id })
+          .from(dashboards)
+          .where(eq(dashboards.id, access.dashboardId))
+        throw still
+          ? new AppError(
+              409,
+              'DASHBOARD_VERSION_CONFLICT',
+              MESSAGES.dashboardVersionConflict,
+            )
+          : dashboardNotFound()
+      }
+
+      const tabIds = input.tabs.map((tab) => tab.id)
+      const widgetIds = input.tabs.flatMap((tab) =>
+        tab.widgets.map((widget) => widget.id),
+      )
+      if (
+        new Set(tabIds).size !== tabIds.length ||
+        new Set(widgetIds).size !== widgetIds.length
+      ) {
+        throw invalidIds()
+      }
+      const foreignTabs = await tx
+        .select({ id: dashboardTabs.id })
+        .from(dashboardTabs)
+        .where(
+          and(
+            inArray(dashboardTabs.id, tabIds),
+            ne(dashboardTabs.dashboardId, access.dashboardId),
+          ),
+        )
+      const foreignWidgets = widgetIds.length
+        ? await tx
+            .select({ id: widgets.id })
+            .from(widgets)
+            .where(
+              and(
+                inArray(widgets.id, widgetIds),
+                ne(widgets.dashboardId, access.dashboardId),
+              ),
+            )
+        : []
+      if (foreignTabs.length || foreignWidgets.length) throw invalidIds()
+
+      await tx
+        .delete(dashboardTabs)
+        .where(eq(dashboardTabs.dashboardId, access.dashboardId))
+      await tx.insert(dashboardTabs).values(
+        input.tabs.map((tab, position) => ({
+          id: tab.id,
+          dashboardId: access.dashboardId,
+          name: tab.name,
+          position,
+        })),
+      )
+      const widgetRows = input.tabs.flatMap((tab) =>
+        tab.widgets.map((widget) => ({
+          id: widget.id,
+          dashboardId: access.dashboardId,
+          tabId: tab.id,
+          title: widget.title,
+          cypher: widget.cypher,
+          visualization: widget.visualization,
+          config: widget.config,
+          ...widget.layout,
+        })),
+      )
+      if (widgetRows.length) await tx.insert(widgets).values(widgetRows)
+    })
+    return this.load(access.dashboardId, access)
+  }
+
+  async remove(user: SessionUser, dashboardId: string): Promise<void> {
+    const access = await this.access.assert(user, dashboardId, 'delete')
+    await this.db
+      .delete(dashboards)
+      .where(eq(dashboards.id, access.dashboardId))
+  }
+
   async listAll(): Promise<DashboardSummaryDto[]> {
     const rows = await this.db
       .select({
@@ -88,6 +195,18 @@ export class DashboardsService {
       .sort((a, b) =>
         a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }),
       )
+  }
+
+  private async assertConnectionExists(connectionId: string): Promise<void> {
+    const [connection] = await this.db
+      .select({ id: connections.id })
+      .from(connections)
+      .where(eq(connections.id, connectionId))
+    if (!connection) {
+      throw new AppError(400, 'VALIDATION_ERROR', MESSAGES.validationError, {
+        connectionId: MESSAGES.connectionNotFound,
+      })
+    }
   }
 
   /** Monta o DTO; quem não edita não recebe o Cypher (AD-043). */

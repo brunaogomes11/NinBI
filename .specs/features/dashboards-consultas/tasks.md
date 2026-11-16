@@ -226,9 +226,9 @@ T28
 
 **Done when**:
 
-- [ ] Testes rápidos: `EDIT-02 salvar grava nome, conexão, abas, widgets e layout de uma vez` (um `PUT` com nome novo, outra conexão, duas abas e três widgets; o `GET` devolve tudo igual, com as abas na ordem enviada e `version` 2), `GRID-06 salvar grava posição e tamanho de cada widget por aba` (`{x: 4, y: 0, w: 6, h: 3}` na aba 2 volta igual na aba 2), `EDIT-04 versão desatualizada responde 409` (dois `PUT` com `version: 1`: o segundo recebe 409 com "Este dashboard foi alterado por outra pessoa. Recarregue para continuar." e o banco fica com o primeiro), `DASH-11 excluir apaga abas e widgets` (204; `GET` dá 404; nenhuma aba nem widget dele sobra), `DASH-19 quem só vê recebe 403 ao alterar ou excluir` (compartilhamento `view` recebe 403 no `PUT` e no `DELETE`; compartilhamento `edit` recebe 403 no `DELETE`), widget com id de outro dashboard dá 400 sem alterar nada
-- [ ] Teste de integração `apps/api/test-int/dashboards.int.spec.ts`: `EDIT-04 duas gravações simultâneas da mesma versão dão um 200 e um 409`
-- [ ] Gate check passes: `pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
+- [x] Testes rápidos: `EDIT-02 salvar grava nome, conexão, abas, widgets e layout de uma vez` (um `PUT` com nome novo, outra conexão, duas abas e três widgets; o `GET` devolve tudo igual, com as abas na ordem enviada e `version` 2), `GRID-06 salvar grava posição e tamanho de cada widget por aba` (`{x: 4, y: 0, w: 6, h: 3}` na aba 2 volta igual na aba 2), `EDIT-04 versão desatualizada responde 409` (dois `PUT` com `version: 1`: o segundo recebe 409 com "Este dashboard foi alterado por outra pessoa. Recarregue para continuar." e o banco fica com o primeiro), `DASH-11 excluir apaga abas e widgets` (204; `GET` dá 404; nenhuma aba nem widget dele sobra), `DASH-19 quem só vê recebe 403 ao alterar ou excluir` (compartilhamento `view` recebe 403 no `PUT` e no `DELETE`; compartilhamento `edit` recebe 403 no `DELETE`), widget com id de outro dashboard dá 400 sem alterar nada
+- [x] Teste de integração `apps/api/test-int/dashboards.int.spec.ts`: `EDIT-04 duas gravações simultâneas da mesma versão dão um 200 e um 409`
+- [x] Gate check passes: `pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
 
 **Tests**: integration
 **Gate**: full
