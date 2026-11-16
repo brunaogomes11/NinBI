@@ -158,6 +158,9 @@ describe('ConnectionFormDialog', () => {
     await view.user.click(screen.getByRole('button', { name: 'Salvar' }))
 
     expect(await screen.findByText('URI inválida')).toBeInTheDocument()
+    expect(screen.getByLabelText('URI')).toHaveAccessibleDescription(
+      'URI inválida',
+    )
     expect(view.posts).toHaveLength(0)
   })
 
