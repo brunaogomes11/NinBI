@@ -11,14 +11,13 @@ import {
 import {
   type LoginInput,
   loginSchema,
-  MESSAGES,
   type SessionUserDto,
 } from '@ninbi/contracts'
 import type { Request, Response } from 'express'
-import { AppError } from '../common/app-error'
 import { ZodValidationPipe } from '../common/zod.pipe'
 import { AuthService } from './auth.service'
-import { SessionService } from './session.service'
+import { CurrentUser, Public } from './decorators'
+import { SessionService, type SessionUser } from './session.service'
 import {
   clearSessionCookie,
   readSessionToken,
@@ -32,6 +31,7 @@ export class AuthController {
     @Inject(SessionService) private readonly sessions: SessionService,
   ) {}
 
+  @Public()
   @Post('login')
   @HttpCode(200)
   async login(
@@ -55,12 +55,7 @@ export class AuthController {
   }
 
   @Get('me')
-  async me(@Req() req: Request): Promise<SessionUserDto> {
-    const token = readSessionToken(req)
-    const user = token ? await this.sessions.resolve(token) : null
-    if (!user) {
-      throw new AppError(401, 'UNAUTHENTICATED', MESSAGES.unauthenticated)
-    }
+  me(@CurrentUser() user: SessionUser): SessionUserDto {
     return user
   }
 }

@@ -480,8 +480,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: AUTH-07 (rota protegida sem cookie e com cookie forjado dá 401), AUTH-09 (relógio avança 7 dias e 1 min: 401), USR-15 (usuário desativado direto no banco com a sessão aberta: próxima requisição 401), ROLE-05 (papel trocado no banco: a próxima resposta de `me` traz o papel novo), USR-06 backend (usuário com senha provisória recebe 403 em outra rota e 200 em `me`)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: AUTH-07 (rota protegida sem cookie e com cookie forjado dá 401), AUTH-09 (relógio avança 7 dias e 1 min: 401), USR-15 (usuário desativado direto no banco com a sessão aberta: próxima requisição 401), ROLE-05 (papel trocado no banco: a próxima resposta de `me` traz o papel novo), USR-06 backend (usuário com senha provisória recebe 403 em outra rota e 200 em `me`)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

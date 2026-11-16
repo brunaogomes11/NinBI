@@ -1,4 +1,4 @@
-import type { INestApplication } from '@nestjs/common'
+import type { INestApplication, Type } from '@nestjs/common'
 import { Test } from '@nestjs/testing'
 import request from 'supertest'
 import { configureApp } from '../src/app.factory'
@@ -23,12 +23,17 @@ export class FakeClock extends Clock {
 export interface TestAppOptions {
   /** Substitui o banco, por exemplo para simular o PostgreSQL fora do ar. */
   db?: AppDatabase
+  /** Controllers só de teste (rotas de sonda) somados ao AppModule. */
+  controllers?: Type[]
 }
 
 export async function createTestApp(options: TestAppOptions = {}) {
   const { db, client } = await createTestDb()
   const clock = new FakeClock()
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+  const moduleRef = await Test.createTestingModule({
+    imports: [AppModule],
+    controllers: options.controllers,
+  })
     .overrideProvider(DB)
     .useValue(options.db ?? db)
     .overrideProvider(Clock)

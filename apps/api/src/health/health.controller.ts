@@ -1,6 +1,7 @@
 import { Controller, Get, Inject, Res } from '@nestjs/common'
 import { sql } from 'drizzle-orm'
 import type { Response } from 'express'
+import { Public } from '../auth/decorators'
 import { type AppDatabase, DB } from '../database/database.module'
 
 interface HealthBody {
@@ -8,6 +9,7 @@ interface HealthBody {
   postgres: 'up' | 'down'
 }
 
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(@Inject(DB) private readonly db: AppDatabase) {}
