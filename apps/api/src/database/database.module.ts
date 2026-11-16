@@ -3,6 +3,7 @@ import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { PgliteDatabase } from 'drizzle-orm/pglite'
 import { Pool } from 'pg'
 import { loadEnv } from '../config/env'
+import { attachPoolErrorLogger } from './pool-error-logger'
 import * as schema from './schema'
 
 export type AppDatabase =
@@ -16,10 +17,11 @@ export const DB = Symbol('DB')
   providers: [
     {
       provide: DB,
-      useFactory: (): AppDatabase =>
-        drizzle(new Pool({ connectionString: loadEnv().DATABASE_URL }), {
-          schema,
-        }),
+      useFactory: (): AppDatabase => {
+        const pool = new Pool({ connectionString: loadEnv().DATABASE_URL })
+        attachPoolErrorLogger(pool)
+        return drizzle(pool, { schema })
+      },
     },
   ],
   exports: [DB],

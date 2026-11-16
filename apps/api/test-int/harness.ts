@@ -15,6 +15,10 @@ import { FakeNeo4jGateway } from '../test/fakes/fake-neo4j.gateway'
 
 const ADMIN_URL = 'postgres://ninbi:ninbi@localhost:55432/postgres'
 
+function ignoreTerminated(error: Error & { code?: string }) {
+  if (error.code !== '57P01') throw error
+}
+
 /**
  * App Nest contra o PostgreSQL real do compose de dev, num banco
  * `ninbi_test_<aleatório>` criado aqui e apagado em `close()`.
@@ -30,11 +34,15 @@ export async function createIntApp(
   const admin = new Pool({ connectionString: ADMIN_URL, max: 1 })
   await admin.query(`CREATE DATABASE ${databaseName}`)
 
+  // O DROP ... WITH (FORCE) derruba backends ociosos; sem listener o `error`
+  // do pool (57P01) vira exceção não tratada e falha a suíte.
+  admin.on('error', ignoreTerminated)
   const pool = new Pool({
     connectionString: ADMIN_URL.replace(/\/postgres$/, `/${databaseName}`),
     min: 4,
     max: 10,
   })
+  pool.on('error', ignoreTerminated)
   const db = drizzle(pool, { schema })
   await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER })
 
