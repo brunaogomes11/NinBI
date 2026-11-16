@@ -1,12 +1,16 @@
 import { MESSAGES, type WidgetDto } from '@ninbi/contracts'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import { ResultTable } from './ResultTable'
 import {
   hasWidgetQuery,
   useWidgetResult,
   type WidgetEditSource,
 } from './useWidgetResult'
+
+/** Classe da alça de arrasto do widget na grade: só o título arrasta (GRID-02). */
+export const DRAG_HANDLE_CLASS = 'widget-drag-handle'
 
 export interface WidgetCardProps {
   dashboardId: string
@@ -61,7 +65,14 @@ function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
 export function WidgetCard(props: WidgetCardProps) {
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 rounded-card bg-card p-4">
-      <h3 className="truncate font-semibold">{props.widget.title}</h3>
+      <h3
+        className={cn(
+          'truncate font-semibold',
+          props.edit && `${DRAG_HANDLE_CLASS} cursor-move`,
+        )}
+      >
+        {props.widget.title}
+      </h3>
       <div className="flex min-h-0 flex-1 flex-col">
         <Body {...props} />
       </div>

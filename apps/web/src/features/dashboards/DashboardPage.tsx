@@ -40,10 +40,12 @@ import { DashboardTabsBar } from './DashboardTabsBar'
 import { DeleteDashboardDialog } from './DeleteDashboardDialog'
 import {
   addTab,
+  addWidget,
   type DashboardDraft,
   removeTab,
   renameTab,
   setConnection,
+  setLayout,
   setName,
 } from './draft'
 import { useDashboardEditor } from './useDashboardEditor'
@@ -145,6 +147,7 @@ function DashboardView({
   const tabs = draft ? draft.tabs : dashboard.tabs
   const shownTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0]
   const edit = draft ? { connectionId: draft.connectionId } : undefined
+  const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null)
 
   function refresh() {
     for (const widget of shownTab?.widgets ?? []) {
@@ -263,8 +266,28 @@ function DashboardView({
             dashboardId={dashboard.id}
             version={dashboard.version}
             widgets={shownTab.widgets}
-            edit={edit}
+            edit={
+              draft && shownTab
+                ? {
+                    connectionId: draft.connectionId,
+                    onLayoutChange: (layouts) =>
+                      editor.change((current) =>
+                        setLayout(current, shownTab.id, layouts),
+                      ),
+                    onAddWidget: () => {
+                      const id = crypto.randomUUID()
+                      editor.change((current) =>
+                        addWidget(current, shownTab.id, id),
+                      )
+                      setEditingWidgetId(id)
+                    },
+                  }
+                : undefined
+            }
           />
+          {editingWidgetId && (
+            <div role="dialog" aria-label="Editor do widget" />
+          )}
         </>
       )}
       <AlertDialog

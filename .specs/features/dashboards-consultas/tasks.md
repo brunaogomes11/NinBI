@@ -640,8 +640,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes com gesto em `DashboardGrid.test.tsx` (largura 1.200 px; `mousedown`, `mousemove`, `mouseup` na alça): `GRID-01 grade tem 12 colunas` (widget com `w: 6` ocupa metade da largura no estilo calculado), `GRID-02 arrastar um widget o põe na célula solta sem sobreposição` (arrastar A para cima de B: depois de salvar, o `PUT` traz A na coluna de destino e B deslocado para baixo, sem retângulos sobrepostos), `GRID-03 redimensionar respeita 2 por 2 no mínimo e 12 colunas no máximo` (puxar a alça para muito pequeno para em `w: 2, h: 2`; para muito largo, em `w: 12`), `GRID-04` continua valendo (fora da edição não há alça), `GRID-05 Novo widget adiciona um widget 4 por 4 no fim da aba e abre o editor` ("Novo widget" aparece abaixo do último e o editor abre), `GRID-06 posição e tamanho arrastados vão no Salvar`
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `DashboardGrid.test.tsx` (largura 1.200 px; `mousedown`, `mousemove`, `mouseup` na alça): `GRID-01 grade tem 12 colunas` (widget com `w: 6` ocupa metade da largura no estilo calculado), `GRID-02 arrastar um widget o põe na célula solta sem sobreposição` (arrastar A para cima de B: depois de salvar, o `PUT` traz A na coluna de destino e B deslocado para baixo, sem retângulos sobrepostos), `GRID-03 redimensionar respeita 2 por 2 no mínimo e 12 colunas no máximo` (puxar a alça para muito pequeno para em `w: 2, h: 2`; para muito largo, em `w: 12`), `GRID-04` continua valendo (fora da edição não há alça), `GRID-05 Novo widget adiciona um widget 4 por 4 no fim da aba e abre o editor` ("Novo widget" aparece abaixo do último e o editor abre), `GRID-06 posição e tamanho arrastados vão no Salvar`
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

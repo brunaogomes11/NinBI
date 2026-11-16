@@ -149,12 +149,24 @@ export function removeWidget(
   )
 }
 
-/** Grava posição e tamanho dos widgets de uma aba, pelo id. */
+/** Grava posição e tamanho dos widgets de uma aba, pelo id; sem mudança devolve o mesmo rascunho. */
 export function setLayout(
   draft: DashboardDraft,
   tabId: string,
   layouts: Record<string, WidgetLayout>,
 ): DashboardDraft {
+  const same = (a: WidgetLayout, b: WidgetLayout) =>
+    a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h
+  const tab = draft.tabs.find((candidate) => candidate.id === tabId)
+  if (
+    !tab ||
+    tab.widgets.every((widget) => {
+      const layout = layouts[widget.id]
+      return !layout || same(layout, widget.layout)
+    })
+  ) {
+    return draft
+  }
   return mapTab(draft, tabId, (widgets) =>
     widgets.map((widget) => {
       const layout = layouts[widget.id]

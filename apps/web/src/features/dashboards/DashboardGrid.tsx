@@ -1,11 +1,18 @@
-import { GRID_COLUMNS, MESSAGES, type WidgetDto } from '@ninbi/contracts'
+import {
+  GRID_COLUMNS,
+  MESSAGES,
+  type WidgetDto,
+  type WidgetLayout,
+} from '@ninbi/contracts'
+import { Plus } from 'lucide-react'
 import ReactGridLayout, {
   type LayoutItem,
   verticalCompactor,
 } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
+import { Button } from '@/components/ui/button'
 import type { WidgetEditSource } from '@/features/widgets/useWidgetResult'
-import { WidgetCard } from '@/features/widgets/WidgetCard'
+import { DRAG_HANDLE_CLASS, WidgetCard } from '@/features/widgets/WidgetCard'
 import { useContainerWidth } from './useContainerWidth'
 
 const ROW_HEIGHT = 80
@@ -21,7 +28,13 @@ function toLayoutItem(widget: WidgetDto): LayoutItem {
   }
 }
 
-/** Os widgets de uma aba numa grade de 12 colunas; em visualização não há arraste nem redimensionamento. */
+/** Ações de edição da grade: presentes só em modo de edição. */
+export interface GridEdit extends WidgetEditSource {
+  onLayoutChange: (layouts: Record<string, WidgetLayout>) => void
+  onAddWidget: () => void
+}
+
+/** Os widgets de uma aba numa grade de 12 colunas; arrastar e redimensionar só em edição (GRID-04). */
 export function DashboardGrid({
   dashboardId,
   version,
@@ -32,12 +45,20 @@ export function DashboardGrid({
   version: number
   widgets: WidgetDto[]
   /** Presente só em edição: os widgets executam o Cypher e a conexão do rascunho. */
-  edit?: WidgetEditSource
+  edit?: GridEdit
 }) {
   const { ref, width } = useContainerWidth()
 
   return (
-    <div ref={ref} className="w-full">
+    <div ref={ref} className="flex w-full flex-col gap-3">
+      {edit && (
+        <div>
+          <Button type="button" variant="outline" onClick={edit.onAddWidget}>
+            <Plus aria-hidden="true" />
+            {MESSAGES.newWidget}
+          </Button>
+        </div>
+      )}
       {widgets.length === 0 ? (
         <p className="py-12 text-center text-muted-foreground text-sm">
           {MESSAGES.tabEmpty}
@@ -53,9 +74,21 @@ export function DashboardGrid({
             containerPadding: [0, 0],
             maxRows: Number.POSITIVE_INFINITY,
           }}
-          dragConfig={{ enabled: false, bounded: false, threshold: 3 }}
-          resizeConfig={{ enabled: false, handles: [] }}
+          dragConfig={{
+            enabled: Boolean(edit),
+            bounded: false,
+            threshold: 3,
+            handle: `.${DRAG_HANDLE_CLASS}`,
+          }}
+          resizeConfig={{ enabled: Boolean(edit), handles: edit ? ['se'] : [] }}
           compactor={verticalCompactor}
+          onLayoutChange={(layout) =>
+            edit?.onLayoutChange(
+              Object.fromEntries(
+                layout.map(({ i, x, y, w, h }) => [i, { x, y, w, h }]),
+              ),
+            )
+          }
         >
           {widgets.map((widget) => (
             <div key={widget.id}>
