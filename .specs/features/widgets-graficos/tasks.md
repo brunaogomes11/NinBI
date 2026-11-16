@@ -135,8 +135,8 @@ T15 → T16
 
 **Done when**:
 
-- [ ] Testes: `VIZ-15 salvar grava a visualização e o mapeamento de cada widget` (um `PUT` com widgets `BAR` `{ x: 'mes', series: ['vendas', 'custo'], stacked: true, horizontal: false }`, `PIE`, `MAP` e `TABLE`; o `GET` do dono devolve cada `visualization` e `config` iguais; o `GET` de quem tem compartilhamento `view` também recebe `visualization` e `config`, com `cypher: null`), `config` inválido para a visualização responde 400 com "Configuração da visualização inválida" e o dashboard continua na versão anterior
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: `VIZ-15 salvar grava a visualização e o mapeamento de cada widget` (um `PUT` com widgets `BAR` `{ x: 'mes', series: ['vendas', 'custo'], stacked: true, horizontal: false }`, `PIE`, `MAP` e `TABLE`; o `GET` do dono devolve cada `visualization` e `config` iguais; o `GET` de quem tem compartilhamento `view` também recebe `visualization` e `config`, com `cypher: null`), `config` inválido para a visualização responde 400 com "Configuração da visualização inválida" e o dashboard continua na versão anterior
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
