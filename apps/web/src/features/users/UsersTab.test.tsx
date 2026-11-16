@@ -21,6 +21,7 @@ describe('UsersTab', () => {
     openUsers(
       http.get('/api/users', () =>
         HttpResponse.json([
+          makeUserRow({ id: 'u-1' }),
           makeUserRow({
             id: 'u-2',
             name: 'bruno',
@@ -34,11 +35,11 @@ describe('UsersTab', () => {
             role: 'VIEWER',
             status: 'DISABLED',
           }),
-          makeUserRow({ id: 'u-1' }),
         ]),
       ),
     )
 
+    // A ordem alfabética é contrato do servidor (users.spec.ts): a tela preserva a ordem recebida.
     await screen.findByText('bruno')
     const rows = screen.getAllByRole('row').slice(1)
     const cells = rows.map((row) =>
@@ -48,9 +49,9 @@ describe('UsersTab', () => {
         .map((cell) => cell.textContent),
     )
     expect(cells).toEqual([
+      ['Ana Souza', 'ana@x.com', 'Admin', 'Ativo'],
       ['bruno', 'bruno@x.com', 'Editor', 'Ativo'],
       ['Carla', 'carla@x.com', 'Visualizador', 'Desativado'],
-      ['Ana Souza', 'ana@x.com', 'Admin', 'Ativo'],
     ])
     expect(
       screen.getAllByRole('columnheader').map((header) => header.textContent),
