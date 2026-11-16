@@ -142,8 +142,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `packages/contracts/src/ai.spec.ts`: `AIQ-14 pedido vazio é recusado` (vazio e só espaços), `AIQ-15 pedido com mais de 4.000 caracteres dá a mensagem` (4.001 caracteres dão "O pedido passa de 4.000 caracteres" no caminho `prompt`; 4.000 passa), `MESSAGES.aiGenerating(2)` é "Gerando... tentativa 2 de 4", `MESSAGES.aiProviderFailed('x')` é "Erro do provedor de IA: x", `widgetId` que não é UUID é recusado
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] Testes em `packages/contracts/src/ai.spec.ts`: `AIQ-14 pedido vazio é recusado` (vazio e só espaços), `AIQ-15 pedido com mais de 4.000 caracteres dá a mensagem` (4.001 caracteres dão "O pedido passa de 4.000 caracteres" no caminho `prompt`; 4.000 passa), `MESSAGES.aiGenerating(2)` é "Gerando... tentativa 2 de 4", `MESSAGES.aiProviderFailed('x')` é "Erro do provedor de IA: x", `widgetId` que não é UUID é recusado
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick

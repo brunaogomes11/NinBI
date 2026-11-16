@@ -133,4 +133,16 @@ export const MESSAGES = {
   llmRemoveConfirm:
     'Remover a configuração do LLM? Os recursos de IA ficarão desligados.',
   llmNotConfigured: 'Nenhum provedor de IA configurado',
+  aiPromptPlaceholder: 'Descreva o que você quer ver',
+  aiPromptRequired: 'Descreva o que você quer ver',
+  aiPromptTooLong: 'O pedido passa de 4.000 caracteres',
+  aiSchemaNotRead: 'Leia o schema da conexão antes de usar a IA',
+  aiGenerating: (attempt: number) => `Gerando... tentativa ${attempt} de 4`,
+  aiNoCypher: 'A resposta da IA não contém uma consulta Cypher',
+  aiProviderAuth: 'O provedor de IA recusou a chave configurada',
+  aiProviderRateLimit: 'O provedor de IA recusou o pedido por limite de uso',
+  aiProviderTimeout: 'O provedor de IA não respondeu em 60 s',
+  aiProviderContext:
+    'O schema desta conexão não cabe no modelo configurado. Desligue exemplos longos em Conexões ou use um modelo com contexto maior.',
+  aiProviderFailed: (message: string) => `Erro do provedor de IA: ${message}`,
 } as const
