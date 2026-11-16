@@ -44,6 +44,7 @@ describe('UsersTab', () => {
     const cells = rows.map((row) =>
       within(row)
         .getAllByRole('cell')
+        .slice(0, 4)
         .map((cell) => cell.textContent),
     )
     expect(cells).toEqual([
@@ -53,7 +54,7 @@ describe('UsersTab', () => {
     ])
     expect(
       screen.getAllByRole('columnheader').map((header) => header.textContent),
-    ).toEqual(['Nome', 'E-mail', 'Papel', 'Situação'])
+    ).toEqual(['Nome', 'E-mail', 'Papel', 'Situação', 'Ações'])
     expect(
       screen.getByRole('button', { name: 'Novo usuário' }),
     ).toBeInTheDocument()

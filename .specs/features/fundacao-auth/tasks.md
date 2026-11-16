@@ -1031,8 +1031,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes com gesto: USR-08 ("Desativar" em "Bruno Lima" mostra "Desativar Bruno Lima? A pessoa não conseguirá mais entrar."), USR-09 (confirmar mostra "Desativado" na linha), USR-10 ("Reativar" mostra "Ativo"), USR-11 (409 mostra "É preciso existir ao menos um administrador ativo"), USR-07 (redefinir envia a senha provisória e mostra a confirmação), ROLE-05 (trocar o papel para "Visualizador" mostra "Visualizador" na linha)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: USR-08 ("Desativar" em "Bruno Lima" mostra "Desativar Bruno Lima? A pessoa não conseguirá mais entrar."), USR-09 (confirmar mostra "Desativado" na linha), USR-10 ("Reativar" mostra "Ativo"), USR-11 (409 mostra "É preciso existir ao menos um administrador ativo"), USR-07 (redefinir envia a senha provisória e mostra a confirmação), ROLE-05 (trocar o papel para "Visualizador" mostra "Visualizador" na linha)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

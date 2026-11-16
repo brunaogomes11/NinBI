@@ -18,6 +18,7 @@ import { TopBarAction } from '@/features/shell/TopBar'
 import { apiFetch } from '@/lib/api'
 import { NewUserDialog } from './NewUserDialog'
 import { USERS_QUERY_KEY } from './queryKeys'
+import { UserRowActions } from './UserRowActions'
 
 const SKELETON_ROWS = 5
 
@@ -73,6 +74,9 @@ export function UsersTab() {
                 <TableHead>E-mail</TableHead>
                 <TableHead>Papel</TableHead>
                 <TableHead>Situação</TableHead>
+                <TableHead className="w-12">
+                  <span className="sr-only">Ações</span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody aria-busy={users.isPending}>
@@ -80,7 +84,7 @@ export function UsersTab() {
                 ? Array.from({ length: SKELETON_ROWS }, (_, index) => (
                     // biome-ignore lint/suspicious/noArrayIndexKey: linhas de esqueleto são todas iguais
                     <TableRow key={index}>
-                      {[0, 1, 2, 3].map((cell) => (
+                      {[0, 1, 2, 3, 4].map((cell) => (
                         <TableCell key={cell}>
                           <Skeleton className="h-4 w-full max-w-40" />
                         </TableCell>
@@ -94,6 +98,9 @@ export function UsersTab() {
                       <TableCell>{ROLE_LABELS[user.role]}</TableCell>
                       <TableCell>
                         <StatusBadge status={user.status} />
+                      </TableCell>
+                      <TableCell>
+                        <UserRowActions user={user} />
                       </TableCell>
                     </TableRow>
                   ))}
