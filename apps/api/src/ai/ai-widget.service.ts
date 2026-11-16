@@ -5,7 +5,9 @@ import {
   type AiWidgetEvent,
   type AiWidgetRequest,
   type ConnectionSchemaDto,
+  can,
   MESSAGES,
+  type Role,
 } from '@ninbi/contracts'
 import { AppError } from '../common/app-error'
 import type { LlmSnapshot } from '../llm/chat-model.factory'
@@ -48,13 +50,21 @@ export class AiWidgetService {
   /** Tudo que pode falhar antes de o primeiro byte da resposta sair (AIQ-16, AIQ-17). */
   async prepare(input: {
     userId: string
-    /** Conexão do dashboard; vale quando o corpo não traz `connectionId`. */
+    role: Role
+    /** Conexão do dashboard; vale quando o corpo não traz `connectionId` (AD-134). */
     dashboardConnectionId: string
     body: AiWidgetBody
   }): Promise<PreparedGeneration> {
     const snapshot = await this.settings.snapshot()
     if (!snapshot) {
       throw new AppError(409, 'LLM_NOT_CONFIGURED', MESSAGES.llmNotConfigured)
+    }
+    // Em edição, a conexão é a do rascunho (AD-134): quem a escolhe precisa poder lê-la.
+    if (
+      input.body.connectionId !== undefined &&
+      !can(input.role, 'connections.read')
+    ) {
+      throw new AppError(403, 'FORBIDDEN', MESSAGES.forbiddenRoute)
     }
     const connectionId = input.body.connectionId ?? input.dashboardConnectionId
     const schema = await this.schemas.get(connectionId)

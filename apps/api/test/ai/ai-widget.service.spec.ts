@@ -100,6 +100,7 @@ async function setup(options: { configured?: boolean; schema?: boolean } = {}) {
   const prepare = (b: AiWidgetBody = body()) =>
     service.prepare({
       userId: admin.user.id,
+      role: admin.user.role,
       dashboardConnectionId: connection.id,
       body: b,
     })
@@ -174,10 +175,30 @@ describe('AiWidgetService', () => {
       cfg: { uri: 'neo4j://vendas.exemplo:7687' },
     })
 
+    // Em edição o web manda a conexão do rascunho (AD-134).
     await t.generate(body({ connectionId: other.id }))
     expect(reads(t)[1]).toMatchObject({
       cfg: { uri: 'neo4j://estoque.exemplo:7687' },
     })
+
+    const missing = await t
+      .prepare(body({ connectionId: '00000000-0000-4000-8000-0000000000ff' }))
+      .catch((e: unknown) => e)
+    expect(missing).toBeInstanceOf(AppError)
+    expect(missing).toMatchObject({
+      status: 404,
+      code: 'CONNECTION_NOT_FOUND',
+    })
+
+    const denied = await t.service
+      .prepare({
+        userId: t.admin.user.id,
+        role: 'VIEWER',
+        dashboardConnectionId: t.connection.id,
+        body: body({ connectionId: other.id }),
+      })
+      .catch((e: unknown) => e)
+    expect(denied).toMatchObject({ status: 403, code: 'FORBIDDEN' })
   })
 
   it('AIQ-09 geração bem-sucedida devolve Cypher, visualização, mapeamento, título e resultado', async () => {

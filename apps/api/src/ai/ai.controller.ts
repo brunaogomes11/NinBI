@@ -55,6 +55,7 @@ export class AiController {
     const access = await this.access.assert(user, id, 'edit')
     const prepared = await this.widgets.prepare({
       userId: user.id,
+      role: user.role,
       dashboardConnectionId: access.connectionId,
       body,
     })

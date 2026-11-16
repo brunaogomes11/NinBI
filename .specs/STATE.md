@@ -714,6 +714,14 @@
 - **Date**: 2026-11-16
 - **Status**: active
 
+### AD-134 (active)
+- **Decision**: O pedido de geração do widget (`POST /api/dashboards/:id/ai/widget`) mantém `connectionId` opcional. Sem ele, o servidor usa a conexão do dashboard (AIQ-03, AIQ-08). Com ele, o servidor exige que a conexão exista (404 `CONNECTION_NOT_FOUND`) e que o usuário tenha `connections.read` (403 `FORBIDDEN`); o schema e a execução usam essa conexão. O web envia a conexão do rascunho.
+- **Reason**: Verificação de `ia-cypher` (F1): em modo de edição a conexão "do dashboard" é a do rascunho, pois o usuário pode trocá-la sem salvar; ignorar o campo geraria com o schema errado. A checagem de permissão impede usar a IA para ler schema de conexão que o usuário não pode ver. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: O servidor aceita qualquer conexão existente que o usuário possa ler, não só a do dashboard salvo.
+- **Scope**: ia-cypher, ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:
