@@ -644,7 +644,7 @@ Proof: run web | ✓ CHART-18 pizza só com zeros mostra A consulta não retorno
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, sonnet) sobre 2e3e5ae - em andamento.
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre 2e3e5ae - returned (186fac0). Lotes 2+3 (T8-T16, sonnet) - returned (af100cd). Verifier (haiku) sobre af100cd - returned: FAIL, 11 findings fechados (e506202..868b74f; AD-133). Round 2: 85 pass / 0 fail em b9b2f4d. `validate_verification.py` resta com 3 erros, todos de screens.md / `*.running.png`, dispensados pelo usuário em AD-023. Feature encerrada.
 **Walked:** dispensado por AD-023
 
 ---
