@@ -207,4 +207,37 @@ describe('MapView', () => {
     expect(fitBounds.mock.calls.length).toBe(calls)
     fitBounds.mockRestore()
   })
+
+  it('MAP-05 vários marcadores enquadram os limites de todos', async () => {
+    const fitBounds = vi.spyOn(L.Map.prototype, 'fitBounds')
+    const { container } = draw()
+    await waitFor(() => expect(markers(container)).toHaveLength(3))
+    expect(fitBounds).toHaveBeenLastCalledWith(
+      [
+        [-23.65, -46.7],
+        [-23.5, -46.6],
+      ],
+      expect.objectContaining({ animate: false }),
+    )
+    fitBounds.mockRestore()
+  })
+
+  it('MAP-05 um marcador centraliza nele com zoom 10', async () => {
+    const setView = vi.spyOn(L.Map.prototype, 'setView')
+    const { container } = draw([['Centro', -23.55, -46.63]])
+    await waitFor(() => expect(markers(container)).toHaveLength(1))
+    expect(setView).toHaveBeenLastCalledWith(
+      [-23.55, -46.63],
+      10,
+      expect.objectContaining({ animate: false }),
+    )
+    await waitFor(() =>
+      expect(
+        container
+          .querySelector('.leaflet-container')
+          ?.getAttribute('data-zoom'),
+      ).toBe('10'),
+    )
+    setView.mockRestore()
+  })
 })
