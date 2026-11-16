@@ -1,4 +1,4 @@
-import type { ConnectionDto } from '@ninbi/contracts'
+import { type ConnectionDto, MESSAGES } from '@ninbi/contracts'
 import { screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { describe, expect, it } from 'vitest'
@@ -10,6 +10,7 @@ import {
   setupStatusHandler,
   usersHandler,
 } from '@/test/renderApp'
+import { server } from '@/test/server'
 
 function openConnections() {
   let connections: ConnectionDto[] = [
@@ -86,5 +87,37 @@ describe('ConnectionRowActions', () => {
     )
     expect(view.deleted).toEqual(['c-1'])
     expect(screen.getByRole('link', { name: 'Estoque' })).toBeInTheDocument()
+  })
+
+  it('DASH-14 excluir conexão usada mostra Esta conexão é usada por', async () => {
+    const view = openConnections()
+    server.use(
+      http.delete('/api/connections/:id', () =>
+        HttpResponse.json(
+          {
+            code: 'CONNECTION_IN_USE',
+            message: MESSAGES.connectionInUse(2),
+          },
+          { status: 409 },
+        ),
+      ),
+    )
+
+    await clickRowButton(view, 'Vendas', 'Excluir')
+    const dialog = await screen.findByRole('alertdialog')
+    await view.user.click(
+      within(dialog).getByRole('button', { name: 'Excluir' }),
+    )
+
+    expect(
+      await within(dialog).findByText(
+        'Esta conexão é usada por 2 dashboard(s)',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument()
+    expect(view.deleted).toEqual([])
+    expect(
+      screen.getByRole('link', { name: 'Vendas', hidden: true }),
+    ).toBeInTheDocument()
   })
 })

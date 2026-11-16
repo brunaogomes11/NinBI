@@ -558,8 +558,8 @@ T28
 
 **Done when**:
 
-- [ ] Teste com gesto: `DASH-14 excluir conexão usada mostra Esta conexão é usada por` (409 com "Esta conexão é usada por 2 dashboard(s)": a mensagem aparece e "Vendas" continua na lista)
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Teste com gesto: `DASH-14 excluir conexão usada mostra Esta conexão é usada por` (409 com "Esta conexão é usada por 2 dashboard(s)": a mensagem aparece e "Vendas" continua na lista)
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
