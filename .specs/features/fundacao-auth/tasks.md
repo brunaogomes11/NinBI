@@ -398,8 +398,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: o hash não contém a senha; duas chamadas com a mesma senha dão hashes diferentes (sal); `verify` aceita a certa e recusa outra
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: o hash não contém a senha; duas chamadas com a mesma senha dão hashes diferentes (sal); `verify` aceita a certa e recusa outra
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
