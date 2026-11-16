@@ -66,6 +66,8 @@ export interface SidebarGroupNode {
 
 export interface SidebarDto {
   items: (SidebarDashboardNode | SidebarGroupNode)[]
+  /** "Compartilhados comigo": compartilhados que o usuário ainda não organizou (AD-051). */
+  shared: SidebarDashboardNode[]
 }
 
 export type ResultValue =

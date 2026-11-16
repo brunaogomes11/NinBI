@@ -21,7 +21,10 @@ function shape(layout: SidebarDto): string[] {
 
 describe('layout da sidebar', () => {
   it('SIDE-03 moveItem põe o item antes do alvo', () => {
-    const layout: SidebarDto = { items: [dash('A'), dash('B'), dash('C')] }
+    const layout: SidebarDto = {
+      items: [dash('A'), dash('B'), dash('C')],
+      shared: [],
+    }
 
     const moved = moveItem(layout, 'C', { before: 'A' })
 
@@ -29,7 +32,7 @@ describe('layout da sidebar', () => {
   })
 
   it('SIDE-03 moveItem sem alvo conhecido devolve o mesmo layout', () => {
-    const layout: SidebarDto = { items: [dash('A'), dash('B')] }
+    const layout: SidebarDto = { items: [dash('A'), dash('B')], shared: [] }
 
     expect(moveItem(layout, 'A', { before: 'nada' })).toBe(layout)
     expect(moveItem(layout, 'A', { before: 'A' })).toBe(layout)
@@ -38,6 +41,7 @@ describe('layout da sidebar', () => {
   it('SIDE-09 removeGroup solta os dashboards na posição do grupo', () => {
     const layout: SidebarDto = {
       items: [dash('A'), group('G', 'B', 'C'), dash('D')],
+      shared: [],
     }
 
     const removed = removeGroup(layout, 'G')
@@ -48,6 +52,7 @@ describe('layout da sidebar', () => {
   it('SIDE-04 moveItem põe o dashboard antes do alvo dentro do grupo e no fim do grupo', () => {
     const layout: SidebarDto = {
       items: [dash('X'), dash('Y'), group('G', 'A', 'B')],
+      shared: [],
     }
 
     const before = moveItem(layout, 'X', { before: 'B' })
@@ -58,7 +63,10 @@ describe('layout da sidebar', () => {
   })
 
   it('SIDE-05 moveItem solta o dashboard do grupo antes de um item solto', () => {
-    const layout: SidebarDto = { items: [group('G', 'A', 'B'), dash('C')] }
+    const layout: SidebarDto = {
+      items: [group('G', 'A', 'B'), dash('C')],
+      shared: [],
+    }
 
     expect(shape(moveItem(layout, 'A', { before: 'C' }))).toEqual([
       'G[B]',
@@ -75,6 +83,7 @@ describe('layout da sidebar', () => {
   it('SIDE-06 grupo movido para dentro de grupo fica antes do grupo alvo', () => {
     const layout: SidebarDto = {
       items: [group('G1', 'A'), group('G2', 'B'), group('G3', 'C')],
+      shared: [],
     }
 
     const intoGroup = moveItem(layout, 'G3', { intoGroup: 'G1' })

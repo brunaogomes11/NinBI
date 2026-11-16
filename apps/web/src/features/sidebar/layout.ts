@@ -85,13 +85,17 @@ export function moveItem(
 
   const rest = without(layout.items, draggedId)
 
-  if ('rootEnd' in target) return { items: [...rest, dragged] }
+  if ('rootEnd' in target) return { ...layout, items: [...rest, dragged] }
 
   if ('intoGroup' in target) {
     if (dragged.type === 'group') {
-      return { items: insertBefore(rest, target.intoGroup, dragged) }
+      return {
+        ...layout,
+        items: insertBefore(rest, target.intoGroup, dragged),
+      }
     }
     return {
+      ...layout,
       items: rest.map((item) =>
         item.id === target.intoGroup && item.type === 'group'
           ? { ...item, items: [...item.items, dragged] }
@@ -103,10 +107,11 @@ export function moveItem(
   if (dragged.type === 'group') {
     const holder = findGroupOf(rest, target.before)
     return {
+      ...layout,
       items: insertBefore(rest, holder ? holder.id : target.before, dragged),
     }
   }
-  return { items: insertBefore(rest, target.before, dragged) }
+  return { ...layout, items: insertBefore(rest, target.before, dragged) }
 }
 
 export function addGroup(
@@ -114,7 +119,10 @@ export function addGroup(
   id: string,
   name: string,
 ): SidebarDto {
-  return { items: [...layout.items, { type: 'group', id, name, items: [] }] }
+  return {
+    ...layout,
+    items: [...layout.items, { type: 'group', id, name, items: [] }],
+  }
 }
 
 export function renameGroup(
@@ -123,6 +131,7 @@ export function renameGroup(
   name: string,
 ): SidebarDto {
   return {
+    ...layout,
     items: layout.items.map((item) =>
       item.type === 'group' && item.id === id ? { ...item, name } : item,
     ),
@@ -132,6 +141,7 @@ export function renameGroup(
 /** Os dashboards do grupo ficam soltos na posição dele (SIDE-09). */
 export function removeGroup(layout: SidebarDto, id: string): SidebarDto {
   return {
+    ...layout,
     items: layout.items.flatMap((item): Node[] =>
       item.type === 'group' && item.id === id ? item.items : [item],
     ),

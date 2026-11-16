@@ -92,6 +92,11 @@ export class DashboardAccessService {
     return access
   }
 
+  /** Os dashboards de outros donos compartilhados com o usuário, em ordem de criação. */
+  sharedDashboardIds(user: SessionUser): Promise<string[]> {
+    return this.shares.sharedDashboardIds(user.id)
+  }
+
   /** Os dashboards do usuário e os compartilhados com ele, em ordem de criação. */
   async sidebarDashboardIds(user: SessionUser): Promise<string[]> {
     const shared = await this.shares.sharedDashboardIds(user.id)

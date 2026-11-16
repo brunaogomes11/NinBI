@@ -58,8 +58,9 @@ export function makeDashboard(
 /** `GET /api/sidebar` com os itens dados (sem itens por padrão). */
 export function sidebarHandler(
   items: SidebarDto['items'] = [],
+  shared: SidebarDto['shared'] = [],
 ): RequestHandler {
-  return http.get('/api/sidebar', () => HttpResponse.json({ items }))
+  return http.get('/api/sidebar', () => HttpResponse.json({ items, shared }))
 }
 
 export interface SavedSidebarItem {

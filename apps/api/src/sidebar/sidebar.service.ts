@@ -28,7 +28,14 @@ export class SidebarService {
       .select()
       .from(sidebarLayouts)
       .where(eq(sidebarLayouts.userId, user.id))
-    return this.assemble(user, row?.layout ?? EMPTY_LAYOUT)
+    const layout = row?.layout ?? EMPTY_LAYOUT
+    const reachable = new Set(await this.access.sidebarDashboardIds(user))
+    const kept = prune(layout, reachable)
+    // ACL-09: ids que o usuário não alcança mais saem do documento gravado.
+    if (row && countIds(kept) < countIds(layout)) {
+      await this.write(user, kept)
+    }
+    return this.assemble(user, kept)
   }
 
   /** Substitui o documento do usuário; a última gravação vale (SIDE-17). */
@@ -37,39 +44,36 @@ export class SidebarService {
     layout: SidebarLayoutInput,
   ): Promise<SidebarDto> {
     const reachable = new Set(await this.access.sidebarDashboardIds(user))
-    const kept: SidebarLayoutInput = {
-      items: layout.items.flatMap((item): SidebarLayoutInput['items'] => {
-        if (item.type === 'dashboard') {
-          return reachable.has(item.id) ? [item] : []
-        }
-        return [
-          {
-            ...item,
-            items: item.items.filter((child) => reachable.has(child.id)),
-          },
-        ]
-      }),
-    }
+    const kept = prune(layout, reachable)
+    await this.write(user, kept)
+    return this.assemble(user, kept)
+  }
+
+  private async write(
+    user: SessionUser,
+    layout: SidebarLayoutInput,
+  ): Promise<void> {
     const updatedAt = this.clock.now()
     await this.db
       .insert(sidebarLayouts)
-      .values({ userId: user.id, layout: kept, updatedAt })
+      .values({ userId: user.id, layout, updatedAt })
       .onConflictDoUpdate({
         target: sidebarLayouts.userId,
-        set: { layout: kept, updatedAt },
+        set: { layout, updatedAt },
       })
-    return this.assemble(user, kept)
   }
 
   /**
    * Cruza o documento gravado com o que o usuário alcança hoje: tira os que sumiram,
-   * acrescenta no fim, soltos, os que faltam, e põe o nome atual (AD-042).
+   * acrescenta no fim, soltos, os próprios que faltam, separa os compartilhados que
+   * o usuário ainda não organizou em `shared` (AD-051) e põe o nome atual (AD-042).
    */
   private async assemble(
     user: SessionUser,
     layout: SidebarLayoutInput,
   ): Promise<SidebarDto> {
     const reachableIds = await this.access.sidebarDashboardIds(user)
+    const sharedIds = new Set(await this.access.sharedDashboardIds(user))
     const names = new Map<string, string>()
     if (reachableIds.length) {
       const rows = await this.db
@@ -99,7 +103,39 @@ export class SidebarService {
         return [group]
       },
     )
-    for (const id of reachableIds) items.push(...node(id))
-    return { items }
+    const shared: SidebarDashboardNode[] = []
+    for (const id of reachableIds) {
+      if (sharedIds.has(id)) shared.push(...node(id))
+      else items.push(...node(id))
+    }
+    return { items, shared }
   }
+}
+
+/** Tira do documento os dashboards que o usuário não alcança. */
+function prune(
+  layout: SidebarLayoutInput,
+  reachable: Set<string>,
+): SidebarLayoutInput {
+  return {
+    items: layout.items.flatMap((item): SidebarLayoutInput['items'] => {
+      if (item.type === 'dashboard') {
+        return reachable.has(item.id) ? [item] : []
+      }
+      return [
+        {
+          ...item,
+          items: item.items.filter((child) => reachable.has(child.id)),
+        },
+      ]
+    }),
+  }
+}
+
+function countIds(layout: SidebarLayoutInput): number {
+  return layout.items.reduce(
+    (total, item) =>
+      total + (item.type === 'dashboard' ? 1 : item.items.length),
+    0,
+  )
 }

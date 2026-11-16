@@ -266,9 +266,9 @@ T16
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/sharing/sidebar-shared.spec.ts` (compartilhamentos pela rota de T6): `ACL-04 dashboard compartilhado aparece em Compartilhados comigo` (vem em `shared` com o nome atual e não em `items`), `ACL-05 compartilhado gravado na sidebar sai de Compartilhados comigo` (`PUT /api/sidebar` com ele dentro do grupo "Comercial": o `GET` o traz no grupo e `shared` vazio), `ACL-09 acesso perdido tira o dashboard da sidebar e dos grupos` (depois do `DELETE` do compartilhamento, some do grupo e de `shared`; compartilhar de novo o põe em `shared`, não no grupo antigo), `ACL-10 sem compartilhados a seção vem vazia` (`shared: []`); dashboards próprios novos continuam no fim de `items`
-- [ ] Teste DASH-01 de `dashboards-consultas` atualizado e verde
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/sharing/sidebar-shared.spec.ts` (compartilhamentos pela rota de T6): `ACL-04 dashboard compartilhado aparece em Compartilhados comigo` (vem em `shared` com o nome atual e não em `items`), `ACL-05 compartilhado gravado na sidebar sai de Compartilhados comigo` (`PUT /api/sidebar` com ele dentro do grupo "Comercial": o `GET` o traz no grupo e `shared` vazio), `ACL-09 acesso perdido tira o dashboard da sidebar e dos grupos` (depois do `DELETE` do compartilhamento, some do grupo e de `shared`; compartilhar de novo o põe em `shared`, não no grupo antigo), `ACL-10 sem compartilhados a seção vem vazia` (`shared: []`); dashboards próprios novos continuam no fim de `items`
+- [x] Teste DASH-01 de `dashboards-consultas` atualizado e verde
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

@@ -68,7 +68,11 @@ describe('sidebar por usuário', () => {
 
     const response = await t.ana.agent.get('/api/sidebar')
     expect(response.status).toBe(200)
-    expect(outline(response.body)).toEqual(['B', 'Comercial[A]', 'C'])
+    // AD-051: o compartilhado fora do layout vem em `shared`, não no fim de `items`.
+    expect(outline(response.body)).toEqual(['B', 'Comercial[A]'])
+    expect(response.body.shared).toEqual([
+      { type: 'dashboard', id: c.id, name: 'C' },
+    ])
     expect(response.body.items[1].id).toBe(GROUP_ID)
     expect(response.body.items[0]).toEqual({
       type: 'dashboard',
@@ -128,7 +132,10 @@ describe('sidebar por usuário', () => {
     expect(long.body.fieldErrors.items).toBe(
       'O nome pode ter até 40 caracteres',
     )
-    expect((await t.ana.agent.get('/api/sidebar')).body).toEqual({ items: [] })
+    expect((await t.ana.agent.get('/api/sidebar')).body).toEqual({
+      items: [],
+      shared: [],
+    })
   })
 
   it('SIDE-10 gravar a sidebar de um usuário não muda a de outro', async () => {
@@ -148,7 +155,11 @@ describe('sidebar por usuário', () => {
     })
 
     expect((await bia.agent.get('/api/sidebar')).body).toEqual(before)
-    expect(outline(before)).toEqual(['A', 'B'])
+    // AD-051: sem layout próprio, os compartilhados vêm em `shared`.
+    expect(before.shared.map((node: { name: string }) => node.name)).toEqual([
+      'A',
+      'B',
+    ])
   })
 
   it('SIDE-11 outra sessão do mesmo usuário recebe a mesma sidebar', async () => {
