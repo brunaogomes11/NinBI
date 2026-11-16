@@ -54,6 +54,10 @@ function textOf(content: unknown): string {
     .join('')
 }
 
+function redactKey(text: string, apiKey: string | null): string {
+  return apiKey ? text.split(apiKey).join('***') : text
+}
+
 /** Única porta de saída para o provedor: prazo, cancelamento, classificação do erro e log (AIQ-21 a AIQ-27). */
 @Injectable()
 export class LlmClient {
@@ -86,10 +90,11 @@ export class LlmClient {
       const cause = timeout.aborted ? new LlmTimeoutError() : err
       const classified = classifyProviderError(cause)
       result = RESULT_BY_CODE[classified.code]
+      // A chave em uso nunca sai daqui, nem se o provedor a ecoar na mensagem.
       throw new LlmProviderError(
         classified.code,
-        classified.message,
-        classified.providerMessage,
+        redactKey(classified.message, snapshot.apiKey),
+        redactKey(classified.providerMessage, snapshot.apiKey),
       )
     } finally {
       this.logger.log(

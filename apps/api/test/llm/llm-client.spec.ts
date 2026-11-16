@@ -99,4 +99,25 @@ describe('LlmClient', () => {
       expect(line).not.toContain('texto-do-schema-secreto')
     }
   })
+
+  it('AIQ-27 a chave em uso é trocada por *** na mensagem do provedor e no log', async () => {
+    const lines: string[] = []
+    vi.spyOn(Logger.prototype, 'log').mockImplementation((message: unknown) => {
+      lines.push(String(message))
+    })
+    const factory = new FakeChatModelFactory()
+    factory.script(
+      Object.assign(new Error('boom sk-teste-1234 e de novo sk-teste-1234'), {
+        status: 500,
+      }),
+    )
+    const client = new LlmClient(factory, 1000)
+    const error = await client.call(snapshot, messages(), ctx).catch((e) => e)
+
+    expect(error).toBeInstanceOf(LlmProviderError)
+    expect(error.providerMessage).toBe('boom *** e de novo ***')
+    expect(error.message).not.toContain('sk-teste-1234')
+    expect(error.message).toContain('***')
+    for (const line of lines) expect(line).not.toContain('sk-teste-1234')
+  })
 })
