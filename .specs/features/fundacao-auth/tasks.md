@@ -378,8 +378,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Teste envia `POST /api/health?token=abc` com corpo `{"password":"segredo123"}` e cookie `ninbi_session=xyz`, captura as linhas do logger e confere método, caminho `/api/health`, status e duração, e a ausência de `segredo123`, `xyz`, `token=abc` e `password`
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Teste envia `POST /api/health?token=abc` com corpo `{"password":"segredo123"}` e cookie `ninbi_session=xyz`, captura as linhas do logger e confere método, caminho `/api/health`, status e duração, e a ausência de `segredo123`, `xyz`, `token=abc` e `password`
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build
