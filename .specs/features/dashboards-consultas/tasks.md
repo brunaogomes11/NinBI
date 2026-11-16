@@ -309,8 +309,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/queries/result-value.spec.ts`: `TBL-06 nó, relacionamento, lista e mapa viram texto JSON` (nó `:Loja {nome: 'Centro'}` vira `{ kind: 'json' }` cujo texto, lido com `JSON.parse`, é `{ labels: ['Loja'], properties: { nome: 'Centro' } }`; relacionamento `:FEZ`; lista `[1, 'a']`; mapa `{a: {b: 2}}`), `TBL-08 inteiro acima de 2^53 mantém todos os dígitos` (`Integer` `9007199254740993` vira `{ kind: 'bigint', value: '9007199254740993' }`; dentro de um mapa, o texto JSON contém `9007199254740993`), `Integer` 42 vira o número 42, `null` fica `null`, `Date` vira `'2024-02-05'`
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/queries/result-value.spec.ts`: `TBL-06 nó, relacionamento, lista e mapa viram texto JSON` (nó `:Loja {nome: 'Centro'}` vira `{ kind: 'json' }` cujo texto, lido com `JSON.parse`, é `{ labels: ['Loja'], properties: { nome: 'Centro' } }`; relacionamento `:FEZ`; lista `[1, 'a']`; mapa `{a: {b: 2}}`), `TBL-08 inteiro acima de 2^53 mantém todos os dígitos` (`Integer` `9007199254740993` vira `{ kind: 'bigint', value: '9007199254740993' }`; dentro de um mapa, o texto JSON contém `9007199254740993`), `Integer` 42 vira o número 42, `null` fica `null`, `Date` vira `'2024-02-05'`
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
