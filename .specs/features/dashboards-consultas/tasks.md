@@ -369,8 +369,8 @@ T28
 
 **Done when**:
 
-- [ ] Testes: `QRY-01 procedimento de escrita é recusado pela transação de leitura e nada é criado` (`CALL db.createLabel('NinbiProbe')` passa no validador, falha no Neo4j, e `CALL db.labels()` não lista `NinbiProbe`), `QRY-06 Neo4j real recusa CALL db.createLabel com a mensagem de leitura` (422 com "Somente consultas de leitura são permitidas"), `QRY-07 produto cartesiano no Neo4j real para no prazo` (`NINBI_QUERY_TIMEOUT_MS` de 1.000 e `MATCH (a), (b), (c) RETURN count(*)`: 422 `QUERY_TIMEOUT` em menos de 10 s), `QRY-08 UNWIND de 6000 linhas devolve 5000` (`UNWIND range(1, 6000) AS i RETURN i`: 5.000 linhas e `truncated: true`), `QRY-13 porta fechada mostra Não foi possível conectar ao banco` (conexão inserida com `bolt://localhost:1`: 422 com o nome da conexão); `MATCH (l:Loja) RETURN l.nome AS nome ORDER BY nome` devolve 12 linhas
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
+- [x] Testes: `QRY-01 procedimento de escrita é recusado pela transação de leitura e nada é criado` (`CALL db.createLabel('NinbiProbe')` passa no validador, falha no Neo4j, e `CALL db.labels()` não lista `NinbiProbe`), `QRY-06 Neo4j real recusa CALL db.createLabel com a mensagem de leitura` (422 com "Somente consultas de leitura são permitidas"), `QRY-07 produto cartesiano no Neo4j real para no prazo` (`NINBI_QUERY_TIMEOUT_MS` de 1.000 e `MATCH (a), (b), (c) RETURN count(*)`: 422 `QUERY_TIMEOUT` em menos de 10 s), `QRY-08 UNWIND de 6000 linhas devolve 5000` (`UNWIND range(1, 6000) AS i RETURN i`: 5.000 linhas e `truncated: true`), `QRY-13 porta fechada mostra Não foi possível conectar ao banco` (conexão inserida com `bolt://localhost:1`: 422 com o nome da conexão); `MATCH (l:Loja) RETURN l.nome AS nome ORDER BY nome` devolve 12 linhas
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test && pnpm infra:up && pnpm --filter @ninbi/api test:int`
 
 **Tests**: integration
 **Gate**: full

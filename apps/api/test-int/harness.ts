@@ -19,7 +19,13 @@ const ADMIN_URL = 'postgres://ninbi:ninbi@localhost:55432/postgres'
  * App Nest contra o PostgreSQL real do compose de dev, num banco
  * `ninbi_test_<aleatório>` criado aqui e apagado em `close()`.
  */
-export async function createIntApp() {
+export async function createIntApp(
+  options: {
+    /** Usa o gateway real do Neo4j (o de dev do compose) no lugar do falso. */
+    realNeo4j?: boolean
+    overrides?: { provide: unknown; useValue: unknown }[]
+  } = {},
+) {
   const databaseName = `ninbi_test_${randomBytes(6).toString('hex')}`
   const admin = new Pool({ connectionString: ADMIN_URL, max: 1 })
   await admin.query(`CREATE DATABASE ${databaseName}`)
@@ -33,12 +39,16 @@ export async function createIntApp() {
   await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER })
 
   const neo4j = new FakeNeo4jGateway()
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+  let builder = Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(DB)
     .useValue(db)
-    .overrideProvider(NEO4J_GATEWAY)
-    .useValue(neo4j)
-    .compile()
+  if (!options.realNeo4j) {
+    builder = builder.overrideProvider(NEO4J_GATEWAY).useValue(neo4j)
+  }
+  for (const { provide, useValue } of options.overrides ?? []) {
+    builder = builder.overrideProvider(provide).useValue(useValue)
+  }
+  const moduleRef = await builder.compile()
   const app: INestApplication = configureApp(moduleRef.createNestApplication())
   await app.init()
 
