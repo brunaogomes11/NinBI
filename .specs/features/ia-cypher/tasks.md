@@ -350,8 +350,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/ai/ai-widget.route.spec.ts`: `AIQ-12 resposta informa cada tentativa` (roteiro inválido e depois válido: o corpo tem as linhas `attempt` 1 e 2 com `maxAttempts: 4` antes de `done`; `Content-Type` `application/x-ndjson`), `AIQ-15 pedido longo responde 400` (4.001 caracteres: 400 com "O pedido passa de 4.000 caracteres" em `fieldErrors.prompt` e nenhuma chamada ao modelo), `AIQ-16 sem provedor a geração responde 409` (`LLM_NOT_CONFIGURED` com "Nenhum provedor de IA configurado"), `AIQ-18 Visualizador e quem não edita recebem 403 na geração` (Visualizador com compartilhamento `edit` e Editor com compartilhamento `view` recebem 403; quem não alcança recebe 404; dono e Admin recebem 200), o corpo de `done` traz `result.rows`
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/ai/ai-widget.route.spec.ts`: `AIQ-12 resposta informa cada tentativa` (roteiro inválido e depois válido: o corpo tem as linhas `attempt` 1 e 2 com `maxAttempts: 4` antes de `done`; `Content-Type` `application/x-ndjson`), `AIQ-15 pedido longo responde 400` (4.001 caracteres: 400 com "O pedido passa de 4.000 caracteres" em `fieldErrors.prompt` e nenhuma chamada ao modelo), `AIQ-16 sem provedor a geração responde 409` (`LLM_NOT_CONFIGURED` com "Nenhum provedor de IA configurado"), `AIQ-18 Visualizador e quem não edita recebem 403 na geração` (Visualizador com compartilhamento `edit` e Editor com compartilhamento `view` recebem 403; quem não alcança recebe 404; dono e Admin recebem 200), o corpo de `done` traz `result.rows`
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build
