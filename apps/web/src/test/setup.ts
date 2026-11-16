@@ -13,14 +13,26 @@ beforeAll(() => {
   Element.prototype.scrollIntoView ??= () => {}
 })
 
+// Pedido sem handler não é só um aviso no log: ele reprova o teste que o fez.
+const unhandled: string[] = []
+
 beforeAll(() => {
-  server.listen({ onUnhandledFrame: 'error' })
+  server.listen({
+    async onUnhandledFrame({ frame, defaults }) {
+      unhandled.push(await frame.getUnhandledMessage())
+      defaults.error()
+    },
+  })
 })
 
 afterEach(() => {
   cleanup()
   server.resetHandlers()
   localStorage.clear()
+  if (unhandled.length > 0) {
+    const messages = unhandled.splice(0).join('\n')
+    throw new Error(`Pedido sem handler MSW:\n${messages}`)
+  }
 })
 
 afterAll(() => {

@@ -63,6 +63,10 @@ function open(
       getDashboard(dashboard),
       getDashboard(makeDashboard({ id: 'd-2', name: 'Outro' })),
       queryHandler([]),
+      // Em visualização cada widget salvo roda pelo id.
+      http.post('/api/dashboards/:id/widgets/:widgetId/run', () =>
+        HttpResponse.json(makeQueryResult()),
+      ),
     ],
   })
 }
