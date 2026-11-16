@@ -280,8 +280,8 @@ T15 → T16
 
 **Done when**:
 
-- [ ] Testes em `PieChartView.test.tsx` (600 × 300): `CHART-09 pizza desenha uma fatia por linha` (cinco categorias dão cinco setores), `CHART-10 Donut desenha o centro vazado` (com `donut`, o caminho de cada setor tem dois arcos, o de fora e o de dentro; sem `donut`, um só), `CHART-13 pizza com 30 linhas mostra Mostrando 12 de 30 categorias` (12 setores e o texto), `CHART-14 dica da pizza mostra categoria e valor` (`NinbiTooltip` do item "Centro" mostra "Centro" e "1.234,56")
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `PieChartView.test.tsx` (600 × 300): `CHART-09 pizza desenha uma fatia por linha` (cinco categorias dão cinco setores), `CHART-10 Donut desenha o centro vazado` (com `donut`, o caminho de cada setor tem dois arcos, o de fora e o de dentro; sem `donut`, um só), `CHART-13 pizza com 30 linhas mostra Mostrando 12 de 30 categorias` (12 setores e o texto), `CHART-14 dica da pizza mostra categoria e valor` (`NinbiTooltip` do item "Centro" mostra "Centro" e "1.234,56")
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
