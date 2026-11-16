@@ -807,8 +807,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: SHELL-11 (renderiza a imagem do símbolo, o texto "NinBI" e o "BI" em elemento com a classe do token `accent-text`, nos dois temas), SHELL-12 (`index.html` tem `<link rel="icon" ... href="/favicon.png">` e o arquivo existe em `public/`), SHELL-13 (nenhum arquivo de `apps/web/src` nem `index.html` contém "BUSINESS INTELLIGENCE", sem diferenciar maiúsculas)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes: SHELL-11 (renderiza a imagem do símbolo, o texto "NinBI" e o "BI" em elemento com a classe do token `accent-text`, nos dois temas), SHELL-12 (`index.html` tem `<link rel="icon" ... href="/favicon.png">` e o arquivo existe em `public/`), SHELL-13 (nenhum arquivo de `apps/web/src` nem `index.html` contém "BUSINESS INTELLIGENCE", sem diferenciar maiúsculas)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
