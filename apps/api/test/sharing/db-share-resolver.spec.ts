@@ -89,6 +89,51 @@ describe('DbShareResolver', () => {
     expect(await t.resolver.accessFor(t.user.id, foreignTeam.id)).toBeNull()
   })
 
+  it('ACL-01 permissão é a mais alta entre direto, equipes e todos: canais combinados no mesmo dashboard', async () => {
+    const t = await setup()
+    const everyoneViewTeamEdit = await t.dashboard(
+      'Todos ver e equipe editar',
+      0,
+    )
+    const everyoneEditUserView = await t.dashboard(
+      'Todos editar e usuário ver',
+      1,
+    )
+    const team = await createTeam(t.db, { memberIds: [t.user.id] })
+    const base = { createdBy: t.owner.id }
+    await createShare(t.db, {
+      ...base,
+      dashboardId: everyoneViewTeamEdit.id,
+      recipient: { type: 'EVERYONE' },
+      permission: 'view',
+    })
+    await createShare(t.db, {
+      ...base,
+      dashboardId: everyoneViewTeamEdit.id,
+      recipient: { type: 'TEAM', teamId: team.id },
+      permission: 'edit',
+    })
+    await createShare(t.db, {
+      ...base,
+      dashboardId: everyoneEditUserView.id,
+      recipient: { type: 'EVERYONE' },
+      permission: 'edit',
+    })
+    await createShare(t.db, {
+      ...base,
+      dashboardId: everyoneEditUserView.id,
+      recipient: { type: 'USER', userId: t.user.id },
+      permission: 'view',
+    })
+
+    expect(await t.resolver.accessFor(t.user.id, everyoneViewTeamEdit.id)).toBe(
+      'edit',
+    )
+    expect(await t.resolver.accessFor(t.user.id, everyoneEditUserView.id)).toBe(
+      'edit',
+    )
+  })
+
   it('ACL-14 Pode ver direto e Pode editar pela equipe dá editar', async () => {
     const t = await setup()
     const dashboard = await t.dashboard('Painel', 0)
