@@ -402,8 +402,8 @@ T15 → T16
 
 **Done when**:
 
-- [ ] Testes: `VIZ-16 widget novo nasce como Tabela` (`addWidget` dá `visualization: 'TABLE'` e `config: {}`), `updateWidget` com `BAR` e o mapeamento leva os dois ao `toSavePayload`, que passa no `dashboardSaveSchema`, `VIZ-15 Salvar envia a visualização e o mapeamento de cada widget` (dashboard com um widget `BAR` e um `MAP`: entrar em edição, mudar o nome e clicar em "Salvar" envia um `PUT` com os dois widgets e seus `visualization` e `config` intactos)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes: `VIZ-16 widget novo nasce como Tabela` (`addWidget` dá `visualization: 'TABLE'` e `config: {}`), `updateWidget` com `BAR` e o mapeamento leva os dois ao `toSavePayload`, que passa no `dashboardSaveSchema`, `VIZ-15 Salvar envia a visualização e o mapeamento de cada widget` (dashboard com um widget `BAR` e um `MAP`: entrar em edição, mudar o nome e clicar em "Salvar" envia um `PUT` com os dois widgets e seus `visualization` e `config` intactos)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

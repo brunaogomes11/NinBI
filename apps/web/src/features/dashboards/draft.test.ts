@@ -100,6 +100,42 @@ describe('draft', () => {
     expect(draft.tabs[0]?.widgets[1]?.title).toBe('Vendas por loja')
   })
 
+  it('VIZ-16 widget novo nasce como Tabela', () => {
+    const draft = addWidget(fromDto(saved()), uuid(1), uuid(13))
+    expect(draft.tabs[0]?.widgets[2]).toMatchObject({
+      id: uuid(13),
+      visualization: 'TABLE',
+      config: {},
+    })
+  })
+
+  it('VIZ-15 updateWidget com BAR e o mapeamento leva os dois ao toSavePayload', () => {
+    const mapping = {
+      x: 'mes',
+      series: ['vendas', 'custo'],
+      stacked: true,
+      horizontal: false,
+    }
+    const draft = updateWidget(fromDto(saved()), uuid(1), uuid(11), {
+      visualization: 'BAR',
+      config: { mapping },
+    })
+    expect(draft.tabs[0]?.widgets[0]).toMatchObject({
+      visualization: 'BAR',
+      config: { mapping },
+    })
+    const payload = toSavePayload(draft)
+    expect(payload.tabs[0]?.widgets[0]).toMatchObject({
+      visualization: 'BAR',
+      config: { mapping },
+    })
+    expect(payload.tabs[0]?.widgets[1]).toMatchObject({
+      visualization: 'TABLE',
+      config: {},
+    })
+    expect(dashboardSaveSchema.safeParse(payload).success).toBe(true)
+  })
+
   it('WDG-09 removeWidget tira o widget da aba', () => {
     const draft = removeWidget(fromDto(saved()), uuid(1), uuid(11))
     expect(draft.tabs[0]?.widgets.map((widget) => widget.id)).toEqual([

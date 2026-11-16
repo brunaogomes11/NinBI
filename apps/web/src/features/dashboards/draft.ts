@@ -4,6 +4,7 @@ import {
   MESSAGES,
   type WidgetDto,
   type WidgetLayout,
+  type WidgetVisualization,
 } from '@ninbi/contracts'
 
 /** O dashboard como a pessoa o está editando, antes de salvar. */
@@ -38,7 +39,7 @@ export function toSavePayload(draft: DashboardDraft): DashboardSaveInput {
         id: widget.id,
         title: widget.title,
         cypher: widget.cypher,
-        visualization: widget.visualization as 'TABLE',
+        visualization: widget.visualization as WidgetVisualization,
         config: widget.config,
         layout: widget.layout,
       })),
@@ -121,7 +122,9 @@ export function updateWidget(
   draft: DashboardDraft,
   tabId: string,
   widgetId: string,
-  changes: Partial<Pick<WidgetDto, 'title' | 'cypher'>>,
+  changes: Partial<
+    Pick<WidgetDto, 'title' | 'cypher' | 'visualization' | 'config'>
+  >,
 ): DashboardDraft {
   return mapTab(draft, tabId, (widgets) =>
     widgets.map((widget) =>

@@ -6,6 +6,7 @@ import { connectionsHandler, makeConnection } from '@/test/fixtures/connections'
 import {
   makeDashboard,
   makeQueryResult,
+  makeWidget,
   sidebarHandler,
 } from '@/test/fixtures/dashboards'
 import {
@@ -148,6 +149,61 @@ describe('DashboardPage em edição', () => {
       screen.getByRole('heading', { name: 'Vendas 2026' }),
     ).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Salvar' })).toBeNull()
+  })
+
+  it('VIZ-15 Salvar envia a visualização e o mapeamento de cada widget', async () => {
+    const bar = {
+      x: 'loja',
+      series: ['total'],
+      stacked: false,
+      horizontal: true,
+    }
+    const map = { lat: 'lat', lon: 'lon', label: 'loja' }
+    const dashboard = saved({
+      tabs: [
+        {
+          id: 't-1',
+          name: 'Aba 1',
+          widgets: [
+            makeWidget({
+              id: 'w-1',
+              title: 'Barras',
+              visualization: 'BAR',
+              config: { mapping: bar },
+            }),
+            makeWidget({
+              id: 'w-2',
+              title: 'Mapa',
+              visualization: 'MAP',
+              config: { mapping: map },
+              layout: { x: 4, y: 0, w: 4, h: 4 },
+            }),
+          ],
+        },
+      ],
+    })
+    const puts: Record<string, unknown>[] = []
+    const { user } = open(
+      '/dashboards/d-1',
+      dashboard,
+      putHandler(puts, () => HttpResponse.json({ ...dashboard, version: 2 })),
+    )
+    await enterEdit(user)
+    await rename(user, 'Vendas 2026')
+
+    await user.click(screen.getByRole('button', { name: 'Salvar' }))
+
+    await waitFor(() => expect(puts).toHaveLength(1))
+    expect(puts[0]).toMatchObject({
+      tabs: [
+        {
+          widgets: [
+            { id: 'w-1', visualization: 'BAR', config: { mapping: bar } },
+            { id: 'w-2', visualization: 'MAP', config: { mapping: map } },
+          ],
+        },
+      ],
+    })
   })
 
   it('EDIT-03 falha ao salvar mantém a edição e mostra Não foi possível salvar', async () => {
