@@ -9,6 +9,9 @@ services:
       DATABASE_URL: postgres://ninbi:ninbi@postgres:5432/ninbi
       # Sem valor padrão: a chave protege as senhas das conexões. Veja .env.example.
       NINBI_ENCRYPTION_KEY: ${NINBI_ENCRYPTION_KEY:?Defina NINBI_ENCRYPTION_KEY}
+      # Servidor de tiles do mapa (precisa conter {z}, {x} e {y}) e a atribuição exibida.
+      NINBI_MAP_TILE_URL: ${NINBI_MAP_TILE_URL:-https://tile.openstreetmap.org/{z}/{x}/{y}.png}
+      NINBI_MAP_ATTRIBUTION: ${NINBI_MAP_ATTRIBUTION:-© OpenStreetMap}
     depends_on:
       postgres:
         condition: service_healthy

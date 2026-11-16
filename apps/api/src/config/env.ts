@@ -1,8 +1,22 @@
 import { z } from 'zod'
 
+export const DEFAULT_MAP_TILE_URL =
+  'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+
 const queryLimitsSchema = z.object({
   NINBI_QUERY_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
   NINBI_QUERY_MAX_ROWS: z.coerce.number().int().positive().default(5_000),
+})
+
+const mapConfigSchema = z.object({
+  NINBI_MAP_TILE_URL: z
+    .string()
+    .default(DEFAULT_MAP_TILE_URL)
+    .refine(
+      (url) => ['{z}', '{x}', '{y}'].every((token) => url.includes(token)),
+      'NINBI_MAP_TILE_URL deve conter {z}, {x} e {y}',
+    ),
+  NINBI_MAP_ATTRIBUTION: z.string().default('© OpenStreetMap'),
 })
 
 const envSchema = z.object({
@@ -15,6 +29,7 @@ const envSchema = z.object({
     .transform((value) => value === 'true'),
   WEB_DIST_DIR: z.string().min(1).optional(),
   ...queryLimitsSchema.shape,
+  ...mapConfigSchema.shape,
 })
 
 export type Env = z.infer<typeof envSchema>
@@ -50,5 +65,17 @@ export function loadQueryLimits(source: NodeJS.ProcessEnv = process.env): {
   return {
     timeoutMs: env.NINBI_QUERY_TIMEOUT_MS,
     maxRows: env.NINBI_QUERY_MAX_ROWS,
+  }
+}
+
+/** Endereço dos tiles e atribuição do mapa; lê só as duas variáveis, sem exigir o resto do ambiente. */
+export function loadMapConfig(source: NodeJS.ProcessEnv = process.env): {
+  tileUrl: string
+  attribution: string
+} {
+  const env = mapConfigSchema.parse(source)
+  return {
+    tileUrl: env.NINBI_MAP_TILE_URL,
+    attribution: env.NINBI_MAP_ATTRIBUTION,
   }
 }

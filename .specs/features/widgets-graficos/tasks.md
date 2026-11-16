@@ -155,8 +155,8 @@ T15 → T16
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/map-config/map-config.spec.ts`: `MAP-07 endereço dos tiles vem de NINBI_MAP_TILE_URL com OpenStreetMap por padrão` (sem as variáveis: `tileUrl` `https://tile.openstreetmap.org/{z}/{x}/{y}.png` e `attribution` `© OpenStreetMap`; com `NINBI_MAP_TILE_URL=https://tiles.exemplo/{z}/{x}/{y}.png` e outra atribuição, a rota devolve as duas), Visualizador logado recebe 200, sem sessão a rota responde 401, `loadEnv` com `NINBI_MAP_TILE_URL=https://tiles.exemplo/mapa.png` lança erro que cita a variável
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/map-config/map-config.spec.ts`: `MAP-07 endereço dos tiles vem de NINBI_MAP_TILE_URL com OpenStreetMap por padrão` (sem as variáveis: `tileUrl` `https://tile.openstreetmap.org/{z}/{x}/{y}.png` e `attribution` `© OpenStreetMap`; com `NINBI_MAP_TILE_URL=https://tiles.exemplo/{z}/{x}/{y}.png` e outra atribuição, a rota devolve as duas), Visualizador logado recebe 200, sem sessão a rota responde 401, `loadEnv` com `NINBI_MAP_TILE_URL=https://tiles.exemplo/mapa.png` lança erro que cita a variável
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build

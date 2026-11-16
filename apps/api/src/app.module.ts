@@ -7,6 +7,7 @@ import { DashboardAccessModule } from './dashboard-access/dashboard-access.modul
 import { DashboardsModule } from './dashboards/dashboards.module'
 import { DatabaseModule } from './database/database.module'
 import { HealthModule } from './health/health.module'
+import { MapConfigModule } from './map-config/map-config.module'
 import { Neo4jModule } from './neo4j/neo4j.module'
 import { QueriesModule } from './queries/queries.module'
 import { SchemaModule } from './schema/schema.module'
@@ -27,6 +28,7 @@ import { WebModule } from './web/web.module'
     DashboardsModule,
     DatabaseModule,
     HealthModule,
+    MapConfigModule,
     Neo4jModule,
     QueriesModule,
     SchemaModule,
