@@ -174,8 +174,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] `pnpm --filter @ninbi/contracts build` gera `dist/index.js`, `dist/index.cjs` e `dist/index.d.ts`
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] `pnpm --filter @ninbi/contracts build` gera `dist/index.js`, `dist/index.cjs` e `dist/index.d.ts`
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: none
 **Gate**: build
