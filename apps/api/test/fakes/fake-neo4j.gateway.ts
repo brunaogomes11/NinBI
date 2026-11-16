@@ -18,6 +18,7 @@ export interface FakeCall {
   cfg: Neo4jConnectionConfig
   cypher?: string
   params?: Record<string, unknown>
+  opts?: { timeoutMs: number; maxRows?: number }
 }
 
 /**
@@ -71,7 +72,13 @@ export class FakeNeo4jGateway implements Neo4jGateway {
     params: Record<string, unknown>,
     opts: { timeoutMs: number; maxRows?: number; signal?: AbortSignal },
   ): Promise<Neo4jReadResult> {
-    this.calls.push({ method: 'read', cfg, cypher, params })
+    this.calls.push({
+      method: 'read',
+      cfg,
+      cypher,
+      params,
+      opts: { timeoutMs: opts.timeoutMs, maxRows: opts.maxRows },
+    })
     const rule = [...this.rules]
       .reverse()
       .find(({ match }) =>

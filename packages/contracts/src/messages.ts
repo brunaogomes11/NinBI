@@ -156,6 +156,7 @@ export const MESSAGES = {
   filterOptionsTooMany: 'A lista pode ter até 1.000 opções',
   filterOptionsQueryRequired: 'Informe a consulta das opções',
   filterDefaultInvalid: 'Valor padrão inválido',
+  filterNotFound: 'Filtro não encontrado',
   filterOptionsFailed: 'Não foi possível carregar as opções',
   filterDateRangeInverted: 'A data inicial é maior que a final',
   filterNumberInvalid: 'Digite um número',

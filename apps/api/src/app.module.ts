@@ -7,6 +7,7 @@ import { CryptoModule } from './crypto/crypto.module'
 import { DashboardAccessModule } from './dashboard-access/dashboard-access.module'
 import { DashboardsModule } from './dashboards/dashboards.module'
 import { DatabaseModule } from './database/database.module'
+import { FiltersModule } from './filters/filters.module'
 import { HealthModule } from './health/health.module'
 import { LlmModule } from './llm/llm.module'
 import { MapConfigModule } from './map-config/map-config.module'
@@ -30,6 +31,7 @@ import { WebModule } from './web/web.module'
     DashboardAccessModule,
     DashboardsModule,
     DatabaseModule,
+    FiltersModule,
     HealthModule,
     LlmModule,
     MapConfigModule,
