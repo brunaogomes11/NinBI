@@ -1,5 +1,11 @@
-import type { QueryResultDto, SidebarDto } from '@ninbi/contracts'
-import { useQuery } from '@tanstack/react-query'
+import {
+  MESSAGES,
+  type QueryResultDto,
+  type SidebarDto,
+} from '@ninbi/contracts'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { toLayoutInput } from '@/features/sidebar/layout'
 import { apiFetch } from '@/lib/api'
 
 /** Executa o Cypher salvo de um widget, pelo id (quem só vê usa esta rota). */
@@ -34,5 +40,31 @@ export function useSidebar() {
   return useQuery({
     queryKey: SIDEBAR_QUERY_KEY,
     queryFn: () => apiFetch<SidebarDto>('/api/sidebar'),
+  })
+}
+
+/**
+ * Grava a organização da sidebar. Aplica a mudança na hora; se a gravação
+ * falha, devolve o layout anterior e avisa (SIDE-12).
+ */
+export function useSaveSidebar() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (layout: SidebarDto) =>
+      apiFetch<SidebarDto>('/api/sidebar', {
+        method: 'PUT',
+        body: toLayoutInput(layout),
+      }),
+    onMutate: async (layout) => {
+      await queryClient.cancelQueries({ queryKey: SIDEBAR_QUERY_KEY })
+      const previous = queryClient.getQueryData<SidebarDto>(SIDEBAR_QUERY_KEY)
+      queryClient.setQueryData(SIDEBAR_QUERY_KEY, layout)
+      return { previous }
+    },
+    onError: (_error, _layout, context) => {
+      queryClient.setQueryData(SIDEBAR_QUERY_KEY, context?.previous)
+      toast.error(MESSAGES.sidebarSaveFailed)
+    },
+    onSuccess: (saved) => queryClient.setQueryData(SIDEBAR_QUERY_KEY, saved),
   })
 }

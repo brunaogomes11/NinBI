@@ -455,9 +455,9 @@ T28
 
 **Done when**:
 
-- [ ] Testes de `layout.test.ts`: `SIDE-03 moveItem põe o item antes do alvo` (A, B, C: mover C antes de A dá C, A, B), `SIDE-09 removeGroup solta os dashboards na posição do grupo` (A, grupo [B, C], D vira A, B, C, D), grupo movido para dentro de grupo fica antes do grupo alvo
-- [ ] Testes com gesto (`fireEvent.dragStart`, `dragOver`, `drop`): `SIDE-03 arrastar um dashboard o mantém na posição em que foi solto` (a ordem na tela muda e o `PUT` leva a ordem nova), `SIDE-04 arrastar um dashboard para dentro de um grupo` (soltar sobre um dashboard do grupo o põe antes dele, dentro do grupo; soltar no cabeçalho põe no fim do grupo), `SIDE-05 arrastar um dashboard para fora de um grupo` (soltar sobre um item solto o põe solto antes dele), `SIDE-06 arrastar um grupo move o grupo com os dashboards`, `SIDE-12 falha ao gravar volta o item e mostra Não foi possível salvar a organização` (`PUT` com 500: a ordem anterior volta à tela e o toast aparece)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes de `layout.test.ts`: `SIDE-03 moveItem põe o item antes do alvo` (A, B, C: mover C antes de A dá C, A, B), `SIDE-09 removeGroup solta os dashboards na posição do grupo` (A, grupo [B, C], D vira A, B, C, D), grupo movido para dentro de grupo fica antes do grupo alvo
+- [x] Testes com gesto (`fireEvent.dragStart`, `dragOver`, `drop`): `SIDE-03 arrastar um dashboard o mantém na posição em que foi solto` (a ordem na tela muda e o `PUT` leva a ordem nova), `SIDE-04 arrastar um dashboard para dentro de um grupo` (soltar sobre um dashboard do grupo o põe antes dele, dentro do grupo; soltar no cabeçalho põe no fim do grupo), `SIDE-05 arrastar um dashboard para fora de um grupo` (soltar sobre um item solto o põe solto antes dele), `SIDE-06 arrastar um grupo move o grupo com os dashboards`, `SIDE-12 falha ao gravar volta o item e mostra Não foi possível salvar a organização` (`PUT` com 500: a ordem anterior volta à tela e o toast aparece)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
