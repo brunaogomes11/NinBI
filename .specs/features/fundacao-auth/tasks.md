@@ -747,8 +747,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: SHELL-04 (sem valor guardado, `<html>` tem `dark`; com `light` guardado, não tem; remontar o provider mantém a última escolha), SHELL-03 (`setTheme('light')` e depois `setTheme('dark')` devolve a classe `dark` e grava `dark`)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes: SHELL-04 (sem valor guardado, `<html>` tem `dark`; com `light` guardado, não tem; remontar o provider mantém a última escolha), SHELL-03 (`setTheme('light')` e depois `setTheme('dark')` devolve a classe `dark` e grava `dark`)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
