@@ -690,6 +690,22 @@
 - **Date**: 2026-11-16
 - **Status**: active
 
+### AD-131 (active)
+- **Decision**: `fieldErrors` da API continua indexado só pelo campo de topo do corpo (`issue.path[0]`, ex.: `fieldErrors.items`, `fieldErrors.tabs`), com a mensagem do primeiro erro daquele campo. O caminho completo (`items.0.name`) fica só nos testes do contrato.
+- **Reason**: Verificação de `dashboards-consultas` (F8): o web consome `fieldErrors` por campo de formulário e valida no cliente; mudar a chave quebraria o contrato atual de todas as telas. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Um 400 de lista aninhada não diz qual item falhou.
+- **Scope**: fundacao-auth, dashboards-consultas.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-132 (active)
+- **Decision**: O limite de 20.000 do Cypher (QRY-09, WDG-07) conta unidades UTF-16, como `String.length` e o `.max()` do zod; um emoji fora do BMP conta 2. O mesmo vale para os demais limites de caracteres dos contratos.
+- **Reason**: Verificação de `dashboards-consultas` (F11): validador e contrato usam a mesma contagem, então web e API nunca divergem. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Quem cola texto com muitos emojis atinge o limite um pouco antes.
+- **Scope**: dashboards-consultas.
+- **Date**: 2026-11-16
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:
