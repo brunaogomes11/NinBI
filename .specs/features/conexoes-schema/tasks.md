@@ -203,8 +203,8 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes: SCH-27 (`new Date(2024, 1, 5)` do driver vira `date('2024-02-05')`; `DateTime` vira `datetime('...')` com fuso; `Point` 4326 vira `point({srid: 4326, x: -46.63, y: -23.55})`; `Point` 3D tem `z`; lista `[1, 'a']` vira `[1, 'a']`; mapa `{nome: 'Ana', 'tem espaço': 1}` vira `{nome: 'Ana', `tem espaço`: 1}`; aninhados), SCH-04 (string de 100.000 caracteres sai inteira entre aspas), aspas e barras escapadas (`O'Brien` → `'O\'Brien'`), `Integer` acima de 2^53 sem perda, `escapeIdentifier('a`b')` → `` `a``b` ``
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: SCH-27 (`new Date(2024, 1, 5)` do driver vira `date('2024-02-05')`; `DateTime` vira `datetime('...')` com fuso; `Point` 4326 vira `point({srid: 4326, x: -46.63, y: -23.55})`; `Point` 3D tem `z`; lista `[1, 'a']` vira `[1, 'a']`; mapa `{nome: 'Ana', 'tem espaço': 1}` vira `{nome: 'Ana', `tem espaço`: 1}`; aninhados), SCH-04 (string de 100.000 caracteres sai inteira entre aspas), aspas e barras escapadas (`O'Brien` → `'O\'Brien'`), `Integer` acima de 2^53 sem perda, `escapeIdentifier('a`b')` → `` `a``b` ``
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
