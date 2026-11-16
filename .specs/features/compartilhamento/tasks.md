@@ -309,9 +309,9 @@ T16
 
 **Done when**:
 
-- [ ] Testes com gesto em `TeamsSection.test.tsx` (Admin abre "Configurações" › "Usuários"): `TEAM-01 seção Equipes mostra nome e número de membros na ordem da API`, `TEAM-02 sem equipes mostra Nenhuma equipe criada`, `TEAM-10 erro nas equipes mostra Não foi possível carregar as equipes e Tentar novamente recarrega` (500 e depois 200: clicar em "Tentar novamente" mostra a lista)
-- [ ] Testes de `UsersTab` de `fundacao-auth` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `TeamsSection.test.tsx` (Admin abre "Configurações" › "Usuários"): `TEAM-01 seção Equipes mostra nome e número de membros na ordem da API`, `TEAM-02 sem equipes mostra Nenhuma equipe criada`, `TEAM-10 erro nas equipes mostra Não foi possível carregar as equipes e Tentar novamente recarrega` (500 e depois 200: clicar em "Tentar novamente" mostra a lista)
+- [x] Testes de `UsersTab` de `fundacao-auth` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

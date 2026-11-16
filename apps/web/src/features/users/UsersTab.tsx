@@ -15,6 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { TopBarAction } from '@/features/shell/TopBar'
+import { TeamsSection } from '@/features/teams/TeamsSection'
 import { apiFetch } from '@/lib/api'
 import { NewUserDialog } from './NewUserDialog'
 import { USERS_QUERY_KEY } from './queryKeys'
@@ -108,6 +109,7 @@ export function UsersTab() {
           </Table>
         </Card>
       )}
+      <TeamsSection />
     </>
   )
 }
