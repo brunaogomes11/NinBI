@@ -541,8 +541,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: PWD-01 (204; login com a nova funciona e com a antiga não), PWD-02 (400 "Senha atual incorreta", senha inalterada), PWD-03 (400 com "A senha precisa ter ao menos 8 caracteres" no campo)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: PWD-01 (204; login com a nova funciona e com a antiga não), PWD-02 (400 "Senha atual incorreta", senha inalterada), PWD-03 (400 com "A senha precisa ter ao menos 8 caracteres" no campo)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
@@ -1298,8 +1298,8 @@ Proof: run web | ✓ PWD-03 nova senha curta mostra a mensagem e não envia
 
 The feature's live state, written as it happens - a compaction gives no warning.
 
-**Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, haiku) - returned (a677f94); `validate_tasks.py --execute` exit 0 após o lote 1. Lote 2 (T8-T14, sonnet) - em andamento. O `**Build**` não existe antes da T1 (repo vazio): o orquestrador executa o lote 1 de scaffolding antes de `validate_tasks.py --execute`, que roda ao fim do lote 1.
+**Settled mid-build:** 2026-11-16 - o teste FND-05 (T12) exigia que nenhuma linha de log contivesse a palavra "password", capturando inclusive os logs de inicialização do Nest; isso contradiz o próprio spec, que exige as rotas `/api/auth/password` e `/api/auth/initial-password` e cujo FND-05 trata só das linhas de requisição. Decisão do orquestrador sob a delegação do usuário ("Pode fazer todas features desse jeito, sem nem me perguntar."): o teste passa a examinar só as linhas de requisição e a afirmar que nelas não aparecem o VALOR da senha enviada, o corpo nem o valor do cookie (o caminho pode conter a palavra "password"). A asserção não fica mais fraca quanto ao que o FND-05 exige.
+**Dispatched:** lote 1 (T1-T7, haiku) - returned (a677f94); `validate_tasks.py --execute` exit 0 após o lote 1. Lote 2 (T8-T14, sonnet) - returned (477693b). Lote 3 (T15-T21, sonnet) - parcial até T19 (4cfdb11), retomado para T20-T21. O `**Build**` não existe antes da T1 (repo vazio): o orquestrador executa o lote 1 de scaffolding antes de `validate_tasks.py --execute`, que roda ao fim do lote 1.
 **Walked:** dispensado por AD-023
 
 ---

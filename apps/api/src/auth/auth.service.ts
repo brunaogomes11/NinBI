@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { MESSAGES, type SessionUserDto } from '@ninbi/contracts'
-import { sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { AppError } from '../common/app-error'
 import { type AppDatabase, DB } from '../database/database.module'
 import { users } from '../database/schema'
@@ -58,6 +58,34 @@ export class AuthService {
         mustChangePassword: user.mustChangePassword,
       },
     }
+  }
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
+    const [user] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+    if (
+      !user ||
+      !(await this.hasher.verify(currentPassword, user.passwordHash))
+    ) {
+      throw new AppError(
+        400,
+        'CURRENT_PASSWORD_INCORRECT',
+        MESSAGES.currentPasswordIncorrect,
+      )
+    }
+    await this.db
+      .update(users)
+      .set({
+        passwordHash: await this.hasher.hash(newPassword),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
   }
 
   private getDummyHash(): Promise<string> {

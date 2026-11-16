@@ -9,6 +9,8 @@ import {
   Res,
 } from '@nestjs/common'
 import {
+  type ChangePasswordInput,
+  changePasswordSchema,
   type LoginInput,
   loginSchema,
   type SessionUserDto,
@@ -52,6 +54,20 @@ export class AuthController {
     const token = readSessionToken(req)
     if (token) await this.sessions.revoke(token)
     clearSessionCookie(res)
+  }
+
+  @Post('password')
+  @HttpCode(204)
+  async changePassword(
+    @CurrentUser() user: SessionUser,
+    @Body(new ZodValidationPipe(changePasswordSchema))
+    body: ChangePasswordInput,
+  ): Promise<void> {
+    await this.auth.changePassword(
+      user.id,
+      body.currentPassword,
+      body.newPassword,
+    )
   }
 
   @Get('me')

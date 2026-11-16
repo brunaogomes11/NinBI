@@ -28,8 +28,9 @@ describe('log de requisições', () => {
     expect(requestLines).toHaveLength(1)
     expect(requestLines[0]).toMatch(/^POST \/api\/health \d+ \d+ms$/)
     expect(requestLines[0]?.split(' ')[2]).toBe(String(response.status))
-    const everything = lines.join('\n')
-    for (const secret of ['segredo123', 'xyz', 'token=abc', 'password']) {
+    // O caminho pode conter "password"; o que não pode aparecer é o valor, o corpo ou o cookie.
+    const everything = lines.join(' | ')
+    for (const secret of ['segredo123', 'xyz', 'token=abc', '{"password"']) {
       expect(everything).not.toContain(secret)
     }
   })
