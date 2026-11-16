@@ -620,7 +620,7 @@ Proof: run api | ✓ SHARE-18 apagar o dashboard apaga os compartilhamentos dele
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, sonnet) sobre 7e736fa - em andamento.
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre 7e736fa - returned (882ad0f). Lotes 2+3 (T8-T16, sonnet) - returned (ff231b6). Verifier (haiku) sobre ff231b6 - returned: FAIL, 2 findings fechados (2ae867e, 8e5d9f0). Round 2: 80 pass / 0 fail em cab211a; `validate_verification.py` exit 0. Feature encerrada.
 **Walked:** dispensado por AD-023
 
 ---
