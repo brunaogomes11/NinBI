@@ -21,17 +21,29 @@ export function formatDateTime(iso: string): string {
 }
 
 const NUMBER = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 })
-const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})/
+const ISO_DATE =
+  /^(\d{4})-(\d{2})-(\d{2})(?:T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})?(?:\[[^\]]*\])?)?$/
 
 /** `1234.56` vira `1.234,56`: até duas casas decimais. */
 export function formatNumber(n: number): string {
-  return NUMBER.format(n)
+  const text = NUMBER.format(n)
+  return /^-0(,0+)?$/.test(text) ? text.slice(1) : text
 }
 
-/** Texto que começa com `AAAA-MM-DD` vira `DD/MM/AAAA`, sem conversão de fuso. */
+/**
+ * Texto que é por inteiro uma data `AAAA-MM-DD` (com hora ISO opcional) e uma
+ * data válida vira `DD/MM/AAAA`, sem conversão de fuso; o resto fica como veio.
+ */
 export function formatDate(text: string): string {
   const match = ISO_DATE.exec(text)
-  return match ? `${match[3]}/${match[2]}/${match[1]}` : text
+  if (!match) return text
+  const [, year, month, day] = match
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)))
+  const valid =
+    date.getUTCFullYear() === Number(year) &&
+    date.getUTCMonth() === Number(month) - 1 &&
+    date.getUTCDate() === Number(day)
+  return valid ? `${day}/${month}/${year}` : text
 }
 
 export function formatValue(value: ResultValue): string {
