@@ -215,8 +215,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] `pnpm --filter @ninbi/web build` gera `apps/web/dist/index.html`
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] `pnpm --filter @ninbi/web build` gera `apps/web/dist/index.html`
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: none
 **Gate**: build
