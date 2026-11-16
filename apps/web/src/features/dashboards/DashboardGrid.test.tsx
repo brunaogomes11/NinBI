@@ -177,10 +177,10 @@ describe('DashboardGrid', () => {
     await user.click(screen.getByRole('button', { name: 'Novo widget' }))
 
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', { name: 'Novo widget' }),
-    ).toBeInTheDocument()
     await user.keyboard('{Escape}')
+    expect(
+      await screen.findByRole('heading', { name: 'Novo widget' }),
+    ).toBeInTheDocument()
     const layouts = await savedLayouts(user, puts)
     const created = Object.entries(layouts).find(
       ([id]) => id !== 'w-a' && id !== 'w-b',

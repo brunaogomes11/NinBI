@@ -33,6 +33,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useConnections } from '@/features/connections/api'
 import { TopBarAction } from '@/features/shell/TopBar'
 import { widgetResultKey } from '@/features/widgets/useWidgetResult'
+import { WidgetEditorDialog } from '@/features/widgets/WidgetEditorDialog'
 import { ApiError } from '@/lib/api'
 import { useDashboard } from './api'
 import { DashboardGrid } from './DashboardGrid'
@@ -47,6 +48,7 @@ import {
   setConnection,
   setLayout,
   setName,
+  updateWidget,
 } from './draft'
 import { useDashboardEditor } from './useDashboardEditor'
 
@@ -148,6 +150,9 @@ function DashboardView({
   const shownTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0]
   const edit = draft ? { connectionId: draft.connectionId } : undefined
   const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null)
+  const editingWidget = shownTab?.widgets.find(
+    (widget) => widget.id === editingWidgetId,
+  )
 
   function refresh() {
     for (const widget of shownTab?.widgets ?? []) {
@@ -285,8 +290,19 @@ function DashboardView({
                 : undefined
             }
           />
-          {editingWidgetId && (
-            <div role="dialog" aria-label="Editor do widget" />
+          {editingWidget && draft && (
+            <WidgetEditorDialog
+              key={editingWidget.id}
+              dashboardId={dashboard.id}
+              connectionId={draft.connectionId}
+              widget={editingWidget}
+              onApply={(changes) =>
+                editor.change((current) =>
+                  updateWidget(current, shownTab.id, editingWidget.id, changes),
+                )
+              }
+              onClose={() => setEditingWidgetId(null)}
+            />
           )}
         </>
       )}

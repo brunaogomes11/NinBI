@@ -136,3 +136,29 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+
+/* Realce de sintaxe do editor de Cypher: as cores vêm das variáveis do tema. */
+.cypher-editor .token.keyword {
+  color: var(--chart-2);
+  font-weight: 600;
+}
+.cypher-editor .token.string {
+  color: var(--chart-5);
+}
+.cypher-editor .token.number,
+.cypher-editor .token.boolean {
+  color: var(--chart-3);
+}
+.cypher-editor .token.variable,
+.cypher-editor .token.class-name,
+.cypher-editor .token.property {
+  color: var(--accent-text);
+}
+.cypher-editor .token.function {
+  color: var(--chart-4);
+}
+.cypher-editor .token.comment,
+.cypher-editor .token.operator,
+.cypher-editor .token.punctuation {
+  color: var(--muted-foreground);
+}
