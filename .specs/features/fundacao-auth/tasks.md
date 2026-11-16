@@ -338,8 +338,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] `drizzle-kit generate` não gera diferença depois do commit
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] `drizzle-kit generate` não gera diferença depois do commit
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
