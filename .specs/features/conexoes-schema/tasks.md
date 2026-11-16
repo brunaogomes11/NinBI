@@ -433,8 +433,8 @@ T15 → T16 → T17
 
 **Done when**:
 
-- [ ] Testes com gesto: SCH-22 (Admin desliga o controle de `email`; o `PUT` leva `{ kind: 'LABEL', element: 'Cliente', property: 'email', sendExample: false }` e a linha mostra "exemplo não enviado"), SCH-24 (para Editor o controle está desabilitado; para Admin, habilitado)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: SCH-22 (Admin desliga o controle de `email`; o `PUT` leva `{ kind: 'LABEL', element: 'Cliente', property: 'email', sendExample: false }` e a linha mostra "exemplo não enviado"), SCH-24 (para Editor o controle está desabilitado; para Admin, habilitado)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

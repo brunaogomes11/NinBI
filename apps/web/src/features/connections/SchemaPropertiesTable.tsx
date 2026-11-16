@@ -60,6 +60,11 @@ export function SchemaPropertiesTable({
                     title={property.example}
                     className="max-w-xs truncate font-mono"
                   >
+                    {!property.sendExample && (
+                      <span className="mr-2 font-sans text-muted-foreground">
+                        exemplo não enviado
+                      </span>
+                    )}
                     {property.example}
                   </TableCell>
                 )}
