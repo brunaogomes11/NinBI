@@ -1,3 +1,4 @@
+import { MESSAGES } from '@ninbi/contracts'
 import { screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http, type RequestHandler } from 'msw'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -102,11 +103,18 @@ describe('Novo widget com a IA', () => {
     ).toBeTruthy()
     withAi.unmount()
 
+    // AIQ-16: sem provedor o campo continua lá, desabilitado, com a mensagem.
     const withoutAi = open(false)
     await statusLoaded(withoutAi)
     const dialogWithout = await newWidget(withoutAi.user)
     expect(within(dialogWithout).getByLabelText('Cypher')).toBeInTheDocument()
-    expect(within(dialogWithout).queryByLabelText(FIELD)).toBeNull()
+    expect(within(dialogWithout).getByLabelText(FIELD)).toBeDisabled()
+    expect(
+      within(dialogWithout).getByText(MESSAGES.llmNotConfigured),
+    ).toBeInTheDocument()
+    expect(
+      within(dialogWithout).getByRole('button', { name: 'Enviar' }),
+    ).toBeDisabled()
   })
 
   it('AIQ-02 enviar a descrição com done fecha o diálogo e o widget mostra o título gerado', async () => {

@@ -245,6 +245,7 @@ export function WidgetEditorDialog({
                 running={running}
                 attempt={ai.state.running?.attempt ?? 1}
                 error={aiRequestError}
+                unavailable={!ai.available}
               />
             )}
             <CypherEditor value={cypher} onChange={setCypher} />

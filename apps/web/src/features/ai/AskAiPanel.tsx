@@ -12,6 +12,8 @@ export interface AskAiPanelProps {
   /** Tentativa em andamento (1 a 4), enquanto `running`. */
   attempt: number
   error: string | null
+  /** Sem provedor de IA: o campo fica desabilitado e a mensagem aparece (AIQ-16). */
+  unavailable?: boolean
 }
 
 /** Pedido em texto livre ao LLM: envio, andamento e erro (AIQ-12, AIQ-14, AIQ-15). */
@@ -23,9 +25,11 @@ export function AskAiPanel({
   running,
   attempt,
   error,
+  unavailable = false,
 }: AskAiPanelProps) {
   const tooLong = value.trim().length > AI_PROMPT_MAX
-  const canSubmit = value.trim().length > 0 && !tooLong && !running
+  const canSubmit =
+    value.trim().length > 0 && !tooLong && !running && !unavailable
 
   return (
     <div className="flex flex-col gap-2">
@@ -33,7 +37,7 @@ export function AskAiPanel({
         aria-label={MESSAGES.aiPromptPlaceholder}
         placeholder={MESSAGES.aiPromptPlaceholder}
         value={value}
-        disabled={running}
+        disabled={running || unavailable}
         aria-invalid={tooLong}
         onChange={(event) => onChange(event.target.value)}
         rows={3}
@@ -46,6 +50,11 @@ export function AskAiPanel({
           <span role="status">{MESSAGES.aiGenerating(attempt)}</span>
         ) : null}
       </div>
+      {unavailable ? (
+        <p className="text-sm text-muted-foreground">
+          {MESSAGES.llmNotConfigured}
+        </p>
+      ) : null}
       {tooLong ? (
         <p role="alert" className="text-sm text-destructive">
           {MESSAGES.aiPromptTooLong}

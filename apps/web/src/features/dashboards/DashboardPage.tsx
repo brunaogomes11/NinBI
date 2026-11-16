@@ -375,11 +375,9 @@ function DashboardView({
                 )
               }
               ai={
-                canUseAi &&
-                aiStatus.data?.configured === true &&
-                newWidgetId === editingWidget.id
+                canUseAi && newWidgetId === editingWidget.id
                   ? {
-                      available: true,
+                      available: aiStatus.data?.configured === true,
                       state: ai.stateOf(editingWidget.id),
                       onStart: (prompt) => {
                         setAiFailure(null)
