@@ -28,13 +28,15 @@ export interface TestAppOptions {
   db?: AppDatabase
   /** Controllers só de teste (rotas de sonda) somados ao AppModule. */
   controllers?: Type[]
+  /** Troca providers do app, por exemplo os prazos injetáveis, por valores curtos de teste. */
+  overrides?: { provide: unknown; useValue: unknown }[]
 }
 
 export async function createTestApp(options: TestAppOptions = {}) {
   const { db, client } = await createTestDb()
   const clock = new FakeClock()
   const neo4j = new FakeNeo4jGateway()
-  const moduleRef = await Test.createTestingModule({
+  let builder = Test.createTestingModule({
     imports: [AppModule],
     controllers: options.controllers,
   })
@@ -47,7 +49,10 @@ export async function createTestApp(options: TestAppOptions = {}) {
     // No módulo de teste o adaptador HTTP só existe depois do compile: sem isto o serve-static cai no loader nulo.
     .overrideProvider(AbstractLoader)
     .useClass(ExpressLoader)
-    .compile()
+  for (const { provide, useValue } of options.overrides ?? []) {
+    builder = builder.overrideProvider(provide).useValue(useValue)
+  }
+  const moduleRef = await builder.compile()
   const app: INestApplication = configureApp(moduleRef.createNestApplication())
   await app.init()
   return {

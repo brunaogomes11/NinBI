@@ -5,6 +5,7 @@ import { CryptoModule } from './crypto/crypto.module'
 import { DatabaseModule } from './database/database.module'
 import { HealthModule } from './health/health.module'
 import { Neo4jModule } from './neo4j/neo4j.module'
+import { SchemaModule } from './schema/schema.module'
 import { SetupModule } from './setup/setup.module'
 import { UsersModule } from './users/users.module'
 import { WebModule } from './web/web.module'
@@ -17,6 +18,7 @@ import { WebModule } from './web/web.module'
     DatabaseModule,
     HealthModule,
     Neo4jModule,
+    SchemaModule,
     SetupModule,
     UsersModule,
     WebModule,
