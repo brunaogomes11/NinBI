@@ -1,0 +1,73 @@
+name: ninbi
+
+services:
+  app:
+    build: .
+    ports:
+      - "${NINBI_PORT:-8080}:8080"
+    environment:
+      DATABASE_URL: postgres://ninbi:ninbi@postgres:5432/ninbi
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ninbi
+      POSTGRES_PASSWORD: ninbi
+      POSTGRES_DB: ninbi
+    volumes:
+      - ninbi-pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ninbi -d ninbi"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      NEO4J_AUTH: neo4j/ninbi-neo4j-password
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - ninbi-neo4j:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "cypher-shell -u neo4j -p ninbi-neo4j-password 'RETURN 1'",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
+  # Carrega o dataset de exemplo uma vez; o seed confere o marcador e não repete.
+  # A imagem leva o arquivo por COPY (sem bind mount), sobre a mesma base do neo4j.
+  neo4j-seed:
+    build:
+      context: infra/neo4j
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    restart: "no"
+    command:
+      - cypher-shell
+      - -a
+      - bolt://neo4j:7687
+      - -u
+      - neo4j
+      - -p
+      - ninbi-neo4j-password
+      - -f
+      - /seed/seed.cypher
+
+volumes:
+  ninbi-pg:
+  ninbi-neo4j:

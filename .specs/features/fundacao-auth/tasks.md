@@ -684,9 +684,9 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] `pnpm smoke` imprime `ok FND-01 docker compose up responde a tela de login em http://localhost:8080` (HTML com `<div id="root">` e título NinBI), `ok FND-03 api health responde 200 com postgres up` e `ok FND-02 neo4j carregou o dataset de exemplo no primeiro start` (12 lojas com latitude)
-- [ ] Depois do smoke, `docker image ls` não tem imagens soltas (`<none>`) e os volumes `ninbi-smoke_*` não existem
-- [ ] Gate check passes: `pnpm test && pnpm smoke`
+- [x] `pnpm smoke` imprime `ok FND-01 docker compose up responde a tela de login em http://localhost:8080` (HTML com `<div id="root">` e título NinBI), `ok FND-03 api health responde 200 com postgres up` e `ok FND-02 neo4j carregou o dataset de exemplo no primeiro start` (12 lojas com latitude)
+- [x] Depois do smoke, `docker image ls` não tem imagens soltas (`<none>`) e os volumes `ninbi-smoke_*` não existem
+- [x] Gate check passes: `pnpm test && pnpm smoke`
 
 **Tests**: e2e
 **Gate**: full

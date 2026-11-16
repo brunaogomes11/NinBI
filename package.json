@@ -16,6 +16,7 @@
     "brand:symbol": "node scripts/brand/crop-symbol.mjs",
     "infra:up": "node scripts/docker.mjs up",
     "infra:down": "node scripts/docker.mjs down",
+    "smoke": "node scripts/smoke-compose.mjs",
     "test": "pnpm -r test"
   },
   "devDependencies": {
