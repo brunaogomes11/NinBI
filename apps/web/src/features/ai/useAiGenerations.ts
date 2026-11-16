@@ -24,7 +24,8 @@ export interface AiFailure {
 
 export interface UseAiGenerationsOptions {
   dashboardId: string
-  draft: DashboardDraft
+  /** `null` fora do modo de edição. */
+  draft: DashboardDraft | null
   setDraft: (change: (draft: DashboardDraft) => DashboardDraft) => void
   editing: boolean
   /** A 4ª tentativa falhou: o editor abre com o último Cypher e a mensagem (FIX-06). */
@@ -32,10 +33,10 @@ export interface UseAiGenerationsOptions {
 }
 
 function findWidget(
-  draft: DashboardDraft,
+  draft: DashboardDraft | null,
   widgetId: string,
 ): { tabId: string; widget: WidgetDto } | null {
-  for (const tab of draft.tabs) {
+  for (const tab of draft?.tabs ?? []) {
     const widget = tab.widgets.find((candidate) => candidate.id === widgetId)
     if (widget) return { tabId: tab.id, widget }
   }
@@ -70,7 +71,7 @@ export function useAiGenerations(options: UseAiGenerationsOptions) {
     (widgetId: string, event: Extract<AiWidgetEvent, { type: 'done' }>) => {
       const { dashboardId, draft, setDraft } = latest.current
       const found = findWidget(draft, widgetId)
-      if (!found) return // widget removido durante a geração (AIQ-29)
+      if (!draft || !found) return // widget removido durante a geração (AIQ-29)
       const resolved = resolveAiMapping(
         event.visualization,
         event.mapping,
@@ -96,7 +97,7 @@ export function useAiGenerations(options: UseAiGenerationsOptions) {
     async (widgetId: string, prompt: string) => {
       const { dashboardId, draft } = latest.current
       const found = findWidget(draft, widgetId)
-      if (!found || controllers.current.has(widgetId)) return
+      if (!draft || !found || controllers.current.has(widgetId)) return
       const controller = new AbortController()
       controllers.current.set(widgetId, controller)
       setState(widgetId, { running: { attempt: 1 } })

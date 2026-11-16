@@ -1,4 +1,4 @@
-import { type DashboardDto, MESSAGES } from '@ninbi/contracts'
+import { can, type DashboardDto, MESSAGES } from '@ninbi/contracts'
 import { useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, RefreshCw, Share2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -30,6 +30,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useAiStatus } from '@/features/ai/api'
+import { useAiGenerations } from '@/features/ai/useAiGenerations'
 import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
 import { ShareDialog } from '@/features/sharing/ShareDialog'
@@ -158,6 +160,23 @@ function DashboardView({
   const editingWidget = shownTab?.widgets.find(
     (widget) => widget.id === editingWidgetId,
   )
+  const [aiFailure, setAiFailure] = useState<{
+    widgetId: string
+    cypher: string | null
+    message: string
+  } | null>(null)
+  const canUseAi = sessionUser ? can(sessionUser.role, 'ai.use') : false
+  const aiStatus = useAiStatus(draft !== null && canUseAi)
+  const ai = useAiGenerations({
+    dashboardId: dashboard.id,
+    draft,
+    setDraft: editor.change,
+    editing: draft !== null,
+    onFailed: (widgetId, failure) => {
+      setAiFailure({ widgetId, ...failure })
+      setEditingWidgetId(widgetId)
+    },
+  })
 
   function refresh() {
     for (const widget of shownTab?.widgets ?? []) {
@@ -308,6 +327,15 @@ function DashboardView({
                         setLayout(current, shownTab.id, layouts),
                       ),
                     onEditWidget: setEditingWidgetId,
+                    ai: canUseAi
+                      ? {
+                          available: aiStatus.data?.configured === true,
+                          stateOf: ai.stateOf,
+                          start: (widgetId, prompt) =>
+                            void ai.start(widgetId, prompt),
+                          cancel: ai.cancel,
+                        }
+                      : undefined,
                     onRemoveWidget: (widgetId) =>
                       editor.change((current) =>
                         removeWidget(current, shownTab.id, widgetId),
@@ -329,12 +357,25 @@ function DashboardView({
               dashboardId={dashboard.id}
               connectionId={draft.connectionId}
               widget={editingWidget}
+              initialCypher={
+                aiFailure?.widgetId === editingWidget.id
+                  ? (aiFailure.cypher ?? undefined)
+                  : undefined
+              }
+              initialError={
+                aiFailure?.widgetId === editingWidget.id
+                  ? aiFailure.message
+                  : undefined
+              }
               onApply={(changes) =>
                 editor.change((current) =>
                   updateWidget(current, shownTab.id, editingWidget.id, changes),
                 )
               }
-              onClose={() => setEditingWidgetId(null)}
+              onClose={() => {
+                setEditingWidgetId(null)
+                setAiFailure(null)
+              }}
             />
           )}
         </>

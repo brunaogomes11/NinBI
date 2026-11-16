@@ -111,12 +111,18 @@ export function WidgetEditorDialog({
   dashboardId,
   connectionId,
   widget,
+  initialCypher,
+  initialError,
   onApply,
   onClose,
 }: {
   dashboardId: string
   connectionId: string
   widget: WidgetDto
+  /** Último Cypher gerado pela IA que falhou (FIX-06): abre no editor no lugar do salvo. */
+  initialCypher?: string
+  /** Mensagem do último erro da IA, mostrada na prévia até a próxima execução (FIX-06). */
+  initialError?: string
   onApply: (changes: {
     title: string
     cypher: string | null
@@ -125,7 +131,7 @@ export function WidgetEditorDialog({
   }) => void
   onClose: () => void
 }) {
-  const [cypher, setCypher] = useState(widget.cypher ?? '')
+  const [cypher, setCypher] = useState(initialCypher ?? widget.cypher ?? '')
   const [visualization, setVisualization] = useState(
     initialVisualization(widget),
   )
@@ -133,13 +139,17 @@ export function WidgetEditorDialog({
     initialMapping(widget, initialVisualization(widget)),
   )
   const [result, setResult] = useState<QueryResultDto | null>(null)
+  const [aiError, setAiError] = useState(initialError ?? null)
   const [mappingError, setMappingError] = useState<MappingError | null>(null)
   const form = useForm<TitleInput>({
     resolver: zodResolver(titleSchema),
     defaultValues: { title: widget.title },
   })
   const run = useMutation({
-    mutationFn: () => runQuery(dashboardId, { cypher, connectionId }),
+    mutationFn: () => {
+      setAiError(null)
+      return runQuery(dashboardId, { cypher, connectionId })
+    },
     onSuccess: (data) => {
       setResult(data)
       // Visualização escolhida antes de executar: agora há colunas para sugerir.
@@ -215,8 +225,8 @@ export function WidgetEditorDialog({
             <section aria-label="Prévia" className="flex min-w-0 flex-col">
               {!run.isPending && (
                 <Preview
-                  result={run.error ? undefined : result}
-                  error={run.error}
+                  result={run.error || aiError ? undefined : result}
+                  error={run.error ?? (aiError ? new Error(aiError) : null)}
                   visualization={visualization}
                   mapping={mapping}
                 />

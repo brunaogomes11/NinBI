@@ -11,6 +11,7 @@ import ReactGridLayout, {
 } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
 import { Button } from '@/components/ui/button'
+import type { AiGenerationState } from '@/features/ai/useAiGenerations'
 import type { WidgetEditSource } from '@/features/widgets/useWidgetResult'
 import { DRAG_HANDLE_CLASS, WidgetCard } from '@/features/widgets/WidgetCard'
 import { useContainerWidth } from './useContainerWidth'
@@ -34,6 +35,16 @@ export interface GridEdit extends WidgetEditSource {
   onAddWidget: () => void
   onEditWidget: (widgetId: string) => void
   onRemoveWidget: (widgetId: string) => void
+  /** Presente só para quem pode usar a IA (`ai.use`). */
+  ai?: GridAi
+}
+
+/** A IA dos widgets da grade: um estado e um pedido por widget. */
+export interface GridAi {
+  available: boolean
+  stateOf: (widgetId: string) => AiGenerationState
+  start: (widgetId: string, prompt: string) => void
+  cancel: (widgetId: string) => void
 }
 
 /** Os widgets de uma aba numa grade de 12 colunas; arrastar e redimensionar só em edição (GRID-04). */
@@ -103,6 +114,12 @@ export function DashboardGrid({
                     connectionId: edit.connectionId,
                     onEdit: () => edit.onEditWidget(widget.id),
                     onRemove: () => edit.onRemoveWidget(widget.id),
+                    ai: edit.ai && {
+                      available: edit.ai.available,
+                      state: edit.ai.stateOf(widget.id),
+                      onStart: (prompt) => edit.ai?.start(widget.id, prompt),
+                      onCancel: () => edit.ai?.cancel(widget.id),
+                    },
                   }
                 }
               />

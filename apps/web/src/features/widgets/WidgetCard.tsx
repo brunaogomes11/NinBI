@@ -1,6 +1,6 @@
 import { MESSAGES, type WidgetDto } from '@ninbi/contracts'
 import { MoreHorizontal } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
+import { AskAiPanel } from '@/features/ai/AskAiPanel'
+import type { AiGenerationState } from '@/features/ai/useAiGenerations'
 import { cn } from '@/lib/utils'
 import {
   hasWidgetQuery,
@@ -41,6 +43,17 @@ export interface WidgetCardProps {
 export interface WidgetCardEdit extends WidgetEditSource {
   onEdit?: () => void
   onRemove?: () => void
+  /** Presente só para quem pode usar a IA (`ai.use`): "Pedir à IA" no menu e o painel no card. */
+  ai?: WidgetAi
+}
+
+/** Os controles da IA de um widget. */
+export interface WidgetAi {
+  /** Há provedor de IA configurado (AIQ-16). */
+  available: boolean
+  state: AiGenerationState
+  onStart: (prompt: string) => void
+  onCancel: () => void
 }
 
 function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
@@ -93,7 +106,15 @@ function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
   )
 }
 
-function WidgetMenu({ title, edit }: { title: string; edit: WidgetCardEdit }) {
+function WidgetMenu({
+  title,
+  edit,
+  onAskAi,
+}: {
+  title: string
+  edit: WidgetCardEdit
+  onAskAi: () => void
+}) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   return (
     <>
@@ -113,6 +134,23 @@ function WidgetMenu({ title, edit }: { title: string; edit: WidgetCardEdit }) {
           <DropdownMenuItem onSelect={() => edit.onEdit?.()}>
             Editar widget
           </DropdownMenuItem>
+          {edit.ai && (
+            <DropdownMenuItem
+              disabled={
+                !edit.ai.available || edit.ai.state.running !== undefined
+              }
+              onSelect={onAskAi}
+            >
+              <span className="flex flex-col">
+                Pedir à IA
+                {!edit.ai.available && (
+                  <span className="text-muted-foreground text-xs">
+                    {MESSAGES.llmNotConfigured}
+                  </span>
+                )}
+              </span>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onSelect={() => setConfirmOpen(true)}>
             Remover widget
           </DropdownMenuItem>
@@ -135,7 +173,56 @@ function WidgetMenu({ title, edit }: { title: string; edit: WidgetCardEdit }) {
   )
 }
 
+/** O painel "Pedir à IA" dentro do card: abre pelo menu e fecha quando a geração acaba (AIQ-12). */
+function CardAi({
+  ai,
+  open,
+  onClose,
+}: {
+  ai: WidgetAi
+  open: boolean
+  onClose: () => void
+}) {
+  const [prompt, setPrompt] = useState('')
+  const running = ai.state.running !== undefined
+  const wasRunning = useRef(false)
+  const cancelled = useRef(false)
+  const error = ai.state.error?.message ?? null
+
+  useEffect(() => {
+    if (running) {
+      wasRunning.current = true
+      return
+    }
+    if (!wasRunning.current) return
+    wasRunning.current = false
+    if (!error && !cancelled.current) {
+      setPrompt('')
+      onClose()
+    }
+    cancelled.current = false
+  }, [running, error, onClose])
+
+  if (!open && !running && !error) return null
+  return (
+    <AskAiPanel
+      value={prompt}
+      onChange={setPrompt}
+      onSubmit={() => ai.onStart(prompt.trim())}
+      onCancel={() => {
+        cancelled.current = true
+        ai.onCancel()
+      }}
+      running={running}
+      attempt={ai.state.running?.attempt ?? 1}
+      error={error}
+    />
+  )
+}
+
 export function WidgetCard(props: WidgetCardProps) {
+  const [askOpen, setAskOpen] = useState(false)
+  const closeAsk = useCallback(() => setAskOpen(false), [])
   return (
     <div className="relative flex h-full min-h-0 flex-col gap-3 rounded-card bg-card p-4">
       <h3
@@ -148,8 +235,15 @@ export function WidgetCard(props: WidgetCardProps) {
       </h3>
       {props.edit && (
         <div className="absolute top-2 right-2">
-          <WidgetMenu title={props.widget.title} edit={props.edit} />
+          <WidgetMenu
+            title={props.widget.title}
+            edit={props.edit}
+            onAskAi={() => setAskOpen(true)}
+          />
         </div>
+      )}
+      {props.edit?.ai && (
+        <CardAi ai={props.edit.ai} open={askOpen} onClose={closeAsk} />
       )}
       <div className="flex min-h-0 flex-1 flex-col">
         <Body {...props} />
