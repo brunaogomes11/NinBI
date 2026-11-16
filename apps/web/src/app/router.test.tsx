@@ -109,6 +109,6 @@ describe('roteador e guardas', () => {
     })
 
     await waitFor(() => expect(currentUrl(router)).toBe('/definir-senha'))
-    expect(screen.getByText('Definir nova senha')).toBeInTheDocument()
+    expect(await screen.findByText('Definir nova senha')).toBeInTheDocument()
   })
 })

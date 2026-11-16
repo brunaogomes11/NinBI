@@ -7,6 +7,7 @@ import {
   RequireSetupDone,
   RequireSetupPending,
 } from '@/features/auth/guards'
+import { InitialPasswordPage } from '@/features/auth/InitialPasswordPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { SetupPage } from '@/features/auth/SetupPage'
 import { HomePage } from '@/features/home/HomePage'
@@ -36,7 +37,7 @@ export const appRoutes: RouteObject[] = [
         children: [
           {
             path: '/definir-senha',
-            element: <Placeholder name="Definir nova senha" />,
+            element: <InitialPasswordPage />,
           },
           {
             element: <RequirePasswordChanged />,

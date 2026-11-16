@@ -949,8 +949,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Teste com gesto: USR-06 (entrar com usuário de senha provisória leva a "Definir nova senha"; tentar abrir `/configuracoes/usuarios` volta para ela; definir a senha abre a página inicial)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste com gesto: USR-06 (entrar com usuário de senha provisória leva a "Definir nova senha"; tentar abrir `/configuracoes/usuarios` volta para ela; definir a senha abre a página inicial)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
