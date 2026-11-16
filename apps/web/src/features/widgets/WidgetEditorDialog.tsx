@@ -7,7 +7,7 @@ import {
   type WidgetDto,
 } from '@ninbi/contracts'
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
@@ -27,6 +27,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { AskAiPanel } from '@/features/ai/AskAiPanel'
 import { runQuery } from '@/features/dashboards/api'
 import { CypherEditor } from './CypherEditor'
 import {
@@ -37,6 +38,7 @@ import {
 } from './mapping/suggest'
 import { ResultTable } from './ResultTable'
 import { type MappingError, VisualizationPanel } from './VisualizationPanel'
+import type { WidgetAi } from './WidgetCard'
 import { WidgetVisualization } from './WidgetVisualization'
 
 const titleSchema = z.object({
@@ -113,6 +115,7 @@ export function WidgetEditorDialog({
   widget,
   initialCypher,
   initialError,
+  ai,
   onApply,
   onClose,
 }: {
@@ -123,6 +126,8 @@ export function WidgetEditorDialog({
   initialCypher?: string
   /** Mensagem do último erro da IA, mostrada na prévia até a próxima execução (FIX-06). */
   initialError?: string
+  /** Só no widget recém-criado por "Novo widget" com provedor configurado (AIQ-02). */
+  ai?: WidgetAi
   onApply: (changes: {
     title: string
     cypher: string | null
@@ -161,6 +166,31 @@ export function WidgetEditorDialog({
     },
   })
   const empty = cypher.trim() === ''
+  const [prompt, setPrompt] = useState('')
+  const running = ai?.state.running !== undefined
+  const aiRequestError = ai?.state.error?.message ?? null
+  const wasRunning = useRef(false)
+  const cancelled = useRef(false)
+
+  // A IA falhou na última tentativa: o editor mostra o último Cypher e a mensagem (FIX-06).
+  useEffect(() => {
+    if (initialCypher !== undefined) setCypher(initialCypher)
+    if (initialError !== undefined) setAiError(initialError)
+  }, [initialCypher, initialError])
+
+  // Geração concluída sem erro nem falha: o diálogo fecha com o widget atualizado (AIQ-02).
+  useEffect(() => {
+    if (running) {
+      wasRunning.current = true
+      return
+    }
+    if (!wasRunning.current) return
+    wasRunning.current = false
+    if (!aiRequestError && !cancelled.current && initialError === undefined) {
+      onClose()
+    }
+    cancelled.current = false
+  }, [running, aiRequestError, initialError, onClose])
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -200,6 +230,23 @@ export function WidgetEditorDialog({
                 </FormItem>
               )}
             />
+            {ai && (
+              <AskAiPanel
+                value={prompt}
+                onChange={setPrompt}
+                onSubmit={() => {
+                  setAiError(null)
+                  ai.onStart(prompt.trim())
+                }}
+                onCancel={() => {
+                  cancelled.current = true
+                  ai.onCancel()
+                }}
+                running={running}
+                attempt={ai.state.running?.attempt ?? 1}
+                error={aiRequestError}
+              />
+            )}
             <CypherEditor value={cypher} onChange={setCypher} />
             <div>
               <Button

@@ -165,6 +165,7 @@ function DashboardView({
     cypher: string | null
     message: string
   } | null>(null)
+  const [newWidgetId, setNewWidgetId] = useState<string | null>(null)
   const canUseAi = sessionUser ? can(sessionUser.role, 'ai.use') : false
   const aiStatus = useAiStatus(draft !== null && canUseAi)
   const ai = useAiGenerations({
@@ -346,6 +347,7 @@ function DashboardView({
                         addWidget(current, shownTab.id, id),
                       )
                       setEditingWidgetId(id)
+                      setNewWidgetId(id)
                     },
                   }
                 : undefined
@@ -372,8 +374,24 @@ function DashboardView({
                   updateWidget(current, shownTab.id, editingWidget.id, changes),
                 )
               }
+              ai={
+                canUseAi &&
+                aiStatus.data?.configured === true &&
+                newWidgetId === editingWidget.id
+                  ? {
+                      available: true,
+                      state: ai.stateOf(editingWidget.id),
+                      onStart: (prompt) => {
+                        setAiFailure(null)
+                        void ai.start(editingWidget.id, prompt)
+                      },
+                      onCancel: () => ai.cancel(editingWidget.id),
+                    }
+                  : undefined
+              }
               onClose={() => {
                 setEditingWidgetId(null)
+                setNewWidgetId(null)
                 setAiFailure(null)
               }}
             />
