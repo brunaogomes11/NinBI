@@ -604,8 +604,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: USR-07 (a sessão aberta do usuário passa a dar 401; login com a nova senha provisória funciona e exige troca), troca de papel pela rota (Admin muda um Editor para Visualizador; `GET /api/auth/me` da sessão aberta desse usuário já devolve `VIEWER`, e uma rota de teste com `dashboards.create` passa de 200 para 403)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: USR-07 (a sessão aberta do usuário passa a dar 401; login com a nova senha provisória funciona e exige troca), troca de papel pela rota (Admin muda um Editor para Visualizador; `GET /api/auth/me` da sessão aberta desse usuário já devolve `VIEWER`, e uma rota de teste com `dashboards.create` passa de 200 para 403)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

@@ -1,7 +1,20 @@
-import { Body, Controller, Get, HttpCode, Inject, Post } from '@nestjs/common'
 import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common'
+import {
+  type ChangeRoleInput,
+  changeRoleSchema,
   type NewUserInput,
   newUserSchema,
+  type ResetPasswordInput,
+  resetPasswordSchema,
   type UserDto,
 } from '@ninbi/contracts'
 import { RequirePermission } from '../auth/decorators'
@@ -24,5 +37,23 @@ export class UsersController {
     @Body(new ZodValidationPipe(newUserSchema)) body: NewUserInput,
   ): Promise<UserDto> {
     return this.users.create(body)
+  }
+
+  @Patch(':id/role')
+  changeRole(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(changeRoleSchema)) body: ChangeRoleInput,
+  ): Promise<UserDto> {
+    return this.users.changeRole(id, body.role)
+  }
+
+  @Post(':id/reset-password')
+  @HttpCode(204)
+  resetPassword(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(resetPasswordSchema))
+    body: ResetPasswordInput,
+  ): Promise<void> {
+    return this.users.resetPassword(id, body.temporaryPassword)
   }
 }
