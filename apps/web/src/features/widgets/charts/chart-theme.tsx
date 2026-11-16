@@ -5,7 +5,7 @@ export interface TooltipItem {
   name?: string | number
   value?: number | string | null
   color?: string
-  payload?: { xLabel?: string; axis?: string }
+  payload?: { xLabel?: string; axis?: string; label?: string }
 }
 
 export interface NinbiTooltipProps {
@@ -35,7 +35,7 @@ export function NinbiTooltip({ active, payload, label }: NinbiTooltipProps) {
               className="size-2 shrink-0 rounded-[2px]"
               style={{ backgroundColor: item.color }}
             />
-            {item.name}
+            {item.payload?.label ?? item.name}
           </span>
           <span className="font-mono font-medium tabular-nums">
             {typeof item.value === 'number'

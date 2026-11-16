@@ -300,8 +300,8 @@ T15 → T16
 
 **Done when**:
 
-- [ ] Testes em `PolarChartViews.test.tsx` (600 × 300): `CHART-11 radar desenha um eixo por linha e um polígono por série` (cinco linhas e duas séries: cinco rótulos de eixo e dois polígonos), `CHART-12 radial desenha uma barra por linha` (cinco setores radiais; o de maior valor é o mais longo), `CHART-14 dica do radar e do radial mostra categoria e valor` (`NinbiTooltip` com os `payload` dos dois mostra a categoria e o valor formatado); radar com 30 linhas mostra "Mostrando 12 de 30 categorias"
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `PolarChartViews.test.tsx` (600 × 300): `CHART-11 radar desenha um eixo por linha e um polígono por série` (cinco linhas e duas séries: cinco rótulos de eixo e dois polígonos), `CHART-12 radial desenha uma barra por linha` (cinco setores radiais; o de maior valor é o mais longo), `CHART-14 dica do radar e do radial mostra categoria e valor` (`NinbiTooltip` com os `payload` dos dois mostra a categoria e o valor formatado); radar com 30 linhas mostra "Mostrando 12 de 30 categorias"
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
