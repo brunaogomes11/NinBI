@@ -300,8 +300,9 @@ describe('DashboardPage', () => {
 
   it('TBL-17 resultado que chega depois de trocar de aba ou sair é descartado', async () => {
     const requests: Request[] = []
+    const releases: (() => void)[] = []
     let widget1Calls = 0
-    const { user, router } = open(
+    const { user, router, queryClient } = open(
       '/dashboards/d-1',
       getDashboard(twoTabs()),
       runHandler([], async (id, request) => {
@@ -310,7 +311,9 @@ describe('DashboardPage', () => {
           // 1ª e 3ª execuções do widget 1 ficam pendentes; a 2ª responde.
           if (widget1Calls !== 2) {
             requests.push(request)
-            await delay('infinite')
+            // O servidor ignora o aborto e entrega o resultado só depois (liberado no fim).
+            await new Promise<void>((resolve) => releases.push(resolve))
+            return HttpResponse.json(makeQueryResult({ rows: [['Tardio', 1]] }))
           }
         }
         return HttpResponse.json(makeQueryResult())
@@ -336,5 +339,13 @@ describe('DashboardPage', () => {
     expect(
       within(document.body).queryByText('Vendas por loja'),
     ).not.toBeInTheDocument()
+
+    // Os resultados entregues depois do aborto não chegam à tela nem ao cache.
+    for (const release of releases) release()
+    await delay(100)
+    expect(screen.queryByText('Tardio')).not.toBeInTheDocument()
+    expect(JSON.stringify(queryClient.getQueryCache().findAll())).not.toContain(
+      'Tardio',
+    )
   })
 })
