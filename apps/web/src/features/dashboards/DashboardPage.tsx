@@ -1,6 +1,6 @@
 import { type DashboardDto, MESSAGES } from '@ninbi/contracts'
 import { useQueryClient } from '@tanstack/react-query'
-import { MoreHorizontal, RefreshCw } from 'lucide-react'
+import { MoreHorizontal, RefreshCw, Share2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import {
@@ -30,7 +30,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
+import { ShareDialog } from '@/features/sharing/ShareDialog'
 import { TopBarAction } from '@/features/shell/TopBar'
 import { widgetResultKey } from '@/features/widgets/useWidgetResult'
 import { WidgetEditorDialog } from '@/features/widgets/WidgetEditorDialog'
@@ -143,6 +145,8 @@ function DashboardView({
 }) {
   const queryClient = useQueryClient()
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const { user: sessionUser } = useSession()
   const [selectedTabId, setSelectedTabId] = useState(dashboard.tabs[0]?.id)
   useNotFoundWatcher(dashboard.id, onNotFound)
   const editor = useDashboardEditor(dashboard, onNotFound)
@@ -193,9 +197,16 @@ function DashboardView({
         </TopBarAction>
       )}
       <div className="flex items-center justify-between gap-3">
-        <h1 className="min-w-0 truncate font-semibold text-xl">
-          {draft ? draft.name : dashboard.name}
-        </h1>
+        <div className="flex min-w-0 flex-col">
+          <h1 className="min-w-0 truncate font-semibold text-xl">
+            {draft ? draft.name : dashboard.name}
+          </h1>
+          {sessionUser && dashboard.ownerId !== sessionUser.id && (
+            <span className="text-muted-foreground text-sm">
+              {MESSAGES.sharedBy(dashboard.ownerName)}
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           {draft && (
             <Button
@@ -204,6 +215,16 @@ function DashboardView({
               onClick={editor.requestDiscard}
             >
               Descartar
+            </Button>
+          )}
+          {dashboard.permissions.share && !draft && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShareOpen(true)}
+            >
+              <Share2 aria-hidden="true" />
+              {MESSAGES.shareTitle}
             </Button>
           )}
           <Button type="button" variant="outline" onClick={refresh}>
@@ -231,6 +252,12 @@ function DashboardView({
           )}
         </div>
       </div>
+      {shareOpen && (
+        <ShareDialog
+          dashboardId={dashboard.id}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
       <DeleteDashboardDialog
         dashboard={dashboard}
         open={deleteOpen}

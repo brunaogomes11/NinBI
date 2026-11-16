@@ -412,8 +412,8 @@ T16
 
 **Done when**:
 
-- [ ] Testes com gesto em `DashboardSharing.test.tsx`: `SHARE-01 Compartilhar aparece só para o dono e Admins` (com `permissions.share` falso o botão não existe; verdadeiro, clicar abre a tela com "Dono:"), `ACL-06 quem pode ver não vê Editar, Excluir nem Compartilhar`, `ACL-07 quem pode editar vê Editar sem Excluir nem Compartilhar`, `ACL-08 quem não é o dono vê Compartilhado por com o nome do dono` ("Compartilhado por Ana Souza"; o dono não vê o texto), `ACL-12 acesso removido mostra Dashboard não encontrado na próxima ação` (em edição, "Salvar" recebe 404 `DASHBOARD_NOT_FOUND` e a página mostra "Dashboard não encontrado"), `ACL-13 salvar sem permissão mostra Você não tem mais permissão para editar este dashboard` (403 `DASHBOARD_EDIT_FORBIDDEN`: a mensagem aparece e o nome digitado continua no campo)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `DashboardSharing.test.tsx`: `SHARE-01 Compartilhar aparece só para o dono e Admins` (com `permissions.share` falso o botão não existe; verdadeiro, clicar abre a tela com "Dono:"), `ACL-06 quem pode ver não vê Editar, Excluir nem Compartilhar`, `ACL-07 quem pode editar vê Editar sem Excluir nem Compartilhar`, `ACL-08 quem não é o dono vê Compartilhado por com o nome do dono` ("Compartilhado por Ana Souza"; o dono não vê o texto), `ACL-12 acesso removido mostra Dashboard não encontrado na próxima ação` (em edição, "Salvar" recebe 404 `DASHBOARD_NOT_FOUND` e a página mostra "Dashboard não encontrado"), `ACL-13 salvar sem permissão mostra Você não tem mais permissão para editar este dashboard` (403 `DASHBOARD_EDIT_FORBIDDEN`: a mensagem aparece e o nome digitado continua no campo)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

@@ -8,7 +8,9 @@ import { type DashboardDraft, fromDto, isDirty, toSavePayload } from './draft'
 const EDIT_PARAM = 'editar'
 
 function saveErrorMessage(error: Error): string {
-  return error instanceof ApiError && error.status === 409
+  // 409 (versão) e DASHBOARD_EDIT_FORBIDDEN (permissão perdida) trazem texto próprio da API.
+  return error instanceof ApiError &&
+    (error.status === 409 || error.code === 'DASHBOARD_EDIT_FORBIDDEN')
     ? error.message
     : MESSAGES.dashboardSaveFailed
 }
