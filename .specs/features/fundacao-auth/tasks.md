@@ -869,8 +869,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes com gesto: SHELL-02 (clicar em "Claro" tira a classe `dark` do `<html>`), SHELL-03 (clicar em "Escuro" devolve), SHELL-05 (clicar em "Configurações" abre a página e o link fica com `aria-current="page"` e a classe do gradiente), ROLE-04 (Visualizador e Editor não veem "Configurações"; Admin vê), CFG-04 ("Configurações" é o último link da sidebar e está fora do contêiner com `overflow-y-auto`)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: SHELL-02 (clicar em "Claro" tira a classe `dark` do `<html>`), SHELL-03 (clicar em "Escuro" devolve), SHELL-05 (clicar em "Configurações" abre a página e o link fica com `aria-current="page"` e a classe do gradiente), ROLE-04 (Visualizador e Editor não veem "Configurações"; Admin vê), CFG-04 ("Configurações" é o último link da sidebar e está fora do contêiner com `overflow-y-auto`)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
@@ -1299,7 +1299,7 @@ Proof: run web | ✓ PWD-03 nova senha curta mostra a mensagem e não envia
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** 2026-11-16 - o teste FND-05 (T12) exigia que nenhuma linha de log contivesse a palavra "password", capturando inclusive os logs de inicialização do Nest; isso contradiz o próprio spec, que exige as rotas `/api/auth/password` e `/api/auth/initial-password` e cujo FND-05 trata só das linhas de requisição. Decisão do orquestrador sob a delegação do usuário ("Pode fazer todas features desse jeito, sem nem me perguntar."): o teste passa a examinar só as linhas de requisição e a afirmar que nelas não aparecem o VALOR da senha enviada, o corpo nem o valor do cookie (o caminho pode conter a palavra "password"). A asserção não fica mais fraca quanto ao que o FND-05 exige.
-**Dispatched:** lote 1 (T1-T7, haiku) - returned (a677f94); `validate_tasks.py --execute` exit 0 após o lote 1. Lote 2 (T8-T14, sonnet) - returned (477693b). Lote 3 (T15-T21, sonnet) - returned (7863045). Lote 4 (T22-T28, sonnet) - returned (34f1cc6). Lote 5 (T29-T35, sonnet) - em andamento. O `**Build**` não existe antes da T1 (repo vazio): o orquestrador executa o lote 1 de scaffolding antes de `validate_tasks.py --execute`, que roda ao fim do lote 1.
+**Dispatched:** lote 1 (T1-T7, haiku) - returned (a677f94); `validate_tasks.py --execute` exit 0 após o lote 1. Lote 2 (T8-T14, sonnet) - returned (477693b). Lote 3 (T15-T21, sonnet) - returned (7863045). Lote 4 (T22-T28, sonnet) - returned (34f1cc6). Lote 5 (T29-T35, sonnet) - returned (34eba5d). Lotes 6+7 (T36-T45, sonnet; o lote 7 de 3 tasks foi anexado) - em andamento. O `**Build**` não existe antes da T1 (repo vazio): o orquestrador executa o lote 1 de scaffolding antes de `validate_tasks.py --execute`, que roda ao fim do lote 1.
 **Walked:** dispensado por AD-023
 
 ---
