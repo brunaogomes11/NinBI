@@ -56,4 +56,16 @@ export class UsersController {
   ): Promise<void> {
     return this.users.resetPassword(id, body.temporaryPassword)
   }
+
+  @Post(':id/deactivate')
+  @HttpCode(200)
+  deactivate(@Param('id') id: string): Promise<UserDto> {
+    return this.users.deactivate(id)
+  }
+
+  @Post(':id/reactivate')
+  @HttpCode(200)
+  reactivate(@Param('id') id: string): Promise<UserDto> {
+    return this.users.reactivate(id)
+  }
 }

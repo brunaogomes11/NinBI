@@ -5,7 +5,7 @@ import {
   type Role,
   type UserDto,
 } from '@ninbi/contracts'
-import { eq, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { PasswordHasher } from '../auth/password-hasher'
 import { SessionService } from '../auth/session.service'
 import { AppError } from '../common/app-error'
@@ -87,14 +87,70 @@ export class UsersService {
   }
 
   async changeRole(id: string, role: Role): Promise<UserDto> {
+    const updated = await this.updateGuardingLastAdmin(
+      id,
+      { role },
+      () => role !== 'ADMIN',
+    )
+    return toUserDto(updated)
+  }
+
+  async deactivate(id: string): Promise<UserDto> {
+    const updated = await this.updateGuardingLastAdmin(
+      id,
+      { status: 'DISABLED' },
+      () => true,
+    )
+    await this.sessions.revokeAllForUser(id)
+    return toUserDto(updated)
+  }
+
+  async reactivate(id: string): Promise<UserDto> {
     if (!UUID_PATTERN.test(id)) throw notFound()
     const [updated] = await this.db
       .update(users)
-      .set({ role, updatedAt: sql`now()` })
+      .set({ status: 'ACTIVE', updatedAt: sql`now()` })
       .where(eq(users.id, id))
       .returning()
     if (!updated) throw notFound()
     return toUserDto(updated)
+  }
+
+  /**
+   * Aplica a mudança travando as linhas dos Admins ativos (`FOR UPDATE`): se ela
+   * tirar um Admin ativo (`removesAdmin`) e ele for o último, recusa com 409.
+   */
+  private async updateGuardingLastAdmin(
+    id: string,
+    changes: Partial<Pick<User, 'role' | 'status'>>,
+    removesAdmin: () => boolean,
+  ): Promise<User> {
+    if (!UUID_PATTERN.test(id)) throw notFound()
+    return this.db.transaction(async (tx) => {
+      const activeAdmins = await tx
+        .select({ id: users.id })
+        .from(users)
+        .where(and(eq(users.role, 'ADMIN'), eq(users.status, 'ACTIVE')))
+        .for('update')
+      const [target] = await tx
+        .select()
+        .from(users)
+        .where(eq(users.id, id))
+        .for('update')
+      if (!target) throw notFound()
+
+      const isActiveAdmin = activeAdmins.some((admin) => admin.id === id)
+      if (isActiveAdmin && removesAdmin() && activeAdmins.length <= 1) {
+        throw new AppError(409, 'LAST_ADMIN', MESSAGES.lastAdmin)
+      }
+      const [updated] = await tx
+        .update(users)
+        .set({ ...changes, updatedAt: sql`now()` })
+        .where(eq(users.id, id))
+        .returning()
+      if (!updated) throw notFound()
+      return updated
+    })
   }
 
   async resetPassword(id: string, temporaryPassword: string): Promise<void> {
@@ -104,7 +160,7 @@ export class UsersService {
       .update(users)
       .set({ passwordHash, mustChangePassword: true, updatedAt: sql`now()` })
       .where(eq(users.id, id))
-      .returning({ id: users.id })
+      .returning()
     if (!updated) throw notFound()
     await this.sessions.revokeAllForUser(id)
   }

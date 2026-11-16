@@ -624,8 +624,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: USR-09 (situação `DISABLED`, sessão do usuário dá 401, login recusado), USR-10 (volta a `ACTIVE` e entra), USR-11 (único Admin ativo: desativar a si mesmo e trocar o próprio papel dão 409 "É preciso existir ao menos um administrador ativo"; com dois Admins, desativar um funciona)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes: USR-09 (situação `DISABLED`, sessão do usuário dá 401, login recusado), USR-10 (volta a `ACTIVE` e entra), USR-11 (único Admin ativo: desativar a si mesmo e trocar o próprio papel dão 409 "É preciso existir ao menos um administrador ativo"; com dois Admins, desativar um funciona)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
