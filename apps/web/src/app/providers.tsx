@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { type ReactNode, useLayoutEffect } from 'react'
+import { Toaster } from '@/components/ui/sonner'
 import { SESSION_QUERY_KEY } from '@/features/auth/useSession'
 import { onUnauthorized } from '@/lib/api'
 import { ThemeProvider } from '@/theme/ThemeProvider'
@@ -26,7 +27,10 @@ export function AppProviders({
 
   return (
     <QueryClientProvider client={client}>
-      <ThemeProvider>{children}</ThemeProvider>
+      <ThemeProvider>
+        {children}
+        <Toaster />
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }

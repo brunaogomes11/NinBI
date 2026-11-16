@@ -1,6 +1,7 @@
 import { ROLE_LABELS } from '@ninbi/contracts'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ChevronDown, KeyRound, LogOut } from 'lucide-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -10,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { ChangePasswordDialog } from '@/features/auth/ChangePasswordDialog'
 import { SESSION_QUERY_KEY, useSession } from '@/features/auth/useSession'
 import { apiFetch } from '@/lib/api'
 
@@ -25,6 +27,7 @@ export function UserMenu() {
   const { user } = useSession()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const [passwordOpen, setPasswordOpen] = useState(false)
 
   const logout = useMutation({
     mutationFn: () =>
@@ -42,41 +45,47 @@ export function UserMenu() {
   if (!user) return null
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="flex items-center gap-3 rounded-control px-2 py-1.5 text-left outline-none transition-colors hover:bg-card-elevated focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <Avatar>
-            <AvatarFallback className="bg-[image:var(--gradient-brand)] font-semibold text-primary-foreground">
-              {initialsOf(user.name)}
-            </AvatarFallback>
-          </Avatar>
-          <span className="flex flex-col leading-tight">
-            <span className="font-semibold text-foreground text-sm">
-              {user.name}
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="flex items-center gap-3 rounded-control px-2 py-1.5 text-left outline-none transition-colors hover:bg-card-elevated focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <Avatar>
+              <AvatarFallback className="bg-[image:var(--gradient-brand)] font-semibold text-primary-foreground">
+                {initialsOf(user.name)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="flex flex-col leading-tight">
+              <span className="font-semibold text-foreground text-sm">
+                {user.name}
+              </span>
+              <span className="text-muted-foreground text-xs">
+                {ROLE_LABELS[user.role]}
+              </span>
             </span>
-            <span className="text-muted-foreground text-xs">
-              {ROLE_LABELS[user.role]}
-            </span>
-          </span>
-          <ChevronDown
-            className="size-4 text-muted-foreground"
-            aria-hidden="true"
-          />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="min-w-48">
-        <DropdownMenuItem>
-          <KeyRound aria-hidden="true" />
-          Alterar senha
-        </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => logout.mutate()}>
-          <LogOut aria-hidden="true" />
-          Sair
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <ChevronDown
+              className="size-4 text-muted-foreground"
+              aria-hidden="true"
+            />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="min-w-48">
+          <DropdownMenuItem onSelect={() => setPasswordOpen(true)}>
+            <KeyRound aria-hidden="true" />
+            Alterar senha
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => logout.mutate()}>
+            <LogOut aria-hidden="true" />
+            Sair
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ChangePasswordDialog
+        open={passwordOpen}
+        onOpenChange={setPasswordOpen}
+      />
+    </>
   )
 }

@@ -929,8 +929,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes com gesto: PWD-01 (preencher e salvar mostra "Senha alterada"), PWD-02 (400 mostra "Senha atual incorreta"), PWD-03 (nova senha de 7 caracteres mostra "A senha precisa ter ao menos 8 caracteres" e não envia)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto: PWD-01 (preencher e salvar mostra "Senha alterada"), PWD-02 (400 mostra "Senha atual incorreta"), PWD-03 (nova senha de 7 caracteres mostra "A senha precisa ter ao menos 8 caracteres" e não envia)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
