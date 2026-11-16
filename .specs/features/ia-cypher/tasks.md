@@ -517,9 +517,9 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes com gesto em `NewWidgetAi.test.tsx`: `AIQ-02 Novo widget mostra Descreva o que você quer ver antes do editor de Cypher` (clicar em "Novo widget": o campo aparece antes do `textarea` "Cypher" na ordem do documento; sem provedor, o campo não aparece e o editor abre como antes), enviar a descrição com `done` fecha o diálogo e o widget mostra o título gerado, `failed` deixa o diálogo aberto com o Cypher e a mensagem
-- [ ] Testes de `WidgetEditorDialog` de `dashboards-consultas` e `widgets-graficos` continuam verdes
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto em `NewWidgetAi.test.tsx`: `AIQ-02 Novo widget mostra Descreva o que você quer ver antes do editor de Cypher` (clicar em "Novo widget": o campo aparece antes do `textarea` "Cypher" na ordem do documento; sem provedor, o campo não aparece e o editor abre como antes), enviar a descrição com `done` fecha o diálogo e o widget mostra o título gerado, `failed` deixa o diálogo aberto com o Cypher e a mensagem
+- [x] Testes de `WidgetEditorDialog` de `dashboards-consultas` e `widgets-graficos` continuam verdes
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build

@@ -1,4 +1,4 @@
-import { type DashboardDto, MESSAGES } from '@ninbi/contracts'
+import { type DashboardDto, MESSAGES, type ResultValue } from '@ninbi/contracts'
 import { screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http, type RequestHandler } from 'msw'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -36,7 +36,7 @@ function ndjson(events: object[]): Response {
 }
 
 function doneEvent(
-  rows: unknown[][] = [
+  rows: ResultValue[][] = [
     ['A', 3],
     ['B', 5],
   ],

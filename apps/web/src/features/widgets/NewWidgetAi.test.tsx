@@ -103,7 +103,7 @@ describe('Novo widget com a IA', () => {
     withAi.unmount()
 
     const withoutAi = open(false)
-    await screen.findByRole('heading', { name: 'Vendas por loja' })
+    await statusLoaded(withoutAi)
     const dialogWithout = await newWidget(withoutAi.user)
     expect(within(dialogWithout).getByLabelText('Cypher')).toBeInTheDocument()
     expect(within(dialogWithout).queryByLabelText(FIELD)).toBeNull()
