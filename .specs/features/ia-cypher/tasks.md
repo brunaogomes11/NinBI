@@ -456,8 +456,8 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes com gesto em `AskAiPanel.test.tsx`: `AIQ-14 Enviar fica desabilitado com o texto vazio` (vazio e só espaços; digitar "total por categoria" habilita), `AIQ-15 texto com mais de 4.000 caracteres mostra O pedido passa de 4.000 caracteres` (e "Enviar" desabilitado), `AIQ-12 durante a geração mostra Gerando tentativa N de 4 e Cancelar` (com `running` e `attempt: 3`: "Gerando... tentativa 3 de 4"; clicar em "Cancelar" chama `onCancel`; o `textarea` fica desabilitado)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `AskAiPanel.test.tsx`: `AIQ-14 Enviar fica desabilitado com o texto vazio` (vazio e só espaços; digitar "total por categoria" habilita), `AIQ-15 texto com mais de 4.000 caracteres mostra O pedido passa de 4.000 caracteres` (e "Enviar" desabilitado), `AIQ-12 durante a geração mostra Gerando tentativa N de 4 e Cancelar` (com `running` e `attempt: 3`: "Gerando... tentativa 3 de 4"; clicar em "Cancelar" chama `onCancel`; o `textarea` fica desabilitado)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
