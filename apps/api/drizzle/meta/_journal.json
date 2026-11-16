@@ -29,6 +29,13 @@
       "when": 1794845804124,
       "tag": "0003_round_wolfpack",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794859845340,
+      "tag": "0004_freezing_baron_strucker",
+      "breakpoints": true
     }
   ]
 }

@@ -25,6 +25,7 @@ describe('schema do banco', () => {
       'dashboard_tabs',
       'dashboards',
       'installation',
+      'llm_settings',
       'login_throttle',
       'schema_example_opt_outs',
       'sessions',

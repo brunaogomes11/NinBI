@@ -162,9 +162,9 @@ T18 → T19 → T20
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/database/llm-settings-schema.spec.ts`: migrações aplicam no PGlite; `LLM-03 tabela llm_settings aceita uma linha só` (`INSERT` com `id = 2` viola o check; segundo `INSERT` com `id = 1` viola a chave); provedor fora do enum é recusado
-- [ ] `drizzle-kit generate` não gera diferença depois do commit
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/database/llm-settings-schema.spec.ts`: migrações aplicam no PGlite; `LLM-03 tabela llm_settings aceita uma linha só` (`INSERT` com `id = 2` viola o check; segundo `INSERT` com `id = 1` viola a chave); provedor fora do enum é recusado
+- [x] `drizzle-kit generate` não gera diferença depois do commit
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

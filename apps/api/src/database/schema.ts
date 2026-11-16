@@ -29,6 +29,13 @@ export const schemaElementKindEnum = pgEnum('schema_element_kind', [
   'LABEL',
   'RELATIONSHIP',
 ])
+export const llmProviderEnum = pgEnum('llm_provider', [
+  'OPENAI',
+  'ANTHROPIC',
+  'GOOGLE',
+  'OLLAMA',
+  'OPENAI_COMPATIBLE',
+])
 export const shareRecipientTypeEnum = pgEnum('share_recipient_type', [
   'USER',
   'TEAM',
@@ -270,11 +277,29 @@ export const dashboardShares = pgTable(
   ],
 )
 
+export const llmSettings = pgTable(
+  'llm_settings',
+  {
+    id: smallint('id').primaryKey(),
+    provider: llmProviderEnum('provider').notNull(),
+    model: varchar('model', { length: 200 }).notNull(),
+    baseUrl: text('base_url'),
+    apiKeyEncrypted: text('api_key_encrypted'),
+    apiKeyLast4: varchar('api_key_last4', { length: 4 }),
+    updatedBy: uuid('updated_by').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamptz('updated_at').notNull(),
+  },
+  (table) => [check('llm_settings_single_row', sql`${table.id} = 1`)],
+)
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type SessionRow = typeof sessions.$inferSelect
 export type ConnectionRow = typeof connections.$inferSelect
 export type DashboardRow = typeof dashboards.$inferSelect
 export type WidgetRow = typeof widgets.$inferSelect
+export type LlmSettingsRow = typeof llmSettings.$inferSelect
 export type TeamRow = typeof teams.$inferSelect
 export type DashboardShareRow = typeof dashboardShares.$inferSelect
