@@ -1,0 +1,285 @@
+import { type AiWidgetEvent, MESSAGES } from '@ninbi/contracts'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { HttpResponse, http } from 'msw'
+import { type ReactNode, useState } from 'react'
+import { describe, expect, it } from 'vitest'
+import { type DashboardDraft, fromDto } from '@/features/dashboards/draft'
+import { makeDashboard, makeQueryResult } from '@/test/fixtures/dashboards'
+import { server } from '@/test/server'
+import { type AiFailure, useAiGenerations } from './useAiGenerations'
+
+const URL_PATH = '/api/dashboards/d-1/ai/widget'
+const encoder = new TextEncoder()
+const MAPPING = {
+  x: 'categoria',
+  series: ['total'],
+  stacked: false,
+  horizontal: false,
+}
+
+function ndjson(events: object[]): Response {
+  const text = events.map((event) => `${JSON.stringify(event)}\n`).join('')
+  return new HttpResponse(text, {
+    headers: { 'Content-Type': 'application/x-ndjson' },
+  })
+}
+
+function doneEvent(
+  overrides: Partial<Extract<AiWidgetEvent, { type: 'done' }>> = {},
+) {
+  return {
+    type: 'done',
+    attempts: 1,
+    cypher:
+      'MATCH (p:Produto) RETURN p.categoria AS categoria, count(*) AS total',
+    visualization: 'BAR',
+    mapping: MAPPING,
+    title: 'Itens por categoria',
+    result: makeQueryResult({
+      columns: ['categoria', 'total'],
+      rows: [
+        ['A', 3],
+        ['B', 5],
+      ],
+    }),
+    ...overrides,
+  }
+}
+
+function setup() {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  })
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  )
+  const failures: [string, AiFailure][] = []
+  const hook = renderHook(
+    ({ editing }: { editing: boolean }) => {
+      const [draft, setDraft] = useState<DashboardDraft>(() =>
+        fromDto(makeDashboard()),
+      )
+      const ai = useAiGenerations({
+        dashboardId: 'd-1',
+        draft,
+        setDraft: (change) => setDraft(change),
+        editing,
+        onFailed: (id, failure) => failures.push([id, failure]),
+      })
+      return { draft, setDraft, ai }
+    },
+    { wrapper, initialProps: { editing: true } },
+  )
+  return { ...hook, queryClient, failures }
+}
+
+function widgetOf(draft: DashboardDraft) {
+  return draft.tabs[0].widgets[0]
+}
+
+/** Resposta que fica aberta até o cliente abortar; guarda se o signal abortou. */
+function hangingHandler(state: { aborted: boolean }) {
+  return http.post(URL_PATH, ({ request }) => {
+    request.signal.addEventListener('abort', () => {
+      state.aborted = true
+    })
+    const first = JSON.stringify({
+      type: 'attempt',
+      attempt: 1,
+      maxAttempts: 4,
+    })
+    return new HttpResponse(
+      new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(encoder.encode(`${first}\n`))
+        },
+      }),
+      { headers: { 'Content-Type': 'application/x-ndjson' } },
+    )
+  })
+}
+
+describe('useAiGenerations', () => {
+  it('AIQ-09 resultado da IA atualiza o widget no rascunho e semeia o resultado', async () => {
+    let queryCalls = 0
+    server.use(
+      http.post(URL_PATH, () =>
+        ndjson([{ type: 'attempt', attempt: 1, maxAttempts: 4 }, doneEvent()]),
+      ),
+      http.post('/api/dashboards/d-1/query', () => {
+        queryCalls += 1
+        return HttpResponse.json(makeQueryResult())
+      }),
+    )
+    const { result, queryClient } = setup()
+    await act(() => result.current.ai.start('w-1', 'itens por categoria'))
+    const widget = widgetOf(result.current.draft)
+    expect(widget.title).toBe('Itens por categoria')
+    expect(widget.cypher).toContain('p.categoria')
+    expect(widget.visualization).toBe('BAR')
+    expect(widget.config).toEqual({ mapping: MAPPING })
+    const seeded = queryClient.getQueryData<{ rows: unknown[] }>([
+      'query',
+      'd-1',
+      'c-1',
+      widget.cypher,
+    ])
+    expect(seeded?.rows).toEqual([
+      ['A', 3],
+      ['B', 5],
+    ])
+    expect(queryCalls).toBe(0)
+    expect(result.current.ai.stateOf('w-1')).toEqual({})
+  })
+
+  it('AIQ-10 geração sem linhas atualiza o widget com resultado vazio', async () => {
+    server.use(
+      http.post(URL_PATH, () =>
+        ndjson([
+          doneEvent({
+            visualization: 'TABLE',
+            mapping: null,
+            result: makeQueryResult({ columns: ['n'], rows: [] }),
+          }),
+        ]),
+      ),
+    )
+    const { result, queryClient } = setup()
+    await act(() => result.current.ai.start('w-1', 'nada'))
+    const widget = widgetOf(result.current.draft)
+    expect(widget.cypher).toContain('p.categoria')
+    expect(
+      queryClient.getQueryData<{ rows: unknown[] }>([
+        'query',
+        'd-1',
+        'c-1',
+        widget.cypher,
+      ])?.rows,
+    ).toEqual([])
+  })
+
+  it('AIQ-13 Cancelar aborta o pedido e deixa o widget como estava', async () => {
+    const state = { aborted: false }
+    server.use(hangingHandler(state))
+    const { result } = setup()
+    const before = result.current.draft
+    act(() => {
+      void result.current.ai.start('w-1', 'pedido')
+    })
+    await waitFor(() =>
+      expect(result.current.ai.stateOf('w-1').running).toBeDefined(),
+    )
+    act(() => result.current.ai.cancel('w-1'))
+    await waitFor(() => expect(state.aborted).toBe(true))
+    expect(result.current.draft).toBe(before)
+    expect(result.current.ai.stateOf('w-1')).toEqual({})
+  })
+
+  it('AIQ-17 schema não lido mostra a mensagem no painel', async () => {
+    server.use(
+      http.post(URL_PATH, () =>
+        HttpResponse.json(
+          { code: 'SCHEMA_NOT_READ', message: MESSAGES.aiSchemaNotRead },
+          { status: 409 },
+        ),
+      ),
+    )
+    const { result } = setup()
+    await act(() => result.current.ai.start('w-1', 'pedido'))
+    expect(result.current.ai.stateOf('w-1').error?.message).toBe(
+      'Leia o schema da conexão antes de usar a IA',
+    )
+  })
+
+  it('AIQ-26 falha do provedor mantém o texto e o widget', async () => {
+    server.use(
+      http.post(URL_PATH, () =>
+        ndjson([
+          { type: 'attempt', attempt: 1, maxAttempts: 4 },
+          {
+            type: 'provider_error',
+            code: 'AI_PROVIDER_AUTH',
+            message: MESSAGES.aiProviderAuth,
+          },
+        ]),
+      ),
+    )
+    const { result } = setup()
+    const before = result.current.draft
+    await act(() => result.current.ai.start('w-1', 'meu pedido'))
+    expect(result.current.ai.stateOf('w-1').error).toEqual({
+      message: 'O provedor de IA recusou a chave configurada',
+      prompt: 'meu pedido',
+    })
+    expect(result.current.draft).toBe(before)
+  })
+
+  it('AIQ-28 sair do modo de edição para a geração', async () => {
+    const state = { aborted: false }
+    server.use(hangingHandler(state))
+    const { result, rerender } = setup()
+    act(() => {
+      void result.current.ai.start('w-1', 'pedido')
+    })
+    await waitFor(() =>
+      expect(result.current.ai.stateOf('w-1').running).toBeDefined(),
+    )
+    rerender({ editing: false })
+    await waitFor(() => expect(state.aborted).toBe(true))
+    expect(result.current.ai.stateOf('w-1')).toEqual({})
+  })
+
+  it('AIQ-29 widget removido durante a geração descarta o resultado', async () => {
+    let release: () => void = () => {}
+    const gate = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    server.use(
+      http.post(URL_PATH, async () => {
+        await gate
+        return ndjson([doneEvent()])
+      }),
+    )
+    const { result } = setup()
+    act(() => {
+      void result.current.ai.start('w-1', 'pedido')
+    })
+    await waitFor(() =>
+      expect(result.current.ai.stateOf('w-1').running).toBeDefined(),
+    )
+    act(() =>
+      result.current.setDraft((draft) => ({
+        ...draft,
+        tabs: draft.tabs.map((tab) => ({ ...tab, widgets: [] })),
+      })),
+    )
+    release()
+    await waitFor(() => expect(result.current.ai.stateOf('w-1')).toEqual({}))
+    expect(result.current.draft.tabs[0].widgets).toEqual([])
+  })
+
+  it('FIX-07 falha final mantém o widget do rascunho até Aplicar', async () => {
+    const message = 'Somente consultas de leitura são permitidas'
+    server.use(
+      http.post(URL_PATH, () =>
+        ndjson([
+          {
+            type: 'failed',
+            attempts: 4,
+            cypher: 'MATCH (x) DELETE x',
+            message,
+          },
+        ]),
+      ),
+    )
+    const { result, failures } = setup()
+    const before = result.current.draft
+    await act(() => result.current.ai.start('w-1', 'pedido'))
+    expect(failures).toEqual([
+      ['w-1', { cypher: 'MATCH (x) DELETE x', message }],
+    ])
+    expect(result.current.draft).toBe(before)
+    expect(result.current.ai.stateOf('w-1')).toEqual({})
+  })
+})
