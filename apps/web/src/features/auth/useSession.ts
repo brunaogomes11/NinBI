@@ -15,7 +15,7 @@ async function fetchSession(): Promise<SessionUserDto | null> {
   }
 }
 
-/** `user` é null quando não há sessão; `isError` quando a consulta falhou. */
+/** `user` é null quando não há sessão; `error` quando a consulta falhou. */
 export function useSession() {
   const query = useQuery({
     queryKey: SESSION_QUERY_KEY,
@@ -26,6 +26,6 @@ export function useSession() {
   return {
     user: query.data ?? null,
     isLoading: query.isPending,
-    isError: query.isError,
+    error: query.error,
   }
 }

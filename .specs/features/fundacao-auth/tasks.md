@@ -787,8 +787,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Testes: sem usuários, `/` vai para `/primeiro-acesso`; com usuários, `/primeiro-acesso` vai para `/entrar` (SETUP-03); sem sessão, `/configuracoes/usuarios` vai para `/entrar?voltar=%2Fconfiguracoes%2Fusuarios`; `voltar=//evil.com` é ignorado; Visualizador em `/configuracoes/usuarios` vê "Você não tem permissão para acessar esta página" e o link "Ir para a página inicial" leva a `/` (ROLE-03); sessão com `mustChangePassword` em `/` vai para `/definir-senha`
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes: sem usuários, `/` vai para `/primeiro-acesso`; com usuários, `/primeiro-acesso` vai para `/entrar` (SETUP-03); sem sessão, `/configuracoes/usuarios` vai para `/entrar?voltar=%2Fconfiguracoes%2Fusuarios`; `voltar=//evil.com` é ignorado; Visualizador em `/configuracoes/usuarios` vê "Você não tem permissão para acessar esta página" e o link "Ir para a página inicial" leva a `/` (ROLE-03); sessão com `mustChangePassword` em `/` vai para `/definir-senha`
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
