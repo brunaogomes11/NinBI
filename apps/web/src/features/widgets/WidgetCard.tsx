@@ -45,6 +45,8 @@ export interface WidgetCardEdit extends WidgetEditSource {
 
 function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
   const query = useWidgetResult(dashboardId, version, widget, edit)
+  // Quem só vê não recebe o Cypher (`cypher` nulo) e nunca lê a mensagem crua do servidor (TBL-12).
+  const canSeeErrors = edit !== undefined || widget.cypher !== null
 
   if (!hasWidgetQuery(widget, edit)) {
     return (
@@ -55,7 +57,7 @@ function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
     return (
       <div className="flex flex-col items-start gap-2">
         <p role="alert" className="text-sm text-destructive">
-          {query.error.message}
+          {canSeeErrors ? query.error.message : MESSAGES.widgetLoadFailed}
         </p>
         <Button
           type="button"

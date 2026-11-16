@@ -72,7 +72,11 @@ export class QueryService {
       const check = validateReadOnlyCypher(input.cypher)
       if (!check.ok) {
         result = 'blocked'
-        throw new AppError(400, check.code, check.message)
+        throw new AppError(
+          400,
+          check.code,
+          input.maskErrors ? MESSAGES.widgetLoadFailed : check.message,
+        )
       }
       const connection = await this.findConnection(input.connectionId)
       let password: string

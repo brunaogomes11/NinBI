@@ -105,6 +105,24 @@ describe('WidgetCard', () => {
     expect(screen.queryByText(/MATCH/)).not.toBeInTheDocument()
   })
 
+  it('TBL-12 mensagem crua do servidor não aparece para quem só vê', async () => {
+    openCard(makeWidget({ cypher: null, hasQuery: true }), [
+      http.post(RUN_URL, () =>
+        HttpResponse.json(
+          {
+            code: 'QUERY_WRITE_BLOCKED',
+            message: MESSAGES.queryWriteBlocked('CREATE'),
+          },
+          { status: 400 },
+        ),
+      ),
+    ])
+    expect(
+      await screen.findByText('Não foi possível carregar este widget'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/CREATE/)).not.toBeInTheDocument()
+  })
+
   it('TBL-14 widget sem Cypher mostra Widget sem consulta', async () => {
     let requests = 0
     openCard(makeWidget({ cypher: null, hasQuery: false }), [

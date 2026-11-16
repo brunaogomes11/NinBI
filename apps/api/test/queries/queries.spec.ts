@@ -1,3 +1,4 @@
+import { eq } from 'drizzle-orm'
 import { afterEach, describe, expect, it } from 'vitest'
 import { CryptoService } from '../../src/crypto/crypto.service'
 import { dashboardTabs, widgets } from '../../src/database/schema'
@@ -138,6 +139,25 @@ describe('execução de consultas', () => {
     const own = await t.owner.agent.post(t.widgetUrl).send({})
     expect(own.status).toBe(422)
     expect(own.body.message).toBe('Variable `l` not defined')
+  })
+
+  it('TBL-12 quem só vê não lê a recusa de cláusula bloqueada de um widget salvo', async () => {
+    const t = await setup()
+    await t.db
+      .update(widgets)
+      .set({ cypher: 'CREATE (n:X) RETURN n' })
+      .where(eq(widgets.id, t.widgetId))
+    const viewer = await signInAs(t.app, t.db, 'VIEWER', 'vis@x.com')
+    t.shares.grant(viewer.user.id, t.dashboard.id, 'view')
+    const seen = await viewer.agent.post(t.widgetUrl).send({})
+    expect(seen.status).toBe(400)
+    expect(seen.body.message).toBe('Não foi possível carregar este widget')
+    expect(JSON.stringify(seen.body)).not.toContain('CREATE')
+
+    const own = await t.owner.agent.post(t.widgetUrl).send({})
+    expect(own.status).toBe(400)
+    expect(own.body.message).toContain('CREATE')
+    expect(t.neo4j.calls).toEqual([])
   })
 
   it('EDIT-10 quem edita executa o texto em outra conexão', async () => {
