@@ -48,6 +48,20 @@ describe('gateway do Neo4j contra o Neo4j de dev', () => {
     expect(result.rows).toEqual([{ name: 'neo4j' }])
   })
 
+  it('QRY-08 leitura para no limite sem ler o resto de um resultado gigante', async () => {
+    const started = Date.now()
+    const result = await gateway.read(
+      cfg,
+      'UNWIND range(1, 2000000000) AS i RETURN i',
+      {},
+      { timeoutMs: 8_000, maxRows: 10 },
+    )
+
+    expect(result.keys).toEqual(['i'])
+    expect(result.rows).toHaveLength(10)
+    expect(Date.now() - started).toBeLessThan(6_000)
+  })
+
   it('SCH-12 leitura usa transação de leitura e recusa escrita', async () => {
     await expect(
       gateway.read(cfg, 'CREATE (:NinbiWriteProbe)', {}, { timeoutMs: 10_000 }),

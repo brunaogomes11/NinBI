@@ -42,16 +42,35 @@ export class DriverNeo4jGateway implements Neo4jGateway {
     opts: { timeoutMs: number; maxRows?: number; signal?: AbortSignal },
   ): Promise<Neo4jReadResult> {
     return this.run(cfg, opts.timeoutMs, opts.signal, async (session) => {
-      const result = await session.executeRead((tx) => tx.run(cypher, params), {
-        timeout: opts.timeoutMs,
-      })
-      const records =
-        opts.maxRows === undefined
-          ? result.records
-          : result.records.slice(0, opts.maxRows)
-      return {
-        keys: result.records[0]?.keys.map(String) ?? [],
-        rows: records.map((record) => record.toObject()),
+      // Transação explícita de leitura: o resultado é lido em stream e a transação termina
+      // em rollback, então parar em `maxRows` descarta o resto no Neo4j (QRY-08).
+      const tx = session.beginTransaction({ timeout: opts.timeoutMs })
+      try {
+        return await new Promise<Neo4jReadResult>((resolve, reject) => {
+          let keys: string[] = []
+          const rows: Record<string, unknown>[] = []
+          let done = false
+          tx.run(cypher, params).subscribe({
+            onKeys: (names) => {
+              keys = names.map(String)
+            },
+            onNext: (record) => {
+              if (done) return
+              rows.push(record.toObject())
+              if (opts.maxRows !== undefined && rows.length >= opts.maxRows) {
+                done = true
+                resolve({ keys, rows })
+              }
+            },
+            onCompleted: () => {
+              done = true
+              resolve({ keys, rows })
+            },
+            onError: reject,
+          })
+        })
+      } finally {
+        await tx.rollback().catch(() => undefined)
       }
     })
   }
