@@ -255,8 +255,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Os dois PNGs existem, com fundo transparente e a estrela inteira, sem a palavra "NinBI" nem o subtítulo
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Os dois PNGs existem, com fundo transparente e a estrela inteira, sem a palavra "NinBI" nem o subtítulo
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: none
 **Gate**: build

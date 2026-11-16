@@ -13,9 +13,11 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "biome check .",
     "format": "biome format --write .",
+    "brand:symbol": "node scripts/brand/crop-symbol.mjs",
     "test": "pnpm -r test"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.7"
+    "@biomejs/biome": "^2.6.7",
+    "sharp": "^0.35.5"
   }
 }
