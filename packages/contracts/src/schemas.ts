@@ -16,6 +16,7 @@ export interface UserDto {
   email: string
   role: Role
   status: 'ACTIVE' | 'DISABLED'
+  mustChangePassword: boolean
 }
 
 const MAX_TEXT = 120
