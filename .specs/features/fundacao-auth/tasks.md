@@ -298,8 +298,8 @@ T43 → T44 → T45
 
 **Done when**:
 
-- [ ] Teste `ROLE-01 matriz de papéis` confere cada célula da matriz da spec (9 permissões × 3 papéis)
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts test`
+- [x] Teste `ROLE-01 matriz de papéis` confere cada célula da matriz da spec (9 permissões × 3 papéis)
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick
