@@ -249,8 +249,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/ai/widget-prompt.spec.ts` e na rota de `ia-cypher`: `FLT-20 pedido ao LLM lista rótulo, parâmetro e tipo de cada filtro sem valores` (`buildWidgetMessages` com "Categoria" `SINGLE_SELECT` e "Período" `DATE_RANGE` tem "Categoria", "$categoria", "Seleção única", "$periodo_inicio" e "$periodo_fim"; pela rota, um corpo com `filters: [{ label: 'Categoria', parameter: 'categoria', type: 'SINGLE_SELECT', defaultValue: 'MARCADOR-VALOR', value: 'MARCADOR-VALOR' }]` faz o modelo falso receber as mensagens sem "MARCADOR-VALOR"), sem filtros a seção diz "nenhum"; testes de AIQ-05 e AIQ-06 continuam verdes
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/ai/widget-prompt.spec.ts` e na rota de `ia-cypher`: `FLT-20 pedido ao LLM lista rótulo, parâmetro e tipo de cada filtro sem valores` (`buildWidgetMessages` com "Categoria" `SINGLE_SELECT` e "Período" `DATE_RANGE` tem "Categoria", "$categoria", "Seleção única", "$periodo_inicio" e "$periodo_fim"; pela rota, um corpo com `filters: [{ label: 'Categoria', parameter: 'categoria', type: 'SINGLE_SELECT', defaultValue: 'MARCADOR-VALOR', value: 'MARCADOR-VALOR' }]` faz o modelo falso receber as mensagens sem "MARCADOR-VALOR"), sem filtros a seção diz "nenhum"; testes de AIQ-05 e AIQ-06 continuam verdes
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build

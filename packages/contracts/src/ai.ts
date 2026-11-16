@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { MAX_CYPHER_LENGTH, type QueryResultDto } from './dashboards'
+import { filterPromptInfoSchema } from './filters'
 import { MESSAGES } from './messages'
 import type { WidgetVisualization } from './widget-config'
 
@@ -21,6 +22,7 @@ export const aiWidgetRequestSchema = z.object({
     visualization: z.string(),
     config: z.record(z.string(), z.unknown()),
   }),
+  filters: z.array(filterPromptInfoSchema).max(30).default([]),
 })
 
 export type AiWidgetRequest = z.input<typeof aiWidgetRequestSchema>

@@ -5,6 +5,8 @@ import {
 } from '@langchain/core/messages'
 import {
   type ConnectionSchemaDto,
+  FILTER_TYPE_LABELS,
+  type FilterPromptInfo,
   MAPPING_FIELD_LABELS,
   type SchemaPropertyDto,
   VISUALIZATION_LABELS,
@@ -83,6 +85,7 @@ function systemText(schema: ConnectionSchemaDto): string {
     'Regras:',
     '- Escreva só Cypher de leitura, com uma única instrução e sem ponto e vírgula no fim.',
     '- Dê nome a cada coluna do RETURN com AS.',
+    '- Use os parâmetros dos filtros do dashboard quando o pedido falar deles; um parâmetro vazio chega como null.',
     '- Escolha a visualização que melhor mostra o resultado e descreva o mapeamento das colunas.',
     '- O título do widget tem até 80 caracteres, em português.',
     '- Responda só com um objeto JSON: {"cypher": "...", "visualization": "...", "mapping": {...} ou null, "title": "..."}',
@@ -105,16 +108,30 @@ function currentWidgetText(widget: CurrentWidget): string {
   ].join('\n')
 }
 
+/** Rótulo, parâmetro e tipo de cada filtro; nunca valores (FLT-20). */
+function filtersText(filters: FilterPromptInfo[]): string {
+  if (filters.length === 0) return 'Filtros do dashboard: nenhum'
+  const lines = filters.map((filter) => {
+    const names =
+      filter.type === 'DATE_RANGE'
+        ? `$${filter.parameter}_inicio e $${filter.parameter}_fim`
+        : `$${filter.parameter}`
+    return `- ${filter.label}: ${names} (${FILTER_TYPE_LABELS[filter.type]})`
+  })
+  return ['Filtros do dashboard:', ...lines].join('\n')
+}
+
 /** Conversa inicial de uma geração: sistema com regras e schema, e o pedido (AIQ-01, AIQ-05). */
 export function buildWidgetMessages(input: {
   schema: ConnectionSchemaDto
   widget: CurrentWidget
   prompt: string
+  filters?: FilterPromptInfo[]
 }): BaseMessage[] {
   return [
     new SystemMessage(systemText(input.schema)),
     new HumanMessage(
-      `${currentWidgetText(input.widget)}\n\nPedido: ${input.prompt}`,
+      `${currentWidgetText(input.widget)}\n\n${filtersText(input.filters ?? [])}\n\nPedido: ${input.prompt}`,
     ),
   ]
 }

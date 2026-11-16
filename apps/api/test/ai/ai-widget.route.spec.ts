@@ -119,6 +119,30 @@ describe('POST /api/dashboards/:id/ai/widget', () => {
     expect(lines[2]).toMatchObject({ type: 'done', attempts: 2 })
   })
 
+  it('FLT-20 pedido ao LLM lista rótulo, parâmetro e tipo de cada filtro sem valores', async () => {
+    const t = await setup()
+    t.chatModels.script(validReply())
+
+    const res = await t.post(t.owner.agent, {
+      ...requestBody(),
+      filters: [
+        {
+          label: 'Categoria',
+          parameter: 'categoria',
+          type: 'SINGLE_SELECT',
+          defaultValue: 'MARCADOR-VALOR',
+          value: 'MARCADOR-VALOR',
+        },
+      ],
+    })
+
+    expect(res.status).toBe(200)
+    const sent = t.chatModels.calls[0]?.map((m) => String(m.content)).join('\n')
+    expect(sent).toContain('Categoria')
+    expect(sent).toContain('$categoria')
+    expect(sent).not.toContain('MARCADOR-VALOR')
+  })
+
   it('AIQ-15 pedido longo responde 400', async () => {
     const t = await setup()
 

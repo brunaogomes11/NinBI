@@ -91,6 +91,7 @@ export class AiWidgetService {
       schema,
       widget: body.widget,
       prompt: body.prompt,
+      filters: body.filters,
     })
     let lastCypher: string | null = null
     let lastMessage: string = MESSAGES.aiNoCypher

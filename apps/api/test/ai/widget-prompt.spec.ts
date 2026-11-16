@@ -92,6 +92,33 @@ describe('widget-prompt', () => {
     expect(all).not.toContain('ana@x.com')
   })
 
+  it('FLT-20 pedido ao LLM lista rótulo, parâmetro e tipo de cada filtro sem valores', () => {
+    const text = textOf(
+      buildWidgetMessages({
+        schema,
+        widget,
+        prompt: 'x',
+        filters: [
+          { label: 'Categoria', parameter: 'categoria', type: 'SINGLE_SELECT' },
+          { label: 'Período', parameter: 'periodo', type: 'DATE_RANGE' },
+        ],
+      }),
+    )
+    expect(text).toContain('Categoria')
+    expect(text).toContain('$categoria')
+    expect(text).toContain('Seleção única')
+    expect(text).toContain('$periodo_inicio')
+    expect(text).toContain('$periodo_fim')
+    expect(text).toContain('Intervalo de datas')
+  })
+
+  it('FLT-20 sem filtros a seção diz nenhum', () => {
+    const human = String(
+      buildWidgetMessages({ schema, widget, prompt: 'x' })[1]?.content,
+    )
+    expect(human).toContain('Filtros do dashboard: nenhum')
+  })
+
   it('AIQ-05 pedido inclui o texto e o título, Cypher, visualização e mapeamento atuais', () => {
     const messages = buildWidgetMessages({
       schema,

@@ -32,6 +32,7 @@ export function makeWidget(overrides: Partial<WidgetDto> = {}): WidgetDto {
     visualization: 'TABLE',
     config: {},
     layout: { x: 0, y: 0, w: 4, h: 4 },
+    parameters: [],
     ...overrides,
   }
 }
@@ -51,6 +52,8 @@ export function makeDashboard(
     connectionName: 'Vendas',
     permissions: { edit: true, delete: true, share: true },
     tabs: [{ id: 't-1', name: 'Aba 1', widgets: [makeWidget()] }],
+    filters: [],
+    refreshIntervalSec: 0,
     ...overrides,
   }
 }

@@ -113,6 +113,7 @@ export function addWidget(
         visualization: 'TABLE',
         config: {},
         layout: { x: 0, y, ...NEW_WIDGET_SIZE },
+        parameters: [],
       },
     ]
   })
