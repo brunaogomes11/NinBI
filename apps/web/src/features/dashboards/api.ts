@@ -84,3 +84,14 @@ export function useCreateDashboard() {
       queryClient.invalidateQueries({ queryKey: SIDEBAR_QUERY_KEY }),
   })
 }
+
+export const dashboardQueryKey = (id: string) => ['dashboard', id] as const
+
+/** Um dashboard com abas, widgets e as permissões do usuário sobre ele. */
+export function useDashboard(id: string) {
+  return useQuery({
+    queryKey: dashboardQueryKey(id),
+    queryFn: ({ signal }) =>
+      apiFetch<DashboardDto>(`/api/dashboards/${id}`, { signal }),
+  })
+}

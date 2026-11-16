@@ -11,6 +11,7 @@ import { InitialPasswordPage } from '@/features/auth/InitialPasswordPage'
 import { LoginPage } from '@/features/auth/LoginPage'
 import { SetupPage } from '@/features/auth/SetupPage'
 import { SchemaPage } from '@/features/connections/SchemaPage'
+import { DashboardPage } from '@/features/dashboards/DashboardPage'
 import { HomePage } from '@/features/home/HomePage'
 import {
   SettingsIndexRedirect,
@@ -46,6 +47,10 @@ export const appRoutes: RouteObject[] = [
                 element: <AppShell />,
                 children: [
                   { path: '/', element: <HomePage /> },
+                  {
+                    path: '/dashboards/:dashboardId',
+                    element: <DashboardPage />,
+                  },
                   {
                     path: '/configuracoes',
                     element: <SettingsIndexRedirect />,
