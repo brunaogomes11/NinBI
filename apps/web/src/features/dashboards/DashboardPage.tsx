@@ -37,6 +37,7 @@ import { useConnections } from '@/features/connections/api'
 import { FilterBar } from '@/features/filters/FilterBar'
 import {
   FilterSessionProvider,
+  useFilterParams,
   useFilterSession,
 } from '@/features/filters/filter-session'
 import {
@@ -202,10 +203,17 @@ function DashboardViewBody({
   useEffect(() => {
     setSessionInterval(dashboard.refreshIntervalSec)
   }, [dashboard.refreshIntervalSec, setSessionInterval])
+  const filterValues = useFilterParams()
   const activeKeys = (shownTab?.widgets ?? [])
     .filter((widget) => hasWidgetQuery(widget, edit))
     .map((widget) =>
-      widgetResultKey(dashboard.id, dashboard.version, widget, edit),
+      widgetResultKey(
+        dashboard.id,
+        dashboard.version,
+        widget,
+        edit,
+        filterValues,
+      ),
     )
   useAutoRefresh({
     intervalSec: session.intervalSec,
@@ -223,6 +231,7 @@ function DashboardViewBody({
           dashboard.version,
           widget,
           edit,
+          filterValues,
         ),
       })
     }

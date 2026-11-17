@@ -1,4 +1,8 @@
-import type { DashboardFilter, FilterValue } from '@ninbi/contracts'
+import type {
+  DashboardFilter,
+  FilterValue,
+  QueryParamValue,
+} from '@ninbi/contracts'
 import {
   createContext,
   type ReactNode,
@@ -8,7 +12,7 @@ import {
   useMemo,
   useReducer,
 } from 'react'
-import { defaultValues } from './filter-values'
+import { defaultValues, filterParams } from './filter-values'
 
 export interface ClickSelection {
   widgetId: string
@@ -117,6 +121,8 @@ export function filterSessionReducer(
 }
 
 interface FilterSession extends FilterSessionState {
+  /** Os filtros em uso (os do rascunho em edição). */
+  filters: DashboardFilter[]
   setValue: (filterId: string, value: FilterValue) => void
   clearAll: () => void
   toggleClick: (widgetId: string, filterId: string, value: FilterValue) => void
@@ -163,8 +169,15 @@ export function FilterSessionProvider({
   )
 
   const session = useMemo<FilterSession>(
-    () => ({ ...state, setValue, clearAll, toggleClick, setInterval }),
-    [state, setValue, clearAll, toggleClick, setInterval],
+    () => ({
+      ...state,
+      filters,
+      setValue,
+      clearAll,
+      toggleClick,
+      setInterval,
+    }),
+    [state, filters, setValue, clearAll, toggleClick, setInterval],
   )
   return (
     <FilterSessionContext.Provider value={session}>
@@ -179,4 +192,22 @@ export function useFilterSession(): FilterSession {
     throw new Error('useFilterSession fora do FilterSessionProvider')
   }
   return session
+}
+
+/** A sessão, ou `null` fora de um `FilterSessionProvider`. */
+export function useOptionalFilterSession(): FilterSession | null {
+  return useContext(FilterSessionContext)
+}
+
+const NO_PARAMS: Record<string, QueryParamValue> = {}
+
+/** Os valores atuais dos filtros como parâmetros de consulta (FLT-11 a FLT-13). */
+export function useFilterParams(): Record<string, QueryParamValue> {
+  const session = useOptionalFilterSession()
+  const filters = session?.filters
+  const values = session?.values
+  return useMemo(
+    () => (filters && values ? filterParams(filters, values) : NO_PARAMS),
+    [filters, values],
+  )
 }

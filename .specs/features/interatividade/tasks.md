@@ -475,8 +475,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes com gesto em `DashboardFilters.test.tsx` (MSW de `.../widgets/:wid/run` grava `widgetId` e `params` de cada chamada; aba 1 com três widgets, dois com `parameters: ['categoria']`; aba 2 com um widget que usa `categoria`): `FLT-09 mudar o filtro executa de novo só os widgets que usam o parâmetro` (escolher "Jogos" gera duas chamadas, dos dois widgets com `categoria`, com `{ categoria: 'Jogos' }`; o terceiro não executa), `FLT-10 abrir outra aba executa os widgets com os valores atuais` (depois de escolher "Jogos", abrir a "Aba 2" executa o widget dela com `{ categoria: 'Jogos' }`), `FLT-11 filtro vazio chega à execução como null` (escolher "Nenhum" executa com `{ categoria: null }`), `FLT-27 só o resultado do valor mais recente aparece` (a resposta de "Jogos" fica pendente; escolher "Livros" e liberar as duas fora de ordem: o card mostra o resultado de "Livros"); em edição, um widget do rascunho com `$categoria` executa por `.../query` com `params: { categoria: 'Jogos' }`
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `DashboardFilters.test.tsx` (MSW de `.../widgets/:wid/run` grava `widgetId` e `params` de cada chamada; aba 1 com três widgets, dois com `parameters: ['categoria']`; aba 2 com um widget que usa `categoria`): `FLT-09 mudar o filtro executa de novo só os widgets que usam o parâmetro` (escolher "Jogos" gera duas chamadas, dos dois widgets com `categoria`, com `{ categoria: 'Jogos' }`; o terceiro não executa), `FLT-10 abrir outra aba executa os widgets com os valores atuais` (depois de escolher "Jogos", abrir a "Aba 2" executa o widget dela com `{ categoria: 'Jogos' }`), `FLT-11 filtro vazio chega à execução como null` (escolher "Nenhum" executa com `{ categoria: null }`), `FLT-27 só o resultado do valor mais recente aparece` (a resposta de "Jogos" fica pendente; escolher "Livros" e liberar as duas fora de ordem: o card mostra o resultado de "Livros"); em edição, um widget do rascunho com `$categoria` executa por `.../query` com `params: { categoria: 'Jogos' }`
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

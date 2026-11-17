@@ -4,6 +4,7 @@ import {
   type DashboardSaveInput,
   type DashboardSummaryDto,
   MESSAGES,
+  type QueryParamValue,
   type QueryResultDto,
   type SidebarDto,
 } from '@ninbi/contracts'
@@ -16,18 +17,23 @@ import { apiFetch } from '@/lib/api'
 export function runWidget(
   dashboardId: string,
   widgetId: string,
+  params: Record<string, QueryParamValue>,
   signal?: AbortSignal,
 ): Promise<QueryResultDto> {
   return apiFetch<QueryResultDto>(
     `/api/dashboards/${dashboardId}/widgets/${widgetId}/run`,
-    { method: 'POST', body: {}, signal },
+    { method: 'POST', body: { params }, signal },
   )
 }
 
 /** Executa um Cypher enviado como texto (só quem edita o dashboard). */
 export function runQuery(
   dashboardId: string,
-  body: { cypher: string; connectionId?: string },
+  body: {
+    cypher: string
+    connectionId?: string
+    params?: Record<string, QueryParamValue>
+  },
   signal?: AbortSignal,
 ): Promise<QueryResultDto> {
   return apiFetch<QueryResultDto>(`/api/dashboards/${dashboardId}/query`, {

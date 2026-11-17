@@ -190,4 +190,48 @@ describe('FilterBar', () => {
       within(header).getByRole('button', { name: 'Novo filtro' }),
     ).toBeInTheDocument()
   })
+
+  it('FLT-29 quem só vê muda o filtro e os widgets executam', async () => {
+    const runs: Array<{ widgetId: string; params: unknown }> = []
+    const dashboard = dashboardWith({
+      permissions: { edit: false, delete: false, share: false },
+      tabs: [
+        {
+          id: 't-1',
+          name: 'Aba 1',
+          widgets: [
+            makeWidget({
+              id: 'w-1',
+              title: 'Vendas',
+              cypher: null,
+              hasQuery: true,
+              parameters: ['categoria'],
+            }),
+          ],
+        },
+      ],
+    })
+    const { user } = renderApp('/dashboards/d-1', {
+      handlers: [
+        setupStatusHandler(false),
+        sessionHandler(makeUser({ role: 'VIEWER' })),
+        http.get('/api/dashboards/d-1', () => HttpResponse.json(dashboard)),
+        http.post(
+          '/api/dashboards/:id/widgets/:widgetId/run',
+          async ({ params, request }) => {
+            const body = (await request.json()) as { params: unknown }
+            runs.push({
+              widgetId: String(params.widgetId),
+              params: body.params,
+            })
+            return HttpResponse.json(makeQueryResult())
+          },
+        ),
+      ],
+    })
+    await waitFor(() => expect(runs).toHaveLength(1))
+    await choose(user, 'Categoria', 'Jogos')
+    await waitFor(() => expect(runs).toHaveLength(2))
+    expect(runs[1]).toEqual({ widgetId: 'w-1', params: { categoria: 'Jogos' } })
+  })
 })
