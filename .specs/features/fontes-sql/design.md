@@ -297,7 +297,9 @@ Os nomes `NEO4J_UNAVAILABLE` e `NEO4J_TIMEOUT` ficam para conexões Neo4j; as SQ
 | Testes que comparam o DTO inteiro de conexão e de dashboard falham com os campos novos | `apps/api/test/connections/`, `apps/api/test/dashboards/` | Falso alarme de regressão | Atualizar só a forma esperada (`type`, `host`, `port`, `ssl`, `connectionType`); nenhuma expectativa de comportamento Neo4j muda |
 | `interatividade` está em andamento e toca os mesmos módulos (filtros, parâmetros, prompt) | `apps/web/src/features/filters/`, `apps/api/src/filters/` | Conflito de merge | Fazer `interatividade` terminar antes da primeira task desta feature |
 | `schema-refresh.service.ts` apaga opt-outs de elementos removidos para labels e relacionamentos | `apps/api/src/schema/schema-refresh.service.ts` | Opt-outs de tabelas e colunas não seriam limpos (SCH-28 análogo) | A task que adapta o refresh cobre `TABLE` com teste |
-| `$$ ... $$` do PostgreSQL e `$1` não são reconhecidos pelo tokenizador | `packages/contracts/src/sql-tokens.ts` (novo) | Consulta com dollar-quoting é lida como texto comum | Fora do escopo na spec; o prompt da IA pede aspas simples |
+| `$$ ... $$` do PostgreSQL e `$1` não são reconhecidos pelo tokenizador | `packages/contracts/src/sql-tokens.ts` (novo) | Consulta com dollar-quoting esconderia do validador o que vem depois | Fora do escopo na spec; o tokenizador lê `$$` e `$tag$` como um delimitador e o validador recusa a consulta ("Texto entre $$ não é aceito; use aspas simples"); o prompt da IA pede aspas simples |
+| Decimal do SQL Server chega como número | `apps/api/src/sources/gateways/mssql.gateway.ts` | Decimal com mais de ~15 dígitos significativos sai arredondado; SQX-22 vale só para PostgreSQL e MySQL | Limite do driver aceito (AD-140, Assumptions da spec); o teste do gateway fixa o arredondamento |
+| MySQL interrompido em `maxRows` ou no prazo não envia `ROLLBACK` | `apps/api/src/sources/gateways/mysql.gateway.ts` | SQX-03 não termina em `ROLLBACK` explícito nesse caminho | A conexão é derrubada e o servidor desfaz a transação; aceito em AD-140 e nos Assumptions da spec |
 
 ---
 

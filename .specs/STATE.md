@@ -762,6 +762,14 @@
 - **Date**: 2026-11-17
 - **Status**: active
 
+### AD-140 (active)
+- **Decision**: Dois limites de driver de `fontes-sql` ficam aceitos e registrados na spec. (1) No SQL Server, o driver (`tedious`) entrega `decimal`/`numeric` como número de JavaScript, sem opção de texto: decimais com mais de ~15 dígitos significativos saem arredondados; SQX-22 (decimal inexato vira texto) vale para PostgreSQL e MySQL. (2) No MySQL, quando a leitura para em `maxRows` ou no prazo, o gateway derruba a conexão em vez de enviar `ROLLBACK`, porque o protocolo não aceita outra instrução antes do fim do resultado; o servidor desfaz a transação ao perder a conexão, então nada é gravado.
+- **Reason**: Verificação de `fontes-sql`, achados F3 (SQX-22 no SQL Server) e F4 (SQX-03 no MySQL). Ler decimal como texto no SQL Server exigiria reescrever cada consulta do usuário com `CAST`; esgotar o resultado do MySQL antes do `ROLLBACK` anularia o limite de linhas e o prazo. Decisão delegada: segue a opção recomendada.
+- **Trade-off**: Um decimal grande do SQL Server aparece arredondado sem aviso; no MySQL, a transação interrompida termina pelo servidor, não por um `ROLLBACK` do NinBI.
+- **Scope**: fontes-sql.
+- **Date**: 2026-11-17
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:

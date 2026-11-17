@@ -58,6 +58,8 @@ O NinBI só consulta Neo4j (AD-002): o formulário de conexão recusa qualquer e
 | Trocar a conexão do dashboard para outro tipo | Pede confirmação e avisa que as consultas precisam ser reescritas | As consultas existentes falhariam | n |
 | Conexões e dashboards | Várias conexões; cada dashboard usa exatamente uma | Vale a regra de `conexoes-schema` | y |
 | Credenciais | Senha criptografada no backend e omitida de toda resposta | Vale CONN-13 e CONN-14 | y |
+| Decimal no SQL Server | O driver do SQL Server entrega `decimal`/`numeric` como número; SQX-22 vale para PostgreSQL e MySQL; no SQL Server decimais com mais de ~15 dígitos significativos saem arredondados (limite do driver) | O driver (`tedious`) não tem opção de texto para decimal; ler como texto exigiria reescrever a consulta do usuário. AD-140, achado F3 da verificação | y - delegado |
+| ROLLBACK no MySQL interrompido | Quando o MySQL para a leitura em `maxRows` ou no prazo, a conexão é derrubada e o servidor desfaz a transação, sem `ROLLBACK` explícito | O protocolo do MySQL não aceita outra instrução antes do fim do resultado; esgotá-lo anularia o limite e o prazo. AD-140, achado F4 da verificação | y - delegado |
 
 **Open questions:** none - all resolved or logged above.
 
@@ -108,7 +110,7 @@ O NinBI só consulta Neo4j (AD-002): o formulário de conexão recusa qualquer e
 
 1. WHEN o dashboard usa uma conexão SQL THEN o sistema SHALL mostrar o editor de consulta como "Consulta SQL", com destaque de SQL [SQX-01]
 2. WHEN o dashboard usa uma conexão Neo4j THEN o sistema SHALL mostrar o editor como "Consulta Cypher", como hoje [SQX-02]
-3. The system SHALL executar toda consulta SQL em uma transação que termina em `ROLLBACK` [SQX-03]
+3. The system SHALL executar toda consulta SQL em uma transação que termina em `ROLLBACK`, exceto quando o MySQL interrompe a leitura em maxRows ou no prazo: a conexão é derrubada e o servidor desfaz a transação (Assumptions) [SQX-03]
 4. WHERE a conexão é PostgreSQL ou MySQL the system SHALL abrir a transação em modo leitura [SQX-04]
 5. IF a consulta não começa por `SELECT` ou `WITH`, ignorados espaços e comentários, THEN o sistema SHALL recusar sem enviá-la ao banco, com "Somente consultas de leitura são permitidas. Comece por SELECT ou WITH" [SQX-05]
 6. IF a consulta contém, fora de strings, comentários e identificadores entre aspas, `[]` ou crases, uma das palavras `INSERT`, `UPDATE`, `DELETE`, `MERGE`, `DROP`, `ALTER`, `CREATE`, `TRUNCATE`, `GRANT`, `REVOKE`, `EXEC`, `EXECUTE`, `CALL`, `COPY`, `SET`, `DO`, `INTO`, `DECLARE`, `WAITFOR`, `OPENROWSET`, `OPENQUERY`, `LOCK` ou `FOR UPDATE` THEN o sistema SHALL recusar sem enviá-la ao banco, com "Somente consultas de leitura são permitidas. Cláusula bloqueada: <palavra>" [SQX-06]
@@ -127,7 +129,7 @@ O NinBI só consulta Neo4j (AD-002): o formulário de conexão recusa qualquer e
 19. WHEN o valor de `$nome` é uma lista THEN o sistema SHALL enviar um parâmetro por item, de modo que `IN ($nome)` compare com cada item [SQX-19]
 20. WHEN o valor de `$nome` é uma data `AAAA-MM-DD` THEN o sistema SHALL enviá-la ao banco como data [SQX-20]
 21. WHEN o resultado tem números, textos, booleanos, datas, datas com hora, JSON, UUID ou nulos THEN o sistema SHALL devolvê-los como número, texto, booleano, `AAAA-MM-DD`, ISO 8601, o valor `json` que o Neo4j já usa, texto e `null` [SQX-21]
-22. WHEN um inteiro não cabe exato em um número de JSON THEN o sistema SHALL devolvê-lo como o valor `bigint` que o Neo4j já usa, e um decimal que não cabe exato como texto decimal [SQX-22]
+22. WHEN um inteiro não cabe exato em um número de JSON THEN o sistema SHALL devolvê-lo como o valor `bigint` que o Neo4j já usa, e um decimal que não cabe exato como texto decimal, exceto decimais no SQL Server (Assumptions) [SQX-22]
 23. WHEN o resultado tem duas colunas com o mesmo nome THEN o sistema SHALL chamar a segunda de `<nome>_2`, a terceira de `<nome>_3` [SQX-23]
 24. The system SHALL registrar em log cada execução com usuário, conexão, tipo, widget, duração, número de linhas e resultado, sem as linhas retornadas [SQX-24]
 25. IF um usuário que não pode editar o dashboard chama a execução de SQL enviado como texto THEN o sistema SHALL responder 403, como em QRY-11 [SQX-25]
