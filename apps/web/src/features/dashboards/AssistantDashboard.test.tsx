@@ -417,4 +417,30 @@ describe('Assistente na página do dashboard', () => {
     expect(await within(panel).findByText('Troquei.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Desfazer' })).toBeNull()
   })
+
+  it('CHAT-26 Descartar mantém a conversa e tira o Desfazer', async () => {
+    localStorage.setItem(OPEN_KEY, '1')
+    const { user } = open({ post: replyPost() })
+    await screen.findByText('Vendas por loja')
+    await user.type(
+      await screen.findByLabelText('Mensagem'),
+      'troque para linha',
+    )
+    await user.click(screen.getByRole('button', { name: 'Enviar' }))
+    expect(await screen.findByText('Vendas em linha')).toBeInTheDocument()
+    expect(
+      await screen.findByRole('button', { name: 'Desfazer' }),
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Descartar' }))
+    const dialog = await screen.findByRole('alertdialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Descartar' }))
+
+    expect(await screen.findByText('Vendas por loja')).toBeInTheDocument()
+    expect(screen.queryByText('Vendas em linha')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Desfazer' })).toBeNull()
+    const panel = screen.getByRole('complementary', { name: 'Assistente' })
+    expect(within(panel).getByText('troque para linha')).toBeInTheDocument()
+    expect(within(panel).getByText('Troquei.')).toBeInTheDocument()
+  })
 })
