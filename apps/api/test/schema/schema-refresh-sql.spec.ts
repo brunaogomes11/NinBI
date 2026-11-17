@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { eq } from 'drizzle-orm'
+import request from 'supertest'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { CryptoService } from '../../src/crypto/crypto.service'
 import {
@@ -14,7 +15,7 @@ import {
 } from '../../src/schema/schema-refresh.service'
 import { POSTGRES_DIALECT } from '../../src/sources/dialects'
 import { SourceGatewayError } from '../../src/sources/source'
-import { createConnection } from '../factories'
+import { createConnection, createUser } from '../factories'
 import {
   programSqlSchema,
   type SqlFixtureForeignKey,
@@ -188,6 +189,41 @@ describe('leitura do schema SQL', () => {
   it('SCS-16 escolha de exemplo por coluna sobrevive à atualização', async () => {
     const t = await setup()
     await t.readOnce()
+    await createUser(t.db, {
+      name: 'Admin',
+      email: 'admin@x.com',
+      role: 'ADMIN',
+    })
+    const admin = request.agent(t.app.getHttpServer())
+    const login = await admin
+      .post('/api/auth/login')
+      .send({ email: 'admin@x.com', password: 'senha-correta-123' })
+    expect(login.status).toBe(200)
+
+    // A escolha é gravada pela rota que a tela usa.
+    const saved = await admin
+      .put(`/api/connections/${t.connection.id}/schema/example-settings`)
+      .send({
+        kind: 'TABLE',
+        element: 'public.clientes',
+        property: 'email',
+        sendExample: false,
+      })
+    expect(saved.status).toBe(204)
+    const stored = () =>
+      t.db
+        .select()
+        .from(schemaExampleOptOuts)
+        .where(eq(schemaExampleOptOuts.connectionId, t.connection.id))
+    const describeRows = (rows: Awaited<ReturnType<typeof stored>>) =>
+      rows
+        .map((r) => `${r.elementKind} ${r.elementName}.${r.propertyName}`)
+        .sort()
+    expect(describeRows(await stored())).toEqual([
+      'TABLE public.clientes.email',
+    ])
+
+    // Escolhas de colunas que um schema anterior tinha e o atual não tem.
     const optOut = (elementName: string, propertyName: string) => ({
       connectionId: t.connection.id,
       elementKind: 'TABLE' as const,
@@ -197,20 +233,29 @@ describe('leitura do schema SQL', () => {
     await t.db
       .insert(schemaExampleOptOuts)
       .values([
-        optOut('public.clientes', 'email'),
         optOut('public.clientes', 'telefone'),
         optOut('public.antiga', 'id'),
       ])
 
     await t.readOnce()
 
-    const rows = await t.db
-      .select()
-      .from(schemaExampleOptOuts)
-      .where(eq(schemaExampleOptOuts.connectionId, t.connection.id))
-    expect(
-      rows.map((r) => `${r.elementKind} ${r.elementName}.${r.propertyName}`),
-    ).toEqual(['TABLE public.clientes.email'])
+    expect(describeRows(await stored())).toEqual([
+      'TABLE public.clientes.email',
+    ])
+    const schema = await admin.get(`/api/connections/${t.connection.id}/schema`)
+    expect(schema.status).toBe(200)
+    const clientes = (
+      schema.body as {
+        tables: {
+          name: string
+          columns: { name: string; sendExample: boolean }[]
+        }[]
+      }
+    ).tables.find((table) => table.name === 'public.clientes')
+    expect(clientes?.columns).toEqual([
+      expect.objectContaining({ name: 'email', sendExample: false }),
+      expect.objectContaining({ name: 'id', sendExample: true }),
+    ])
   })
 
   it('SCS-17 log da leitura SQL traz tipo, tabelas e relações sem exemplos', async () => {
