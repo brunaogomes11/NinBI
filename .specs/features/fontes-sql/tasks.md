@@ -756,10 +756,10 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SAI-04 consulta SQL do modelo passa pelo validador antes de executar` em apps/api/test
-- [ ] Teste `SAI-05 consulta SQL que falha pede correção com o erro do banco` em apps/api/test
-- [ ] Os testes de `ai-widget.service.spec.ts` e `ai-widget.route.spec.ts` seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SAI-04 consulta SQL do modelo passa pelo validador antes de executar` em apps/api/test
+- [x] Teste `SAI-05 consulta SQL que falha pede correção com o erro do banco` em apps/api/test
+- [x] Os testes de `ai-widget.service.spec.ts` e `ai-widget.route.spec.ts` seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

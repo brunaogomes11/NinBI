@@ -5,15 +5,18 @@ import {
   type AiProviderErrorCode,
   type AiWidgetEvent,
   type AiWidgetRequest,
-  type ConnectionSchemaDto,
   can,
   type FilterPromptInfo,
   MESSAGES,
   type QueryResultDto,
   type Role,
+  type SchemaDto,
   type WidgetVisualization,
 } from '@ninbi/contracts'
+import { eq } from 'drizzle-orm'
 import { AppError } from '../common/app-error'
+import { type AppDatabase, DB } from '../database/database.module'
+import { connections } from '../database/schema'
 import type { LlmSnapshot } from '../llm/chat-model.factory'
 import {
   LlmCancelledError,
@@ -22,10 +25,9 @@ import {
 } from '../llm/llm-client'
 import { LlmSettingsService } from '../llm/llm-settings.service'
 import { QueryService } from '../queries/query.service'
-import {
-  SchemaQueryService,
-  toGraphSchemaDto,
-} from '../schema/schema-query.service'
+import { SchemaQueryService } from '../schema/schema-query.service'
+import type { PromptDialect } from '../sources/source'
+import { SourceRegistry } from '../sources/source-registry'
 import {
   buildWidgetMessages,
   type CurrentWidget,
@@ -41,14 +43,18 @@ export interface PreparedGeneration {
   /** Cópia da configuração no início: a geração inteira usa esta (LLM-15). */
   snapshot: LlmSnapshot
   connectionId: string
-  schema: ConnectionSchemaDto
+  schema: SchemaDto
+  /** Idioma da consulta que o modelo escreve, o da fonte da conexão (SAI-01). */
+  dialect: PromptDialect
   body: AiWidgetBody
 }
 
 export interface GenerateInput {
   userId: string
   snapshot: LlmSnapshot
-  schema: ConnectionSchemaDto
+  schema: SchemaDto
+  /** Sem ele, Cypher: o assistente (`ia-dashboard`) só conhece o Neo4j. */
+  dialect?: PromptDialect
   connectionId: string
   widget: CurrentWidget
   /** Só para o log da consulta. */
@@ -82,6 +88,8 @@ export class AiWidgetService {
     @Inject(LlmClient) private readonly llm: LlmClient,
     @Inject(SchemaQueryService) private readonly schemas: SchemaQueryService,
     @Inject(QueryService) private readonly queries: QueryService,
+    @Inject(DB) private readonly db: AppDatabase,
+    @Inject(SourceRegistry) private readonly sources: SourceRegistry,
   ) {}
 
   /** Tudo que pode falhar antes de o primeiro byte da resposta sair (AIQ-16, AIQ-17). */
@@ -104,8 +112,7 @@ export class AiWidgetService {
       throw new AppError(403, 'FORBIDDEN', MESSAGES.forbiddenRoute)
     }
     const connectionId = input.body.connectionId ?? input.dashboardConnectionId
-    // SPEC_DEVIATION (T26): até a T29 o prompt só conhece o grafo.
-    const schema = toGraphSchemaDto(await this.schemas.get(connectionId))
+    const schema = await this.schemas.get(connectionId)
     // "Lido" é ter documento guardado, em qualquer estado (AD-085).
     if (schema.readAt === null) {
       throw new AppError(409, 'SCHEMA_NOT_READ', MESSAGES.aiSchemaNotRead)
@@ -115,8 +122,18 @@ export class AiWidgetService {
       snapshot,
       connectionId,
       schema,
+      dialect: await this.dialectOf(connectionId),
       body: input.body,
     }
+  }
+
+  /** O dialeto da fonte do tipo da conexão (SAI-01, SAI-03). */
+  private async dialectOf(connectionId: string): Promise<PromptDialect> {
+    const [connection] = await this.db
+      .select({ type: connections.type })
+      .from(connections)
+      .where(eq(connections.id, connectionId))
+    return this.sources.for(connection?.type ?? 'NEO4J').dialect
   }
 
   /**
@@ -125,8 +142,10 @@ export class AiWidgetService {
    */
   async generate(input: GenerateInput): Promise<WidgetGenerationOutcome> {
     const { snapshot, schema, connectionId, userId, signal } = input
+    const dialect = input.dialect ?? 'Cypher'
     const messages: BaseMessage[] = buildWidgetMessages({
       schema,
+      dialect,
       widget: input.widget,
       prompt: input.prompt,
       filters: input.filters,
@@ -184,7 +203,11 @@ export class AiWidgetService {
         } catch (error) {
           if (signal.aborted) throw new LlmCancelledError()
           if (!(error instanceof AppError)) throw error
-          if (error.code === 'NEO4J_UNAVAILABLE') {
+          // Banco fora do ar não se corrige com outra consulta (FIX, SQX-14).
+          if (
+            error.code === 'NEO4J_UNAVAILABLE' ||
+            error.code === 'SOURCE_UNAVAILABLE'
+          ) {
             return { kind: 'stopped', message: error.message }
           }
           failure = {
@@ -195,7 +218,7 @@ export class AiWidgetService {
         }
       }
       lastMessage = failure.message
-      messages.push(new AIMessage(text), correctionMessage(failure))
+      messages.push(new AIMessage(text), correctionMessage(failure, dialect))
     }
 
     return {
@@ -211,13 +234,14 @@ export class AiWidgetService {
     emit: (event: AiWidgetEvent) => void,
     signal: AbortSignal,
   ): Promise<void> {
-    const { body, snapshot, schema, connectionId, userId } = prepared
+    const { body, snapshot, schema, dialect, connectionId, userId } = prepared
     let outcome: WidgetGenerationOutcome
     try {
       outcome = await this.generate({
         userId,
         snapshot,
         schema,
+        dialect,
         connectionId,
         widget: body.widget,
         widgetId: body.widgetId,
