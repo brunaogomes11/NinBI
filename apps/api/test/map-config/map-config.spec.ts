@@ -33,22 +33,18 @@ describe('configuração do mapa', () => {
   it('MAP-07 endereço dos tiles vem de NINBI_MAP_TILE_URL com OpenStreetMap por padrão', async () => {
     delete process.env.NINBI_MAP_TILE_URL
     delete process.env.NINBI_MAP_ATTRIBUTION
-    const first = await start()
-    const user = await signInAs(first.app, first.db, 'EDITOR', 'ed@x.com')
+    const t = await start()
+    const user = await signInAs(t.app, t.db, 'EDITOR', 'ed@x.com')
     const byDefault = await user.agent.get('/api/map-config')
     expect(byDefault.status).toBe(200)
     expect(byDefault.body).toEqual({
       tileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution: '© OpenStreetMap',
     } satisfies MapConfigDto)
-    await close?.()
-    close = undefined
-
+    // o controller lê o ambiente a cada requisição: o mesmo app serve os dois cenários
     process.env.NINBI_MAP_TILE_URL = 'https://tiles.exemplo/{z}/{x}/{y}.png'
     process.env.NINBI_MAP_ATTRIBUTION = '© Exemplo'
-    const second = await start()
-    const other = await signInAs(second.app, second.db, 'EDITOR', 'ed@x.com')
-    const configured = await other.agent.get('/api/map-config')
+    const configured = await user.agent.get('/api/map-config')
     expect(configured.body).toEqual({
       tileUrl: 'https://tiles.exemplo/{z}/{x}/{y}.png',
       attribution: '© Exemplo',
