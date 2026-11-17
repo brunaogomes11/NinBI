@@ -1,6 +1,6 @@
 # fontes-sql verification
 
-**Verdict**: FAIL
+**Verdict**: FAIL (round 1; every finding is now closed, see Closed and the proofs rerun)
 **Proofs**: `proofs.md` at d925f55
 **Verifier**: independent sub-agent (author != verifier)
 
@@ -110,7 +110,7 @@ Count of `no` rows: 12 (C8, C9, C25, C28, C30, C31, C39, C44, C60, C66, C75, C76
 | F8 | C76 | Minor | The SMG-01 migration test does not assert that the connection schema survives the migration, though the criterion lists "schema" among the fields that must stay equal. | `apps/api/test/database/connections-schema.spec.ts:75-96` (asserts type, URI, database, username, password only). | Seed a schema record before `applyFontesSql()` and assert it is unchanged after, or correct the criterion if "schema" means something the migration does not touch. | 29655bc |
 | F9 | C66 | Minor | The SCS-16 named test seeds opt-out rows directly and never calls the PUT endpoint, so a broken save still passes it. The save is asserted only inside the test titled SCS-12 in `schema-relational.spec.ts` (PUT then GET with `sendExample: false`), which is not in the proof set. | `schema-refresh-sql.spec.ts:56-82`; `schema-relational.spec.ts` (PUT at roughly lines 22-30). | Drive the named test through `PUT .../example-settings` and assert the stored row, or add the save-asserting test to C66's proofs. | be7cfa5 |
 | F10 | C39 | Minor | `bindSqlParams` reads `params[name]` on a plain object, so a `$` name that exists on `Object.prototype` and has no value binds to an inherited function instead of `null`. | `apps/api/src/queries/sql-params.ts:96`. Probes: `SELECT $constructor` with `{}` gives values `[Object]` (function); `SELECT $toString` gives `[toString]`. The named test uses only `a` and `b`. | Use `Object.hasOwn(params, name) ? params[name] : undefined` (or a null-prototype object), and add a `$constructor` case to `sql-params.spec.ts` SQX-17. | 62dea33 |
-| F11 | Header | Minor | `proofs.md` says `**HEAD**: 9053c87`, but HEAD is d925f55. The only commits in between change `.specs/` files, so the code proofs hold; the gate reads `proofs.md` at HEAD and will refuse the mismatch. | `.specs/features/fontes-sql/proofs.md:3`; `git diff --stat 9053c87..HEAD` lists only `proofs.md` and `tasks.md`. | Rerun `check_proofs.py fontes-sql` at d925f55 so the header matches HEAD. | |
+| F11 | Header | Minor | `proofs.md` says `**HEAD**: 9053c87`, but HEAD is d925f55. The only commits in between change `.specs/` files, so the code proofs hold; the gate reads `proofs.md` at HEAD and will refuse the mismatch. | `.specs/features/fontes-sql/proofs.md:3`; `git diff --stat 9053c87..HEAD` lists only `proofs.md` and `tasks.md`. | Rerun `check_proofs.py fontes-sql` at d925f55 so the header matches HEAD. | c0f0e78 (check_proofs rerun after the fixes: 132 pass, 0 fail) |
 
 ## Advisory notes
 
