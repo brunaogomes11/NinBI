@@ -33,6 +33,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { CypherEditor } from '@/features/widgets/CypherEditor'
 import { fetchDraftFilterOptions } from './api'
 import { FilterControl } from './FilterControl'
+import { parseStaticOptions } from './filter-values'
 
 const SELECTION_TYPES: FilterType[] = ['SINGLE_SELECT', 'MULTI_SELECT']
 const PREVIEW_OPTIONS_SHOWN = 20
@@ -116,10 +117,7 @@ export function FilterEditorDialog({
   })
 
   function build(): DashboardFilter {
-    const staticValues = staticText
-      .split('\n')
-      .map((line) => line.trim())
-      .filter((line) => line !== '')
+    const staticValues = parseStaticOptions(staticText)
     return {
       id,
       label,
@@ -163,10 +161,7 @@ export function FilterEditorDialog({
           source: 'STATIC',
           values:
             source === 'STATIC'
-              ? staticText
-                  .split('\n')
-                  .map((line) => line.trim())
-                  .filter((line) => line !== '')
+              ? parseStaticOptions(staticText)
               : (loaded ?? []).map(String),
         },
   }

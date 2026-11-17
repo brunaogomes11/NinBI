@@ -233,6 +233,29 @@ describe('FilterControl', () => {
     ).toBeInTheDocument()
   })
 
+  it('FLT-24 opções repetidas aparecem uma vez só no filtro de seleção única', async () => {
+    const user = userEvent.setup()
+    render(
+      withClient(
+        <FilterControl
+          filter={makeFilter({
+            options: {
+              source: 'STATIC',
+              values: ['Livros', 'Jogos', 'Livros'],
+            },
+          })}
+          value={null}
+          source={SOURCE}
+          onChange={() => {}}
+        />,
+      ),
+    )
+    await user.click(screen.getByRole('combobox', { name: 'Categoria' }))
+    expect(
+      await screen.findAllByRole('option', { name: 'Livros' }),
+    ).toHaveLength(1)
+  })
+
   it('FLT-14 escolher Nenhum chama onChange com null', async () => {
     const user = userEvent.setup()
     const onChange = vi.fn()

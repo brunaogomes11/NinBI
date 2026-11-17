@@ -5,6 +5,7 @@ import type {
 } from '@ninbi/contracts'
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
+import { uniqueOptions } from './filter-values'
 
 /** Opções de um filtro "Consulta Cypher" pela consulta salva (quem vê o dashboard). */
 export function fetchSavedFilterOptions(
@@ -76,14 +77,14 @@ export function useFilterOptions(
   })
   if (staticValues) {
     return {
-      options: staticValues,
+      options: uniqueOptions(staticValues),
       loading: false,
       failed: false,
       retry: () => {},
     }
   }
   return {
-    options: query.data ?? [],
+    options: uniqueOptions(query.data ?? []),
     loading: query.isFetching && !query.data,
     failed: query.isError,
     retry: () => void query.refetch(),

@@ -30,6 +30,11 @@ describe('optionsFromResult', () => {
     expect(out.options).toEqual(['b', 'a', 1])
   })
 
+  it('FLT-24 o número 1 e o texto "1" são a mesma opção', () => {
+    const out = optionsFromResult(result([[1], ['1'], ['a'], [true], ['true']]))
+    expect(out.options).toEqual([1, 'a', true])
+  })
+
   it('FLT-24 bigint e json viram o texto e só a primeira coluna conta', () => {
     const out = optionsFromResult(
       result(

@@ -83,6 +83,29 @@ export function widgetsUsingFilter(
     .length
 }
 
+/** Opções sem repetidas por texto (`1` e `'1'` são a mesma opção), na ordem da primeira aparição. */
+export function uniqueOptions<T extends string | number | boolean>(
+  options: readonly T[],
+): T[] {
+  const seen = new Set<string>()
+  return options.filter((option) => {
+    const key = String(option)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+/** Linhas da lista fixa: sem espaços nas pontas, sem vazias e sem repetidas. */
+export function parseStaticOptions(text: string): string[] {
+  return uniqueOptions(
+    text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line !== ''),
+  )
+}
+
 export type NumberInputResult =
   | { ok: true; value: number | null }
   | { ok: false; message: string }
