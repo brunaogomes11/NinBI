@@ -97,9 +97,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Teste `ASQ-08 filtro com consulta de opções é validado pelo tipo da conexão` em apps/api/test/assistant
-- [ ] Os testes de `resolve-actions.spec.ts` seguem verdes (o validador de Cypher é o padrão nos testes que não passam um)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `ASQ-08 filtro com consulta de opções é validado pelo tipo da conexão` em apps/api/test/assistant
+- [x] Os testes de `resolve-actions.spec.ts` seguem verdes (o validador de Cypher é o padrão nos testes que não passam um)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick

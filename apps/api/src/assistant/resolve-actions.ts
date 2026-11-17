@@ -161,12 +161,21 @@ function actionType(raw: unknown): string {
   return typeof type === 'string' && type !== '' ? type : 'desconhecida'
 }
 
-/** Aplica o plano do LLM, em ordem, a uma cópia do rascunho: só a lista fechada de ações, só alvos que existem (CHAT-07, CHAT-23, CHAT-24). */
+/** Valida o texto de uma consulta como somente leitura no tipo da conexão (`Source.validate`). */
+export type QueryValidator = (query: string) => { ok: boolean }
+
+/**
+ * Aplica o plano do LLM, em ordem, a uma cópia do rascunho: só a lista fechada
+ * de ações, só alvos que existem (CHAT-07, CHAT-23, CHAT-24). A consulta das
+ * opções de um filtro passa por `validate`, o validador do tipo da conexão do
+ * rascunho; sem ele, o de Cypher como antes (ASQ-08).
+ */
 export function resolveActions(
   draft: AssistantDraft,
   refs: DraftRefs,
   rawActions: unknown[],
   newId: () => string,
+  validate: QueryValidator = validateReadOnlyCypher,
 ): ResolvedPlan {
   const tabs: SimTab[] = draft.tabs.map((tab) => ({
     id: tab.id,
@@ -405,7 +414,7 @@ export function resolveActions(
         const checked = dashboardFilterSchema.safeParse(candidate)
         if (
           !checked.success ||
-          !optionsAreReadOnly(checked.data) ||
+          !optionsAreReadOnly(checked.data, validate) ||
           !dashboardFiltersSchema.safeParse([
             ...filters.map(forValidation),
             checked.data,
@@ -449,7 +458,7 @@ export function resolveActions(
         const rest = filters.filter((item) => item.id !== current.id)
         if (
           !checked.success ||
-          !optionsAreReadOnly(checked.data) ||
+          !optionsAreReadOnly(checked.data, validate) ||
           !dashboardFiltersSchema.safeParse([
             ...rest.map(forValidation),
             checked.data,
@@ -503,8 +512,11 @@ export function resolveActions(
 }
 
 /** A consulta das opções `QUERY` passa pela mesma validação somente leitura dos widgets; não é executada aqui. */
-function optionsAreReadOnly(filter: DashboardFilter): boolean {
+function optionsAreReadOnly(
+  filter: DashboardFilter,
+  validate: QueryValidator,
+): boolean {
   const options = filter.options
   if (options?.source !== 'QUERY' || options.cypher === null) return true
-  return validateReadOnlyCypher(options.cypher).ok
+  return validate(options.cypher).ok
 }

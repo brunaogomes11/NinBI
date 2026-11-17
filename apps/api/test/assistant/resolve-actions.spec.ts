@@ -5,6 +5,7 @@ import {
   serializeDraft,
 } from '../../src/assistant/assistant-prompt'
 import { resolveActions } from '../../src/assistant/resolve-actions'
+import { validateReadOnlySql } from '../../src/queries/read-only-sql'
 
 const id = (n: number) =>
   `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
@@ -280,6 +281,65 @@ describe('resolver as ações do plano', () => {
       MESSAGES.assistantInvalidAction('create_filter'),
       MESSAGES.assistantInvalidAction('create_filter'),
     ])
+  })
+
+  it('ASQ-08 filtro com consulta de opções é validado pelo tipo da conexão', () => {
+    const draft = makeDraft()
+    const sql = (query: string) => validateReadOnlySql(query, 'POSTGRES')
+    const filterWith = (cypher: string, parameter: string) => ({
+      type: 'create_filter',
+      label: `Filtro ${parameter}`,
+      parameter,
+      filterType: 'SINGLE_SELECT',
+      options: { source: 'QUERY', cypher },
+    })
+    const plan = resolveActions(
+      draft,
+      serializeDraft(draft).refs,
+      [
+        filterWith('SELECT DISTINCT cidade AS value FROM clientes', 'cidade'),
+        filterWith('DELETE FROM clientes RETURNING cidade', 'apagar'),
+        // Cypher numa conexão SQL não passa no validador de SQL
+        filterWith('MATCH (c:Cliente) RETURN c.cidade AS value', 'cypher'),
+        {
+          type: 'update_filter',
+          filter: 'f1',
+          filterType: 'SINGLE_SELECT',
+          options: {
+            source: 'QUERY',
+            cypher: 'UPDATE clientes SET cidade = 1',
+          },
+        },
+      ],
+      counter(),
+      sql,
+    )
+    expect(plan.actions).toEqual([
+      {
+        type: 'create_filter',
+        filter: expect.objectContaining({
+          parameter: 'cidade',
+          options: {
+            source: 'QUERY',
+            cypher: 'SELECT DISTINCT cidade AS value FROM clientes',
+          },
+        }),
+      },
+    ])
+    expect(plan.notApplied).toEqual([
+      MESSAGES.assistantInvalidAction('create_filter'),
+      MESSAGES.assistantInvalidAction('create_filter'),
+      MESSAGES.assistantInvalidAction('update_filter'),
+    ])
+
+    // sem validador vale o de Cypher (o padrão): a mesma consulta Cypher entra
+    const cypherPlan = resolveActions(
+      draft,
+      serializeDraft(draft).refs,
+      [filterWith('MATCH (c:Cliente) RETURN c.cidade AS value', 'cypher')],
+      counter(),
+    )
+    expect(cypherPlan.actions).toHaveLength(1)
   })
 
   it('move_widget e resize_widget saem como set_layout sem sobreposição', () => {
