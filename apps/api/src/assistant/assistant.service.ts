@@ -27,7 +27,10 @@ import {
 } from '../llm/llm-client'
 import { LlmSettingsService } from '../llm/llm-settings.service'
 import { QueryService } from '../queries/query.service'
-import { SchemaQueryService } from '../schema/schema-query.service'
+import {
+  SchemaQueryService,
+  toGraphSchemaDto,
+} from '../schema/schema-query.service'
 import { AssistantHistoryService } from './assistant-history.service'
 import { buildAssistantMessages, serializeDraft } from './assistant-prompt'
 import { parseAssistantReply } from './assistant-reply'
@@ -94,7 +97,9 @@ export class AssistantService {
     ) {
       throw new AppError(403, 'FORBIDDEN', MESSAGES.forbiddenRoute)
     }
-    const schema = await this.schemas.get(connectionId)
+    // SPEC_DEVIATION (fontes-sql T26): o assistente só fala Cypher e fica fora
+    // da feature; uma conexão SQL chega a ele como grafo vazio, como antes.
+    const schema = toGraphSchemaDto(await this.schemas.get(connectionId))
     if (schema.readAt === null) {
       throw new AppError(409, 'SCHEMA_NOT_READ', MESSAGES.aiSchemaNotRead)
     }

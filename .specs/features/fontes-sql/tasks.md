@@ -690,9 +690,9 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SCS-12 schema SQL sai em ordem alfabética com views e relações` em apps/api/test
-- [ ] Os testes de `schema-routes.spec.ts` de Neo4j seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SCS-12 schema SQL sai em ordem alfabética com views e relações` em apps/api/test
+- [x] Os testes de `schema-routes.spec.ts` de Neo4j seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

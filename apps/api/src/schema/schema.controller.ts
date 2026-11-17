@@ -9,9 +9,9 @@ import {
   Put,
 } from '@nestjs/common'
 import {
-  type ConnectionSchemaDto,
   type ExampleSetting,
   exampleSettingSchema,
+  type SchemaDto,
   type SchemaStateDto,
 } from '@ninbi/contracts'
 import { RequirePermission } from '../auth/decorators'
@@ -29,7 +29,7 @@ export class SchemaController {
 
   @RequirePermission('connections.read')
   @Get()
-  get(@Param('id') id: string): Promise<ConnectionSchemaDto> {
+  get(@Param('id') id: string): Promise<SchemaDto> {
     return this.query.get(id)
   }
 

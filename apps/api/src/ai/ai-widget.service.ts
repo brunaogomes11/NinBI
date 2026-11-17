@@ -22,7 +22,10 @@ import {
 } from '../llm/llm-client'
 import { LlmSettingsService } from '../llm/llm-settings.service'
 import { QueryService } from '../queries/query.service'
-import { SchemaQueryService } from '../schema/schema-query.service'
+import {
+  SchemaQueryService,
+  toGraphSchemaDto,
+} from '../schema/schema-query.service'
 import {
   buildWidgetMessages,
   type CurrentWidget,
@@ -101,7 +104,8 @@ export class AiWidgetService {
       throw new AppError(403, 'FORBIDDEN', MESSAGES.forbiddenRoute)
     }
     const connectionId = input.body.connectionId ?? input.dashboardConnectionId
-    const schema = await this.schemas.get(connectionId)
+    // SPEC_DEVIATION (T26): até a T29 o prompt só conhece o grafo.
+    const schema = toGraphSchemaDto(await this.schemas.get(connectionId))
     // "Lido" é ter documento guardado, em qualquer estado (AD-085).
     if (schema.readAt === null) {
       throw new AppError(409, 'SCHEMA_NOT_READ', MESSAGES.aiSchemaNotRead)
