@@ -30,6 +30,7 @@ O assistente de chat (`ia-dashboard`) assume Neo4j: o prompt diz "dashboard de d
 | Comportamento com SQL | Igual ao do Neo4j, na linguagem e no dialeto da conexão | Nada de produto a decidir: só a linguagem muda | y - delegado |
 | De onde vem o dialeto | `Source.dialect` da conexão do rascunho; o laço de geração já aceita `dialect` (T29 de `fontes-sql`) | Reaproveita AD-137 | y - delegado |
 | Qual conexão vale | A do rascunho, como em AD-134 | O usuário pode trocar a conexão sem salvar | y - delegado |
+| Limites de `extractParameterNames` em SQL | O extrator não conhece o `#` de comentário do MySQL e lê o corpo de `$$ ... $$` como código; um `$nome` ali conta como parâmetro (inofensivo: vai como `null`; o validador já recusa `$$`) | Passar o dialeto até o extrator custaria mais que o ganho | y - delegado |
 | Rótulo da consulta no rascunho enviado ao LLM | `SQL:` e ```sql para SQL; `Cypher:` e ```cypher para Neo4j | Mantém o texto do Neo4j como está | n |
 | Texto da spec de `ia-dashboard` | Fica como está; os critérios CHAT e GEN valem para SQL com a consulta no lugar do Cypher | Evita reescrever uma spec fechada | n |
 
@@ -72,7 +73,7 @@ O assistente de chat (`ia-dashboard`) assume Neo4j: o prompt diz "dashboard de d
 **Acceptance Criteria**:
 
 1. WHEN o assistente cria ou altera widgets de um dashboard SQL THEN o sistema SHALL calcular os parâmetros de cada widget com o tokenizador de SQL [ASQ-12]
-2. WHEN o assistente muda filtros ou widgets de um dashboard SQL THEN o sistema SHALL achar os widgets que usam cada filtro pelos `$nome` lidos como SQL, para atualizar o resultado guardado [ASQ-13]
+2. WHEN o assistente muda filtros ou widgets de um dashboard SQL THEN o sistema SHALL achar os widgets que usam cada filtro pelos `$nome` lidos como SQL (exceto `$nome` depois de `#` do MySQL e dentro de `$$`, ver Assumptions), para atualizar o resultado guardado [ASQ-13]
 
 **Independent Test**: Aplicar uma ação `create_widget` com `$cidade` num dashboard SQL e ver o parâmetro no widget.
 
