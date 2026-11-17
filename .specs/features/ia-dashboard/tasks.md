@@ -223,8 +223,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/assistant-reply.spec.ts`: `CHAT-12 texto sem JSON vira resposta sem ações` ("Este dashboard mostra vendas." dá `reply` com esse texto e `actions: []`), JSON em cerca ```` ```json ```` com texto antes e depois é lido, `actions` que não é lista vira `[]`, `reply` ausente vira `''`
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/assistant/assistant-reply.spec.ts`: `CHAT-12 texto sem JSON vira resposta sem ações` ("Este dashboard mostra vendas." dá `reply` com esse texto e `actions: []`), JSON em cerca ```` ```json ```` com texto antes e depois é lido, `actions` que não é lista vira `[]`, `reply` ausente vira `''`
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
