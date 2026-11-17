@@ -165,6 +165,73 @@ describe('applyAssistantActions', () => {
     })
   })
 
+  it('CHAT-08 update_widget que falhou sem nova consulta mantém a visualização e o mapeamento atuais', () => {
+    const draft = fromDto(
+      makeDashboard({
+        tabs: [
+          {
+            id: 't-1',
+            name: 'Aba 1',
+            widgets: [
+              makeWidget({
+                visualization: 'BAR',
+                config: { mapping: BAR_MAPPING },
+              }),
+            ],
+          },
+        ],
+      }),
+    )
+
+    const next = applyAssistantActions(draft, [
+      {
+        type: 'update_widget',
+        widgetId: 'w-1',
+        title: 'Outro',
+        result: null,
+        error: 'Não foi possível gerar',
+      },
+    ])
+
+    const widget = next.tabs[0].widgets[0]
+    expect(widget.title).toBe('Outro')
+    expect(widget.visualization).toBe('BAR')
+    expect(widget.config.mapping).toEqual(BAR_MAPPING)
+  })
+
+  it('CHAT-08 mudar só a visualização com a consulta atual em erro aplica a visualização pedida', () => {
+    const draft = fromDto(
+      makeDashboard({
+        tabs: [
+          {
+            id: 't-1',
+            name: 'Aba 1',
+            widgets: [
+              makeWidget({
+                visualization: 'TABLE',
+                config: { mapping: BAR_MAPPING },
+              }),
+            ],
+          },
+        ],
+      }),
+    )
+
+    const next = applyAssistantActions(draft, [
+      {
+        type: 'update_widget',
+        widgetId: 'w-1',
+        visualization: 'BAR',
+        result: null,
+        error: 'Consulta com erro',
+      },
+    ])
+
+    const widget = next.tabs[0].widgets[0]
+    expect(widget.visualization).toBe('BAR')
+    expect(widget.config.mapping).toEqual(BAR_MAPPING)
+  })
+
   it('update_widget com novo Cypher troca consulta e título e mantém a posição', () => {
     const next = applyAssistantActions(baseDraft(), [
       {

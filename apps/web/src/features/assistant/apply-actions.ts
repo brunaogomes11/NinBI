@@ -113,11 +113,9 @@ function applyOne(
         action.mapping !== undefined ||
         action.cypher !== undefined
       if (reshapes) {
+        // com erro de consulta a visualização pedida vale: a prévia mostra o erro
         const visualization =
-          action.error === null
-            ? (action.visualization ??
-              (widget.visualization as WidgetVisualization))
-            : 'TABLE'
+          action.visualization ?? (widget.visualization as WidgetVisualization)
         const mapping =
           action.mapping !== undefined
             ? action.mapping

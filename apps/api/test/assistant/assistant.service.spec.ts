@@ -534,6 +534,51 @@ describe('AssistantService', () => {
     expect(reads(t).at(-1)?.cypher).toBe(CURRENT_CYPHER)
   })
 
+  it('CHAT-08 update_widget com prompt que falha mantém Cypher, visualização e mapeamento e traz o erro', async () => {
+    const t = await setup()
+    t.chatModels.script(
+      plan([
+        { type: 'update_widget', widget: 'w1', prompt: 'agrupe por categoria' },
+      ]),
+      widgetReply('MATCH (n) DELETE n'),
+      widgetReply('MATCH (n) SET n.a = 1'),
+      widgetReply('MATCH (n) REMOVE n.a'),
+      widgetReply('MATCH (n) DETACH DELETE n'),
+    )
+
+    const action = done(await t.run()).actions[0]
+
+    expect(action).toMatchObject({
+      type: 'update_widget',
+      widgetId: WIDGET_ID,
+      result: null,
+      error: expect.any(String),
+    })
+    expect(action).not.toHaveProperty('visualization')
+    expect(action).not.toHaveProperty('mapping')
+    expect(action).not.toHaveProperty('cypher')
+  })
+
+  it('CHAT-08 mudar só a visualização com a consulta atual em erro mantém a visualização pedida', async () => {
+    const t = await setup()
+    t.neo4j.whenRead(
+      'count(n)',
+      new Neo4jGatewayError('sem rota', 'ServiceUnavailable'),
+    )
+    t.chatModels.script(
+      plan([{ type: 'update_widget', widget: 'w1', visualization: 'BAR' }]),
+    )
+
+    const action = done(await t.run()).actions[0]
+
+    expect(action).toMatchObject({
+      type: 'update_widget',
+      visualization: 'BAR',
+      result: null,
+      error: expect.any(String),
+    })
+  })
+
   it('CHAT-09 resposta do assistente traz a lista do que mudou', async () => {
     const t = await setup()
     t.chatModels.script(

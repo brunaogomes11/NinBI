@@ -411,9 +411,12 @@ export class AssistantService {
         type: 'update_widget',
         widgetId: action.widgetId,
         title,
-        ...(cypher !== null && { cypher }),
-        visualization,
-        mapping,
+        // falha: o widget fica como estava (Cypher, visualização e mapeamento); só o erro é informado
+        ...(done && {
+          ...(cypher !== null && { cypher }),
+          visualization,
+          mapping,
+        }),
         result,
         error,
       },
