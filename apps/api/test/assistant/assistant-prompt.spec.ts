@@ -7,6 +7,7 @@ import {
   type AssistantMessageDto,
   assistantDraftSchema,
   type ConnectionSchemaDto,
+  type RelationalSchemaDto,
 } from '@ninbi/contracts'
 import { describe, expect, it } from 'vitest'
 import {
@@ -177,5 +178,183 @@ describe('pedido do plano do assistente', () => {
       text.indexOf('w2 "Ranking"'),
     )
     expect(text.indexOf('w2 "Ranking"')).toBeLessThan(text.indexOf('f1 '))
+  })
+})
+
+const relational: RelationalSchemaDto = {
+  kind: 'RELATIONAL',
+  connectionId: 'c2',
+  connectionName: 'Loja SQL',
+  status: 'READY',
+  readAt: '2026-01-01T00:00:00.000Z',
+  startedAt: null,
+  error: null,
+  tables: [
+    {
+      name: 'public.pedidos',
+      isView: false,
+      columns: [
+        { name: 'id', type: 'integer', example: '7', sendExample: true },
+        {
+          name: 'cliente_id',
+          type: 'integer',
+          example: '42',
+          sendExample: true,
+        },
+        {
+          name: 'cpf',
+          type: 'text',
+          example: 'EXEMPLO-SECRETO-9f1c',
+          sendExample: false,
+        },
+      ],
+    },
+    {
+      name: 'public.clientes',
+      isView: false,
+      columns: [
+        { name: 'id', type: 'integer', example: null, sendExample: true },
+        {
+          name: 'cidade',
+          type: 'varchar(80)',
+          example: 'Recife',
+          sendExample: true,
+        },
+      ],
+    },
+  ],
+  foreignKeys: [
+    {
+      from: { table: 'public.pedidos', columns: ['cliente_id'] },
+      to: { table: 'public.clientes', columns: ['id'] },
+    },
+  ],
+}
+
+const sqlDraft = {
+  ...rawDraft,
+  tabs: [
+    {
+      id: id(10),
+      name: 'Vendas',
+      widgets: [
+        {
+          id: id(11),
+          title: 'Pedidos por cidade',
+          cypher:
+            'SELECT c.cidade AS cidade, count(*) AS total FROM public.pedidos p JOIN public.clientes c ON c.id = p.cliente_id GROUP BY c.cidade',
+          visualization: 'BAR',
+          mapping: { x: 'cidade', series: ['total'], stacked: false },
+          layout: { x: 0, y: 0, w: 6, h: 4 },
+        },
+      ],
+    },
+  ],
+}
+
+const systemOf = (messages: ReturnType<typeof buildAssistantMessages>) =>
+  String(messages[0]?.content)
+
+describe('pedido do plano pela conexão do rascunho', () => {
+  it('ASQ-01 plano para conexão SQL leva o schema relacional', () => {
+    const messages = buildAssistantMessages({
+      schema: relational,
+      dialect: 'PostgreSQL',
+      draft: assistantDraftSchema.parse(sqlDraft),
+      history: [],
+      message: 'pedidos por cliente',
+    })
+    const system = systemOf(messages)
+    expect(system).toContain('Tabelas')
+    expect(system).toContain('public.pedidos')
+    expect(system).toContain('- cliente_id: integer = 42')
+    expect(system).toContain('- cidade: varchar(80) = Recife')
+    // exemplo desligado pelo Admin: só o tipo
+    expect(system).toContain('- cpf: text')
+    expect(system).not.toContain('EXEMPLO-SECRETO-9f1c')
+    expect(system).toContain('Chaves estrangeiras')
+    expect(system).toContain('public.pedidos.cliente_id → public.clientes.id')
+    expect(system).not.toContain('Labels')
+  })
+
+  it('ASQ-02 plano para conexão Neo4j leva o schema de grafo como antes', () => {
+    const draft = assistantDraftSchema.parse(rawDraft)
+    const withDialect = buildAssistantMessages({
+      schema,
+      dialect: 'Cypher',
+      draft,
+      history,
+      message: 'oi',
+    })
+    const withoutDialect = buildAssistantMessages({
+      schema,
+      draft,
+      history,
+      message: 'oi',
+    })
+    const system = systemOf(withDialect)
+    expect(system).toContain('Labels')
+    expect(system).toContain('(:Pedido)')
+    expect(system).toContain('Relacionamentos')
+    expect(system).not.toContain('Tabelas')
+    expect(withDialect.map((m) => String(m.content))).toEqual(
+      withoutDialect.map((m) => String(m.content)),
+    )
+  })
+
+  it('ASQ-03 sistema descreve o dashboard no banco da conexão', () => {
+    const draft = assistantDraftSchema.parse(rawDraft)
+    const cases = [
+      { dialect: 'Cypher', banco: 'Neo4j', schema },
+      { dialect: 'PostgreSQL', banco: 'PostgreSQL', schema: relational },
+      { dialect: 'MySQL', banco: 'MySQL', schema: relational },
+      { dialect: 'T-SQL', banco: 'SQL Server', schema: relational },
+    ] as const
+    for (const item of cases) {
+      const system = systemOf(
+        buildAssistantMessages({
+          schema: item.schema,
+          dialect: item.dialect,
+          draft,
+          history: [],
+          message: 'oi',
+        }),
+      )
+      expect(system).toContain(
+        `Você é o assistente de um dashboard de dados em ${item.banco}:`,
+      )
+      for (const other of cases.filter((c) => c.banco !== item.banco)) {
+        expect(system).not.toContain(`dashboard de dados em ${other.banco}`)
+      }
+      expect(system).toContain('para quem escreve a consulta')
+      expect(system).not.toContain('para quem escreve o Cypher')
+    }
+  })
+
+  it('ASQ-04 rascunho mostra a consulta na linguagem da conexão', () => {
+    const sql = serializeDraft(assistantDraftSchema.parse(sqlDraft), 'MySQL')
+    expect(sql.text).toContain(
+      '  SQL: ```sql\nSELECT c.cidade AS cidade, count(*) AS total',
+    )
+    expect(sql.text).not.toContain('Cypher:')
+    expect(sql.text).not.toContain('```cypher')
+
+    const neo4j = serializeDraft(assistantDraftSchema.parse(rawDraft), 'Cypher')
+    expect(neo4j.text).toContain(
+      '  Cypher: ```cypher\nMATCH (p:Pedido) RETURN p.mes AS mes, count(p) AS total\n```',
+    )
+    expect(neo4j.text).not.toContain('SQL:')
+    expect(neo4j.text).toBe(
+      serializeDraft(assistantDraftSchema.parse(rawDraft)).text,
+    )
+
+    const last = buildAssistantMessages({
+      schema: relational,
+      dialect: 'T-SQL',
+      draft: assistantDraftSchema.parse(sqlDraft),
+      history: [],
+      message: 'oi',
+    }).at(-1)
+    expect(String(last?.content)).toContain('SQL: ```sql')
   })
 })

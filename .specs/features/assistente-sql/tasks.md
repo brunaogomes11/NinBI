@@ -73,12 +73,12 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Teste `ASQ-01 plano para conexão SQL leva o schema relacional` em apps/api/test/assistant
-- [ ] Teste `ASQ-02 plano para conexão Neo4j leva o schema de grafo como antes` em apps/api/test/assistant
-- [ ] Teste `ASQ-03 sistema descreve o dashboard no banco da conexão` em apps/api/test/assistant
-- [ ] Teste `ASQ-04 rascunho mostra a consulta na linguagem da conexão` em apps/api/test/assistant
-- [ ] Os testes de `assistant-prompt.spec.ts` que existem seguem verdes sem mudar nenhuma expectativa de Neo4j
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `ASQ-01 plano para conexão SQL leva o schema relacional` em apps/api/test/assistant
+- [x] Teste `ASQ-02 plano para conexão Neo4j leva o schema de grafo como antes` em apps/api/test/assistant
+- [x] Teste `ASQ-03 sistema descreve o dashboard no banco da conexão` em apps/api/test/assistant
+- [x] Teste `ASQ-04 rascunho mostra a consulta na linguagem da conexão` em apps/api/test/assistant
+- [x] Os testes de `assistant-prompt.spec.ts` que existem seguem verdes sem mudar nenhuma expectativa de Neo4j
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
