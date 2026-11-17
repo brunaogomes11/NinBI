@@ -560,13 +560,13 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-28 filtro vazio devolve todas as linhas no PostgreSQL real` em apps/api/test-int
-- [ ] Teste `SQX-04 PostgreSQL real recusa escrita em transação de leitura` em apps/api/test-int
-- [ ] Teste `SCS-03 PostgreSQL real lista só schemas de usuário com views e chaves estrangeiras` em apps/api/test-int
-- [ ] Teste `SQX-21 PostgreSQL real devolve os tipos da spec` em apps/api/test-int
-- [ ] Teste `SQX-10 PostgreSQL real cancela consulta lenta` em apps/api/test-int
-- [ ] Requer `pnpm infra:up`
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test:int`
+- [x] Teste `SQX-28 filtro vazio devolve todas as linhas no PostgreSQL real` em apps/api/test-int
+- [x] Teste `SQX-04 PostgreSQL real recusa escrita em transação de leitura` em apps/api/test-int
+- [x] Teste `SCS-03 PostgreSQL real lista só schemas de usuário com views e chaves estrangeiras` em apps/api/test-int
+- [x] Teste `SQX-21 PostgreSQL real devolve os tipos da spec` em apps/api/test-int
+- [x] Teste `SQX-10 PostgreSQL real cancela consulta lenta` em apps/api/test-int
+- [x] Requer `pnpm infra:up`
+- [x] Gate check passes: `pnpm --filter @ninbi/api test:int`
 
 **Tests**: integration
 **Gate**: full
