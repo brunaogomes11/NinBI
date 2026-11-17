@@ -290,5 +290,5 @@ Proof: run api | ✓ ASQ-06 consulta SQL gerada é validada, executada e corrigi
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** fase 1 (T1 a T4, opus) returned; fase 2 (T5 a T8, sonnet) em f4ed685
+**Dispatched:** fases 1 e 2 returned; check_proofs em 1253798
 **Walked:** none
