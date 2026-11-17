@@ -391,8 +391,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes com gesto em `AssistantMessageList.test.tsx`: `HIST-07 conversa carregando mostra esqueleto`, `HIST-08 conversa que não carrega mostra Não foi possível carregar a conversa e Tentar novamente` (clicar chama `onReload`), `CHAT-20 conversa vazia mostra Descreva o que você quer ver ou mudar neste dashboard`, `CHAT-09 resposta mostra o texto e a lista do que mudou` (cada item de `changes` e de `notApplied` em uma linha), `GEN-07 resposta mostra os widgets criados e os títulos com erro` ("3 widgets criados" e "Widgets com erro: Ranking de lojas"), `GEN-12 resposta mostra quantos widgets foram descartados` ("3 widgets descartados: o limite é 20 por pedido"), `CHAT-10 Desfazer aparece só na resposta indicada` (duas respostas com mudanças e `undoMessageId` da segunda: um botão só, na segunda; clicar chama `onUndo`), `HIST-09 respostas antigas aparecem sem Desfazer` (sem `undoMessageId`: nenhum botão "Desfazer"), `CHAT-21 falha mostra a mensagem do provedor e Tentar novamente na mensagem do usuário` (clicar chama `onRetry`), mensagens na ordem recebida
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `AssistantMessageList.test.tsx`: `HIST-07 conversa carregando mostra esqueleto`, `HIST-08 conversa que não carrega mostra Não foi possível carregar a conversa e Tentar novamente` (clicar chama `onReload`), `CHAT-20 conversa vazia mostra Descreva o que você quer ver ou mudar neste dashboard`, `CHAT-09 resposta mostra o texto e a lista do que mudou` (cada item de `changes` e de `notApplied` em uma linha), `GEN-07 resposta mostra os widgets criados e os títulos com erro` ("3 widgets criados" e "Widgets com erro: Ranking de lojas"), `GEN-12 resposta mostra quantos widgets foram descartados` ("3 widgets descartados: o limite é 20 por pedido"), `CHAT-10 Desfazer aparece só na resposta indicada` (duas respostas com mudanças e `undoMessageId` da segunda: um botão só, na segunda; clicar chama `onUndo`), `HIST-09 respostas antigas aparecem sem Desfazer` (sem `undoMessageId`: nenhum botão "Desfazer"), `CHAT-21 falha mostra a mensagem do provedor e Tentar novamente na mensagem do usuário` (clicar chama `onRetry`), mensagens na ordem recebida
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
@@ -682,7 +682,7 @@ Proof: run api | ✓ CHAT-29 log de cada pedido tem usuário, dashboard, ações
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, sonnet) - returned (ab6f4a6). Lote 2 (T8-T13, sonnet) - em andamento.
+**Dispatched:** lote 1 (T1-T7, sonnet) - returned (ab6f4a6). Lote 2 (T8-T13, sonnet) - returned (473c49b). Lote 3 (T14-T18, sonnet) - em andamento.
 **Walked:** dispensado por AD-023
 
 ---
