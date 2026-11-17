@@ -349,8 +349,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apply-actions.test.ts`: `GEN-03 aplicar as ações cria abas, widgets e filtros no rascunho` (aba nova com o id e o nome da ação; widgets com título, Cypher, visualização, mapeamento resolvido e layout; filtro novo; nome do dashboard), `GEN-06 widget com erro entra no rascunho com o último Cypher` (`create_widget` com `error` e `result: null`: o widget tem o Cypher da ação, `TABLE` e `{}`), `CHAT-23 ação sobre widget que saiu do rascunho é ignorada` (`update_widget` e `set_layout` de widget removido não mudam nada e não criam widget), `remove_filter` tira o `crossFilter` dos widgets que apontavam para ele, `update_widget` com `BAR` e mapeamento de coluna ausente vira a sugestão de `resolveAiMapping`, o rascunho original não é mutado
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `apply-actions.test.ts`: `GEN-03 aplicar as ações cria abas, widgets e filtros no rascunho` (aba nova com o id e o nome da ação; widgets com título, Cypher, visualização, mapeamento resolvido e layout; filtro novo; nome do dashboard), `GEN-06 widget com erro entra no rascunho com o último Cypher` (`create_widget` com `error` e `result: null`: o widget tem o Cypher da ação, `TABLE` e `{}`), `CHAT-23 ação sobre widget que saiu do rascunho é ignorada` (`update_widget` e `set_layout` de widget removido não mudam nada e não criam widget), `remove_filter` tira o `crossFilter` dos widgets que apontavam para ele, `update_widget` com `BAR` e mapeamento de coluna ausente vira a sugestão de `resolveAiMapping`, o rascunho original não é mutado
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

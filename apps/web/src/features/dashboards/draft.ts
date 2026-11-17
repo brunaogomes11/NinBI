@@ -70,6 +70,17 @@ export function addTab(
   }
 }
 
+/** Acrescenta uma aba com id e nome já definidos, vazia, depois das existentes. */
+export function insertTab(
+  draft: DashboardDraft,
+  tab: { id: string; name: string },
+): DashboardDraft {
+  return {
+    ...draft,
+    tabs: [...draft.tabs, { id: tab.id, name: tab.name, widgets: [] }],
+  }
+}
+
 export function renameTab(
   draft: DashboardDraft,
   tabId: string,
@@ -126,6 +137,15 @@ export function addWidget(
       },
     ]
   })
+}
+
+/** Acrescenta um widget pronto ao fim da aba. */
+export function insertWidget(
+  draft: DashboardDraft,
+  tabId: string,
+  widget: WidgetDto,
+): DashboardDraft {
+  return mapTab(draft, tabId, (widgets) => [...widgets, widget])
 }
 
 export function updateWidget(
