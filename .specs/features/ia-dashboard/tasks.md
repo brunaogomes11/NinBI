@@ -682,7 +682,7 @@ Proof: run api | ✓ CHAT-29 log de cada pedido tem usuário, dashboard, ações
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** none
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre o commit de fechamento da interatividade - em andamento.
 **Walked:** dispensado por AD-023
 
 ---

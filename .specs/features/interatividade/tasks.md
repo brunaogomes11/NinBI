@@ -836,7 +836,7 @@ Proof: run web | ✓ RFR-12 mudar um filtro reinicia a contagem do intervalo
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, sonnet) sobre 0994860 - em andamento.
+**Dispatched:** lote 1 (T1-T7, sonnet) sobre 0994860 - returned (ab4064e). Lote 2 (T8-T15) - returned (023bf6a). Lotes 3+4 (T16-T24) - returned (41b2fc3). Verifier (haiku) sobre 41b2fc3 - returned: FAIL, 4 findings fechados (b49a7af..06380b2; AD-135). Round 2: 101 pass / 0 fail em 3b82b19; `validate_verification.py` exit 0. Feature encerrada. Executada no worktree NinBI-wt-ia (branch feat/interatividade-ia-dashboard).
 **Walked:** dispensado por AD-023
 
 ---
