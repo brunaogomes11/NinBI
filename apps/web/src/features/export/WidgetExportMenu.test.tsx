@@ -284,4 +284,30 @@ describe('WidgetExportMenu', () => {
       )
     }
   })
+
+  it('EXP-08 atualização que falha depois de uma carga boa mantém os dados e desabilita a exportação', async () => {
+    let fail = false
+    const app = open(() =>
+      fail
+        ? HttpResponse.json(
+            { code: 'QUERY_FAILED', message: 'falhou' },
+            { status: 422 },
+          )
+        : HttpResponse.json(MANY),
+    )
+    await screen.findByText('Página 1 de 3')
+    fail = true
+    await app.user.click(
+      await screen.findByRole('button', { name: 'Atualizar' }),
+    )
+    await screen.findByText(/Não foi possível atualizar às/)
+    expect(screen.getByText('Página 1 de 3')).toBeInTheDocument()
+    await openMenu(app)
+    for (const name of ['Exportar CSV', 'Exportar PNG']) {
+      expect(await screen.findByRole('menuitem', { name })).toHaveAttribute(
+        'aria-disabled',
+        'true',
+      )
+    }
+  })
 })
