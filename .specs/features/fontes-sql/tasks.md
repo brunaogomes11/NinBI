@@ -284,13 +284,13 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-15 $nome vira parâmetro do driver sem colar o valor` em apps/api/test
-- [ ] Teste `SQX-17 parâmetro sem valor vai como null` em apps/api/test
-- [ ] Teste `SQX-18 $nome IS NULL e IS NOT NULL viram condição constante` em apps/api/test
-- [ ] Teste `SQX-19 lista vira um parâmetro por item e lista vazia vira NULL` em apps/api/test
-- [ ] Teste `SQX-20 data AAAA-MM-DD vai como texto de data` em apps/api/test
-- [ ] Teste `SQX-28 filtro vazio com IS NULL OR IN vira condição verdadeira` em apps/api/test
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SQX-15 $nome vira parâmetro do driver sem colar o valor` em apps/api/test
+- [x] Teste `SQX-17 parâmetro sem valor vai como null` em apps/api/test
+- [x] Teste `SQX-18 $nome IS NULL e IS NOT NULL viram condição constante` em apps/api/test
+- [x] Teste `SQX-19 lista vira um parâmetro por item e lista vazia vira NULL` em apps/api/test
+- [x] Teste `SQX-20 data AAAA-MM-DD vai como texto de data` em apps/api/test
+- [x] Teste `SQX-28 filtro vazio com IS NULL OR IN vira condição verdadeira` em apps/api/test
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
