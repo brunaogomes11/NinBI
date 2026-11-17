@@ -20,6 +20,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { AskAiPanel } from '@/features/ai/AskAiPanel'
 import type { AiGenerationState } from '@/features/ai/useAiGenerations'
+import { formatClock } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import {
   hasWidgetQuery,
@@ -66,7 +67,7 @@ function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
       <p className="text-sm text-muted-foreground">{MESSAGES.widgetNoQuery}</p>
     )
   }
-  if (query.isError) {
+  if (query.isError && !query.data) {
     return (
       <div className="flex flex-col items-start gap-2">
         <p role="alert" className="text-sm text-destructive">
@@ -92,17 +93,29 @@ function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
       </div>
     )
   }
+  // Falha de uma atualização: os dados anteriores ficam e a hora da falha aparece (RFR-10).
+  const refreshFailed = query.isError ? (
+    <p className="text-muted-foreground text-xs">
+      {MESSAGES.refreshFailedAt(formatClock(query.errorUpdatedAt))}
+    </p>
+  ) : null
   if (query.data.rows.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">{MESSAGES.queryNoData}</p>
+      <>
+        <p className="text-sm text-muted-foreground">{MESSAGES.queryNoData}</p>
+        {refreshFailed}
+      </>
     )
   }
   return (
-    <WidgetVisualization
-      result={query.data}
-      visualization={widget.visualization}
-      config={widget.config}
-    />
+    <>
+      <WidgetVisualization
+        result={query.data}
+        visualization={widget.visualization}
+        config={widget.config}
+      />
+      {refreshFailed}
+    </>
   )
 }
 

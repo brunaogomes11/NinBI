@@ -55,3 +55,23 @@ export function formatValue(value: ResultValue): string {
     return BigInt(value.value).toLocaleString('pt-BR')
   return value.value
 }
+
+const CLOCK = new Intl.DateTimeFormat('pt-BR', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+})
+const CLOCK_SECONDS = new Intl.DateTimeFormat('pt-BR', {
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+  hourCycle: 'h23',
+})
+
+/** `14:05` ou, com `seconds`, `14:05:09`, no fuso do navegador. */
+export function formatClock(
+  date: Date | number,
+  options: { seconds?: boolean } = {},
+): string {
+  return (options.seconds ? CLOCK_SECONDS : CLOCK).format(date)
+}

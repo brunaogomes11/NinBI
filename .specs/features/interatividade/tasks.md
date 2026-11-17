@@ -393,8 +393,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `WidgetCard.refresh.test.tsx` (dashboard aberto, uma tabela de 3 linhas; nova execução por "Atualizar"): `RFR-09 atualização mantém os dados anteriores sem esqueleto` (com a segunda resposta pendente, as 3 linhas continuam e não há esqueleto; a resposta nova com 4 linhas troca a tabela), `RFR-10 falha da atualização mantém os dados e mostra Não foi possível atualizar às` (relógio em 14:05, segunda resposta 422: as 3 linhas continuam e o card mostra "Não foi possível atualizar às 14:05"); `formatClock` dá "14:05" e "14:05:09"; testes de TBL-09 a TBL-12 de `dashboards-consultas` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `WidgetCard.refresh.test.tsx` (dashboard aberto, uma tabela de 3 linhas; nova execução por "Atualizar"): `RFR-09 atualização mantém os dados anteriores sem esqueleto` (com a segunda resposta pendente, as 3 linhas continuam e não há esqueleto; a resposta nova com 4 linhas troca a tabela), `RFR-10 falha da atualização mantém os dados e mostra Não foi possível atualizar às` (relógio em 14:05, segunda resposta 422: as 3 linhas continuam e o card mostra "Não foi possível atualizar às 14:05"); `formatClock` dá "14:05" e "14:05:09"; testes de TBL-09 a TBL-12 de `dashboards-consultas` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
