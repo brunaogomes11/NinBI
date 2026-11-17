@@ -26,6 +26,40 @@ export interface SourceConnection {
   password: string
 }
 
+/** Linha de `connections` com o que a fonte precisa (sem a senha cifrada). */
+export interface SourceConnectionRow {
+  id: string
+  name: string
+  type: ConnectionType
+  uri: string | null
+  host: string | null
+  port: number | null
+  ssl: boolean
+  database: string | null
+  username: string
+}
+
+/** Monta a conexão da fonte a partir da linha guardada e da senha decifrada. */
+// SPEC_DEVIATION: helper partilhado pelos serviços que passam a usar o registro
+// (T22, T24, T25); o design só nomeia o tipo `SourceConnection`.
+export function toSourceConnection(
+  row: SourceConnectionRow,
+  password: string,
+): SourceConnection {
+  return {
+    id: row.id,
+    name: row.name,
+    type: row.type,
+    uri: row.uri,
+    host: row.host,
+    port: row.port,
+    ssl: row.ssl,
+    database: row.database,
+    username: row.username,
+    password,
+  }
+}
+
 /** Resultado de uma consulta, com os valores já em `ResultValue`. */
 export interface SourceResult {
   keys: string[]

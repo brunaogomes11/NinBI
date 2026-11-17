@@ -9,10 +9,16 @@ import { DASHBOARD_SHARE_RESOLVER } from '../src/dashboard-access/dashboard-shar
 import { type AppDatabase, DB } from '../src/database/database.module'
 import { CHAT_MODEL_FACTORY } from '../src/llm/chat-model.factory'
 import { NEO4J_GATEWAY } from '../src/neo4j/neo4j.gateway'
+import {
+  MYSQL_GATEWAY,
+  POSTGRES_GATEWAY,
+  SQLSERVER_GATEWAY,
+} from '../src/sources/gateways/sql.gateway'
 import { createTestDb } from './db'
 import { FakeChatModelFactory } from './fakes/fake-chat-model.factory'
 import { FakeNeo4jGateway } from './fakes/fake-neo4j.gateway'
 import { FakeShareResolver } from './fakes/fake-share-resolver'
+import { FakeSqlGateway } from './fakes/fake-sql.gateway'
 
 /** Relógio controlável: começa em 2026-01-01T12:00:00Z e só anda quando o teste manda. */
 export class FakeClock extends Clock {
@@ -46,6 +52,12 @@ export async function createTestApp(options: TestAppOptions = {}) {
   const { db, client } = await createTestDb()
   const clock = new FakeClock()
   const neo4j = new FakeNeo4jGateway()
+  // Um gateway SQL falso por tipo de banco (fontes-sql).
+  const sql = {
+    POSTGRES: new FakeSqlGateway(),
+    MYSQL: new FakeSqlGateway(),
+    SQLSERVER: new FakeSqlGateway(),
+  }
   const chatModels = options.chatModels ?? new FakeChatModelFactory()
   const shares = options.shares ?? new FakeShareResolver()
   let builder = Test.createTestingModule({
@@ -58,6 +70,12 @@ export async function createTestApp(options: TestAppOptions = {}) {
     .useValue(clock)
     .overrideProvider(NEO4J_GATEWAY)
     .useValue(neo4j)
+    .overrideProvider(POSTGRES_GATEWAY)
+    .useValue(sql.POSTGRES)
+    .overrideProvider(MYSQL_GATEWAY)
+    .useValue(sql.MYSQL)
+    .overrideProvider(SQLSERVER_GATEWAY)
+    .useValue(sql.SQLSERVER)
     .overrideProvider(CHAT_MODEL_FACTORY)
     .useValue(chatModels)
     // No módulo de teste o adaptador HTTP só existe depois do compile: sem isto o serve-static cai no loader nulo.
@@ -81,6 +99,7 @@ export async function createTestApp(options: TestAppOptions = {}) {
     db,
     clock,
     neo4j,
+    sql,
     chatModels,
     shares,
     http: request.agent(app.getHttpServer()),

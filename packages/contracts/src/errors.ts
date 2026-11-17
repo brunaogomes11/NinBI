@@ -15,6 +15,11 @@ export const ERROR_CODES = [
   'CONNECTION_NOT_FOUND',
   'NEO4J_UNAVAILABLE',
   'NEO4J_TIMEOUT',
+  // SPEC_DEVIATION: os códigos das fontes SQL (design, "Error Handling Strategy")
+  // não tinham task de contrato; entram aqui com a T22, que é a primeira a usá-los.
+  'SOURCE_UNAVAILABLE',
+  'SOURCE_TIMEOUT',
+  'QUERY_NOT_SELECT',
   'SCHEMA_PROPERTY_NOT_FOUND',
   'DASHBOARD_NOT_FOUND',
   'DASHBOARD_VERSION_CONFLICT',

@@ -167,7 +167,8 @@ describe('QueryService', () => {
     expect(queryLines).toHaveLength(2)
     expect(queryLines[0]).toMatch(
       new RegExp(
-        `^query user=user-1 connection=${t.connection.id} widget=widget-1 durationMs=\\d+ rows=2 result=ok$`,
+        // fontes-sql (SQX-24): a linha ganha o tipo da conexão.
+        `^query user=user-1 connection=${t.connection.id} type=NEO4J widget=widget-1 durationMs=\\d+ rows=2 result=ok$`,
       ),
     )
     expect(queryLines[1]).toContain('result=blocked')

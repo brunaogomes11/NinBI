@@ -1,5 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
-import { MESSAGES, type QueryResultDto } from '@ninbi/contracts'
+import {
+  type ConnectionType,
+  MESSAGES,
+  type QueryResultDto,
+} from '@ninbi/contracts'
 import { eq } from 'drizzle-orm'
 import { AppError } from '../common/app-error'
 import {
@@ -10,18 +14,13 @@ import { CryptoService } from '../crypto/crypto.service'
 import { type AppDatabase, DB } from '../database/database.module'
 import { connections } from '../database/schema'
 import {
-  NEO4J_GATEWAY,
-  type Neo4jConnectionConfig,
-  type Neo4jGateway,
-  Neo4jGatewayError,
-  Neo4jTimeoutError,
-} from '../neo4j/neo4j.gateway'
-import { toCypherParams } from './cypher-params'
-import {
-  extractParameterNames,
-  validateReadOnlyCypher,
-} from './read-only-cypher'
-import { toResultValue } from './result-value'
+  SourceGatewayError,
+  type SourceResult,
+  SourceTimeoutError,
+  SourceUnavailableError,
+  toSourceConnection,
+} from '../sources/source'
+import { SourceRegistry } from '../sources/source-registry'
 
 export const QUERY_TIMEOUT_MS = Symbol('QUERY_TIMEOUT_MS')
 export const QUERY_MAX_ROWS = Symbol('QUERY_MAX_ROWS')
@@ -34,7 +33,7 @@ export interface RunQueryInput {
   widgetId?: string | null
   /** Quem só vê o dashboard não enxerga o erro do banco (TBL-12). */
   maskErrors?: boolean
-  /** Cancela a consulta no Neo4j (AIQ-13). */
+  /** Cancela a consulta no banco (AIQ-13). */
   signal?: AbortSignal
 }
 
@@ -50,11 +49,21 @@ type QueryErrorCode =
   | 'QUERY_TIMEOUT'
   | 'QUERY_WRITE_BLOCKED'
   | 'NEO4J_UNAVAILABLE'
+  | 'SOURCE_UNAVAILABLE'
   | 'QUERY_FAILED'
 
+/** Códigos do neo4j-driver que dizem que o servidor não foi alcançado. */
 const UNAVAILABLE_CODES = new Set(['ServiceUnavailable', 'SessionExpired'])
 
-/** Execução de Cypher com validação, prazo, limite de linhas, erros traduzidos e log (QRY-*). */
+/** O Neo4j mantém o código de hoje; as conexões SQL usam o das fontes. */
+function unavailableCode(type: ConnectionType): QueryErrorCode {
+  return type === 'NEO4J' ? 'NEO4J_UNAVAILABLE' : 'SOURCE_UNAVAILABLE'
+}
+
+/**
+ * Execução de uma consulta pela fonte do tipo da conexão (AD-137), com
+ * validação, prazo, limite de linhas, erros traduzidos e log (QRY-*, SQX-*).
+ */
 @Injectable()
 export class QueryService {
   private readonly logger = new Logger('Query')
@@ -62,7 +71,7 @@ export class QueryService {
   constructor(
     @Inject(DB) private readonly db: AppDatabase,
     @Inject(CryptoService) private readonly crypto: CryptoService,
-    @Inject(NEO4J_GATEWAY) private readonly gateway: Neo4jGateway,
+    @Inject(SourceRegistry) private readonly sources: SourceRegistry,
     @Inject(QUERY_TIMEOUT_MS) private readonly timeoutMs: number,
     @Inject(QUERY_MAX_ROWS) private readonly maxRows: number,
   ) {}
@@ -71,8 +80,13 @@ export class QueryService {
     const started = Date.now()
     let rows = 0
     let result: LogResult = 'failed'
+    let type: ConnectionType | '-' = '-'
     try {
-      const check = validateReadOnlyCypher(input.cypher)
+      // O tipo da conexão escolhe a fonte, e a fonte, o validador.
+      const connection = await this.findConnection(input.connectionId)
+      type = connection.type
+      const source = this.sources.for(connection.type)
+      const check = source.validate(input.cypher)
       if (!check.ok) {
         result = 'blocked'
         throw new AppError(
@@ -81,40 +95,37 @@ export class QueryService {
           input.maskErrors ? MESSAGES.widgetLoadFailed : check.message,
         )
       }
-      const connection = await this.findConnection(input.connectionId)
       let password: string
       try {
         password = this.crypto.decrypt(connection.passwordEncrypted)
       } catch {
         result = 'unavailable'
         throw this.fail(
-          'NEO4J_UNAVAILABLE',
+          unavailableCode(connection.type),
           MESSAGES.neo4jUnreachable(connection.name),
           input.maskErrors,
         )
       }
-      const cfg: Neo4jConnectionConfig = {
-        uri: connection.uri,
-        database: connection.database,
-        username: connection.username,
-        password,
-      }
       const params: Record<string, unknown> = {}
-      for (const name of extractParameterNames(input.cypher)) {
+      for (const name of source.parameterNames(input.cypher)) {
         params[name] = null
       }
       Object.assign(params, input.params)
-      const cypherParams = toCypherParams(params)
 
-      let read: Awaited<ReturnType<Neo4jGateway['read']>>
+      let read: SourceResult
       try {
-        read = await this.gateway.read(cfg, input.cypher, cypherParams, {
-          timeoutMs: this.timeoutMs,
-          maxRows: this.maxRows + 1,
-          signal: input.signal,
-        })
+        read = await source.run(
+          toSourceConnection(connection, password),
+          input.cypher,
+          params,
+          {
+            timeoutMs: this.timeoutMs,
+            maxRows: this.maxRows + 1,
+            signal: input.signal,
+          },
+        )
       } catch (error) {
-        const translated = this.translate(error, connection.name, input)
+        const translated = this.translate(error, connection, input)
         result = translated.result
         throw translated.error
       }
@@ -125,15 +136,13 @@ export class QueryService {
       result = truncated ? 'truncated' : 'ok'
       return {
         columns: read.keys,
-        rows: kept.map((row) =>
-          read.keys.map((key) => toResultValue(row[key])),
-        ),
+        rows: kept,
         truncated,
         rowLimit: this.maxRows,
       }
     } finally {
       this.logger.log(
-        `query user=${input.userId} connection=${input.connectionId} widget=${input.widgetId ?? '-'} durationMs=${Date.now() - started} rows=${rows} result=${result}`,
+        `query user=${input.userId} connection=${input.connectionId} type=${type} widget=${input.widgetId ?? '-'} durationMs=${Date.now() - started} rows=${rows} result=${result}`,
       )
     }
   }
@@ -150,11 +159,11 @@ export class QueryService {
 
   private translate(
     error: unknown,
-    connectionName: string,
+    connection: { name: string; type: ConnectionType },
     input: RunQueryInput,
   ): { error: AppError; result: LogResult } {
     const mask = input.maskErrors
-    if (error instanceof Neo4jTimeoutError) {
+    if (error instanceof SourceTimeoutError) {
       return {
         result: 'timeout',
         error: this.fail(
@@ -164,7 +173,7 @@ export class QueryService {
         ),
       }
     }
-    if (error instanceof Neo4jGatewayError) {
+    if (error instanceof SourceGatewayError) {
       if (
         error.code === 'Neo.ClientError.Statement.AccessMode' ||
         /access mode/i.test(error.message)
@@ -174,12 +183,16 @@ export class QueryService {
           error: this.fail('QUERY_WRITE_BLOCKED', MESSAGES.queryReadOnly, mask),
         }
       }
-      if (error.code !== undefined && UNAVAILABLE_CODES.has(error.code)) {
+      // Erro de rede do driver SQL (SQX-14, SQX-26) ou servidor Neo4j fora do ar.
+      if (
+        error instanceof SourceUnavailableError ||
+        (error.code !== undefined && UNAVAILABLE_CODES.has(error.code))
+      ) {
         return {
           result: 'unavailable',
           error: this.fail(
-            'NEO4J_UNAVAILABLE',
-            MESSAGES.neo4jUnreachable(connectionName),
+            unavailableCode(connection.type),
+            MESSAGES.neo4jUnreachable(connection.name),
             mask,
           ),
         }

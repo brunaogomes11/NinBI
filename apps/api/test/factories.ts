@@ -1,4 +1,4 @@
-import type { Role } from '@ninbi/contracts'
+import type { ConnectionType, Role } from '@ninbi/contracts'
 import { PasswordHasher } from '../src/auth/password-hasher'
 import type { CryptoService } from '../src/crypto/crypto.service'
 import type { AppDatabase } from '../src/database/database.module'
@@ -42,7 +42,12 @@ export async function createUser(db: AppDatabase, input: TestUserInput = {}) {
 
 export interface TestConnectionInput {
   name?: string
+  /** Padrão NEO4J; os tipos SQL usam host, porta e banco no lugar da URI. */
+  type?: ConnectionType
   uri?: string
+  host?: string
+  port?: number
+  ssl?: boolean
   database?: string | null
   username?: string
   password?: string
@@ -54,12 +59,20 @@ export async function createConnection(
   crypto: CryptoService,
   input: TestConnectionInput = {},
 ) {
+  const type = input.type ?? 'NEO4J'
+  const sqlType = type !== 'NEO4J'
   const [row] = await db
     .insert(connections)
     .values({
       name: input.name ?? 'Vendas',
-      uri: input.uri ?? 'neo4j://vendas.exemplo:7687',
-      database: input.database ?? null,
+      type,
+      uri: sqlType ? null : (input.uri ?? 'neo4j://vendas.exemplo:7687'),
+      host: sqlType ? (input.host ?? 'sql.exemplo') : null,
+      port: sqlType ? (input.port ?? 5432) : null,
+      ssl: input.ssl ?? false,
+      database: sqlType
+        ? (input.database ?? 'vendas')
+        : (input.database ?? null),
       username: input.username ?? 'neo4j',
       passwordEncrypted: crypto.encrypt(input.password ?? 'segredo'),
     })

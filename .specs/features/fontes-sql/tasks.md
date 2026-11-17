@@ -585,16 +585,16 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-10 consulta que passa de 30 s mostra o tempo limite` em apps/api/test
-- [ ] Teste `SQX-11 resultado acima de 5.000 linhas devolve as primeiras e avisa` em apps/api/test
-- [ ] Teste `SQX-13 erro do banco SQL aparece a quem edita e genérico a quem só vê` em apps/api/test
-- [ ] Teste `SQX-14 banco SQL inacessível mostra o nome da conexão` em apps/api/test
-- [ ] Teste `SQX-17 QueryService executa $nome sem valor com null` em apps/api/test
-- [ ] Teste `SQX-24 log de execução traz o tipo e não traz as linhas` em apps/api/test
-- [ ] Teste `SQX-25 SQL enviado como texto por quem não edita responde 403` em apps/api/test
-- [ ] Teste `SMG-03 consulta Cypher passa pelo registro com o mesmo resultado` em apps/api/test
-- [ ] Todos os testes de `apps/api/test/queries/` seguem verdes sem mudar expectativa de Neo4j
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SQX-10 consulta que passa de 30 s mostra o tempo limite` em apps/api/test
+- [x] Teste `SQX-11 resultado acima de 5.000 linhas devolve as primeiras e avisa` em apps/api/test
+- [x] Teste `SQX-13 erro do banco SQL aparece a quem edita e genérico a quem só vê` em apps/api/test
+- [x] Teste `SQX-14 banco SQL inacessível mostra o nome da conexão` em apps/api/test
+- [x] Teste `SQX-17 QueryService executa $nome sem valor com null` em apps/api/test
+- [x] Teste `SQX-24 log de execução traz o tipo e não traz as linhas` em apps/api/test
+- [x] Teste `SQX-25 SQL enviado como texto por quem não edita responde 403` em apps/api/test
+- [x] Teste `SMG-03 consulta Cypher passa pelo registro com o mesmo resultado` em apps/api/test
+- [x] Todos os testes de `apps/api/test/queries/` seguem verdes sem mudar expectativa de Neo4j
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
@@ -1292,5 +1292,5 @@ Proof: run web | ✓ SMG-08 filtro mostra Consulta SQL ou Consulta Cypher pelo t
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** MySQL e SQL Server sem container; só o PostgreSQL do compose tem teste real, e o usuário testa os outros dois à mão contra um banco remoto (user: "não precisa, só o postgres e eu vou pegar um banco remoto pra testar"). T21 removida.
-**Dispatched:** lote 1 (T1 a T6, sonnet) returned; lote 2 (T7 a T12, opus) returned; lote 3 (T13 a T20, opus) em ed98240
+**Dispatched:** lotes 1 a 3 returned; lote 4 (T22 a T29, opus) em 9e90c65
 **Walked:** none
