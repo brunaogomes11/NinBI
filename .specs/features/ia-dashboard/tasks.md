@@ -431,8 +431,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes com gesto em `AssistantPanel.test.tsx` (MSW): `HIST-04 Limpar conversa pede confirmação com Apagar toda a conversa deste dashboard?` ("Cancelar" fecha sem requisição), `HIST-05 confirmar a limpeza apaga a conversa do painel` (o `DELETE` sai e o painel mostra o estado vazio), `CHAT-19 conversa rola com a mais recente embaixo e o campo fixo` (a lista está num contêiner com `overflow-y-auto` e `flex-1`, o `textarea` fica fora dele, depois do contêiner; ao chegar uma mensagem nova, `scrollIntoView` é chamado no último item), sem provedor o composer fica desabilitado com "Nenhum provedor de IA configurado"
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `AssistantPanel.test.tsx` (MSW): `HIST-04 Limpar conversa pede confirmação com Apagar toda a conversa deste dashboard?` ("Cancelar" fecha sem requisição), `HIST-05 confirmar a limpeza apaga a conversa do painel` (o `DELETE` sai e o painel mostra o estado vazio), `CHAT-19 conversa rola com a mais recente embaixo e o campo fixo` (a lista está num contêiner com `overflow-y-auto` e `flex-1`, o `textarea` fica fora dele, depois do contêiner; ao chegar uma mensagem nova, `scrollIntoView` é chamado no último item), sem provedor o composer fica desabilitado com "Nenhum provedor de IA configurado"
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
