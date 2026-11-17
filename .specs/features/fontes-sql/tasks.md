@@ -374,14 +374,14 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SCS-02 leitura guarda tabelas, views e colunas com o tipo` em apps/api/test
-- [ ] Teste `SCS-04 exemplo é o primeiro valor não nulo das primeiras 100 linhas` em apps/api/test
-- [ ] Teste `SCS-05 chave estrangeira composta vira par de tabela e colunas` em apps/api/test
-- [ ] Teste `SCS-06 nome qualificado no PostgreSQL e no SQL Server e simples no MySQL` em apps/api/test
-- [ ] Teste `SCS-07 tabela sem permissão de leitura fica sem exemplo e a leitura conclui` em apps/api/test
-- [ ] Teste `SCS-08 catálogo ilegível falha a leitura com a mensagem do banco` em apps/api/test
-- [ ] Teste `SCS-09 a leitura do schema só usa gateway.read` em apps/api/test
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SCS-02 leitura guarda tabelas, views e colunas com o tipo` em apps/api/test
+- [x] Teste `SCS-04 exemplo é o primeiro valor não nulo das primeiras 100 linhas` em apps/api/test
+- [x] Teste `SCS-05 chave estrangeira composta vira par de tabela e colunas` em apps/api/test
+- [x] Teste `SCS-06 nome qualificado no PostgreSQL e no SQL Server e simples no MySQL` em apps/api/test
+- [x] Teste `SCS-07 tabela sem permissão de leitura fica sem exemplo e a leitura conclui` em apps/api/test
+- [x] Teste `SCS-08 catálogo ilegível falha a leitura com a mensagem do banco` em apps/api/test
+- [x] Teste `SCS-09 a leitura do schema só usa gateway.read` em apps/api/test
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
