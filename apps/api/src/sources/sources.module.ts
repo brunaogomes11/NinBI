@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common'
 import { DriverNeo4jGateway } from '../neo4j/driver-neo4j.gateway'
 import { NEO4J_GATEWAY } from '../neo4j/neo4j.gateway'
+import { Neo4jSource } from './neo4j.source'
 
 /**
  * Acesso aos bancos do usuário: os gateways dos drivers e as fontes por tipo de
@@ -12,7 +13,10 @@ import { NEO4J_GATEWAY } from '../neo4j/neo4j.gateway'
 // T16 a T19; registrá-lo antes derrubaria a API e todos os testes que a sobem.
 @Global()
 @Module({
-  providers: [{ provide: NEO4J_GATEWAY, useClass: DriverNeo4jGateway }],
+  providers: [
+    { provide: NEO4J_GATEWAY, useClass: DriverNeo4jGateway },
+    Neo4jSource,
+  ],
   exports: [NEO4J_GATEWAY],
 })
 export class SourcesModule {}

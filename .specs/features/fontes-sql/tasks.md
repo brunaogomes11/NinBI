@@ -441,8 +441,8 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SMG-03 Neo4jSource devolve o mesmo resultado que o QueryService devolvia` em apps/api/test
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SMG-03 Neo4jSource devolve o mesmo resultado que o QueryService devolvia` em apps/api/test
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
