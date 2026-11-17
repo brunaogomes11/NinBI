@@ -174,8 +174,8 @@ T38 → T39
 
 **Done when**:
 
-- [ ] `pnpm --filter @ninbi/contracts build` compila e os testes de contrato que existem continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] `pnpm --filter @ninbi/contracts build` compila e os testes de contrato que existem continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: none
 **Gate**: quick
