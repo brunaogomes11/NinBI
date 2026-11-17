@@ -351,8 +351,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `filter-session.test.tsx`: `FLT-15 clearAll devolve todos os filtros ao valor padrão` (dois filtros alterados e uma seleção: os dois voltam ao padrão e a seleção some), `XFL-05 toggleClick no mesmo elemento esvazia o filtro` (primeiro clique define "Livros" e a seleção; o segundo com o mesmo widget, filtro e valor deixa o filtro `null` e sem seleção; clicar em outro valor troca), `XFL-06 setValue pela barra remove a seleção do filtro` (seleção em `categoria`: `setValue` em `categoria` a remove; `setValue` em outro filtro a mantém), `FLT-31 duas sessões guardam valores, seleção e intervalo separados` (dois `FilterSessionProvider` do mesmo dashboard: mudar valor, seleção e intervalo em um não muda o outro; um provider novo começa nos padrões e no intervalo do dashboard); `paramsVersion` aumenta a cada mudança de valor e não muda com `setInterval`; `syncFilters` põe o filtro novo no padrão
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `filter-session.test.tsx`: `FLT-15 clearAll devolve todos os filtros ao valor padrão` (dois filtros alterados e uma seleção: os dois voltam ao padrão e a seleção some), `XFL-05 toggleClick no mesmo elemento esvazia o filtro` (primeiro clique define "Livros" e a seleção; o segundo com o mesmo widget, filtro e valor deixa o filtro `null` e sem seleção; clicar em outro valor troca), `XFL-06 setValue pela barra remove a seleção do filtro` (seleção em `categoria`: `setValue` em `categoria` a remove; `setValue` em outro filtro a mantém), `FLT-31 duas sessões guardam valores, seleção e intervalo separados` (dois `FilterSessionProvider` do mesmo dashboard: mudar valor, seleção e intervalo em um não muda o outro; um provider novo começa nos padrões e no intervalo do dashboard); `paramsVersion` aumenta a cada mudança de valor e não muda com `setInterval`; `syncFilters` põe o filtro novo no padrão
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
