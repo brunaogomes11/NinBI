@@ -534,14 +534,14 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-03 SQL Server consulta termina em ROLLBACK e fecha a conexão` em apps/api/test
-- [ ] Teste `SQX-03 SQL Server não tem modo leitura e depende do ROLLBACK e do validador` em apps/api/test
-- [ ] Teste `SQX-10 SQL Server aplica o prazo e cancela ao estourar` em apps/api/test
-- [ ] Teste `SQX-11 SQL Server para a leitura em maxRows` em apps/api/test
-- [ ] Teste `SQX-21 SQL Server converte data, data com hora e decimal` em apps/api/test
-- [ ] Teste `SRC-12 SQL Server com SSL criptografa e valida o certificado` em apps/api/test
-- [ ] Teste `SRC-13 SQL Server sem SSL abre a conexão sem criptografia` em apps/api/test
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SQX-03 SQL Server consulta termina em ROLLBACK e fecha a conexão` em apps/api/test
+- [x] Teste `SQX-03 SQL Server não tem modo leitura e depende do ROLLBACK e do validador` em apps/api/test
+- [x] Teste `SQX-10 SQL Server aplica o prazo e cancela ao estourar` em apps/api/test
+- [x] Teste `SQX-11 SQL Server para a leitura em maxRows` em apps/api/test
+- [x] Teste `SQX-21 SQL Server converte data, data com hora e decimal` em apps/api/test
+- [x] Teste `SRC-12 SQL Server com SSL criptografa e valida o certificado` em apps/api/test
+- [x] Teste `SRC-13 SQL Server sem SSL abre a conexão sem criptografia` em apps/api/test
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
