@@ -7,8 +7,8 @@ import {
 } from '@ninbi/contracts'
 import { useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, RefreshCw, Share2, Sparkles } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +39,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useAiStatus } from '@/features/ai/api'
 import { useAiGenerations } from '@/features/ai/useAiGenerations'
 import { AssistantPanel } from '@/features/assistant/AssistantPanel'
+import { useAssistantMessages } from '@/features/assistant/api'
 import { useAssistant } from '@/features/assistant/useAssistant'
 import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
@@ -113,6 +114,13 @@ function writeAssistantOpen(open: boolean) {
   } catch {
     // sem armazenamento o painel só não lembra (CHAT-03)
   }
+}
+
+/** A descrição de "Descrever para a IA" que veio na navegação (GEN-02). */
+function promptFromState(state: unknown): string | null {
+  if (typeof state !== 'object' || state === null) return null
+  const prompt = (state as { assistantPrompt?: unknown }).assistantPrompt
+  return typeof prompt === 'string' && prompt.trim() !== '' ? prompt : null
 }
 
 function isNotFound(error: unknown): boolean {
@@ -225,7 +233,17 @@ function DashboardViewBody({
   const canUseAi = sessionUser ? can(sessionUser.role, 'ai.use') : false
   const aiStatus = useAiStatus(draft !== null && canUseAi)
   const canUseAssistant = canUseAi && dashboard.permissions.edit
-  const [assistantOpen, setAssistantOpen] = useState(readAssistantOpen)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const initialPrompt = useRef<string | null>(promptFromState(location.state))
+  const [assistantOpen, setAssistantOpen] = useState(
+    () => initialPrompt.current !== null || readAssistantOpen(),
+  )
+  // A conversa carrega antes do primeiro envio, para a mensagem aceita não se perder (GEN-02).
+  const conversation = useAssistantMessages(
+    dashboard.id,
+    canUseAssistant && (assistantOpen || initialPrompt.current !== null),
+  )
   const assistant = useAssistant({
     dashboardId: dashboard.id,
     draft,
@@ -235,6 +253,27 @@ function DashboardViewBody({
     },
     editing: draft !== null,
   })
+  const conversationReady = conversation.status === 'success'
+  const { send: sendToAssistant } = assistant
+  // O pedido inicial sai uma vez e a navegação perde o estado, então recarregar não reenvia (GEN-02).
+  useEffect(() => {
+    const prompt = initialPrompt.current
+    if (!prompt || !canUseAssistant || !conversationReady) return
+    initialPrompt.current = null
+    writeAssistantOpen(true)
+    navigate(
+      { pathname: location.pathname, search: location.search },
+      { replace: true, state: null },
+    )
+    sendToAssistant(prompt)
+  }, [
+    canUseAssistant,
+    conversationReady,
+    navigate,
+    location.pathname,
+    location.search,
+    sendToAssistant,
+  ])
   const ai = useAiGenerations({
     dashboardId: dashboard.id,
     draft,

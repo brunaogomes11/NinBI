@@ -1,10 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  assistantDescriptionSchema,
+  can,
   type DashboardCreateInput,
   dashboardCreateSchema,
   MESSAGES,
 } from '@ninbi/contracts'
-import { useForm } from 'react-hook-form'
+import { useState } from 'react'
+import { type Resolver, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,11 +33,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
+import { useAiStatus } from '@/features/ai/api'
+import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
 import { ApiError } from '@/lib/api'
 import { useCreateDashboard } from './api'
 
-/** "Novo dashboard": nome e conexão; ao criar, abre o dashboard já em edição. */
+type NewDashboardValues = DashboardCreateInput & { description: string }
+type Mode = 'blank' | 'describe'
+
+/** "Novo dashboard": nome e conexão (e a descrição para a IA); ao criar, abre o dashboard já em edição. */
 export function NewDashboardDialog({
   open,
   onOpenChange,
@@ -45,36 +55,82 @@ export function NewDashboardDialog({
   const navigate = useNavigate()
   const connections = useConnections()
   const create = useCreateDashboard()
-  const form = useForm<DashboardCreateInput>({
-    resolver: zodResolver(dashboardCreateSchema),
-    defaultValues: { name: '', connectionId: '' },
+  const { user } = useSession()
+  const canUseAi = user ? can(user.role, 'ai.use') : false
+  const aiStatus = useAiStatus(canUseAi)
+  const aiAvailable = aiStatus.data?.configured === true
+  const [mode, setMode] = useState<Mode>('blank')
+  const describing = canUseAi && mode === 'describe'
+  const resolver: Resolver<NewDashboardValues> = async (
+    values,
+    context,
+    options,
+  ) => {
+    const base = await zodResolver(dashboardCreateSchema)(
+      values,
+      context,
+      options as never,
+    )
+    const parsed = assistantDescriptionSchema.safeParse(values.description)
+    if (!describing || parsed.success) {
+      // o zod descarta o que o esquema não conhece: a descrição volta junto
+      return {
+        ...base,
+        values: { ...base.values, description: values.description ?? '' },
+      } as never
+    }
+    return {
+      values: {},
+      errors: {
+        ...base.errors,
+        description: {
+          type: 'validation',
+          message: parsed.error.issues[0]?.message,
+        },
+      },
+    } as never
+  }
+  const form = useForm<NewDashboardValues>({
+    resolver,
+    defaultValues: { name: '', connectionId: '', description: '' },
   })
   const noConnections = connections.data?.length === 0
 
-  function submit(values: DashboardCreateInput) {
-    create.mutate(values, {
-      onSuccess: (dashboard) => {
-        form.reset()
-        onOpenChange(false)
-        navigate(`/dashboards/${dashboard.id}?editar=1`)
-      },
-      onError: (error) => {
-        if (error instanceof ApiError && error.fieldErrors) {
-          for (const [field, message] of Object.entries(error.fieldErrors)) {
-            form.setError(field as keyof DashboardCreateInput, { message })
+  function submit(values: NewDashboardValues) {
+    const assistantPrompt = describing ? values.description.trim() : null
+    create.mutate(
+      { name: values.name, connectionId: values.connectionId },
+      {
+        onSuccess: (dashboard) => {
+          form.reset()
+          setMode('blank')
+          onOpenChange(false)
+          navigate(
+            `/dashboards/${dashboard.id}?editar=1`,
+            assistantPrompt ? { state: { assistantPrompt } } : undefined,
+          )
+        },
+        onError: (error) => {
+          if (error instanceof ApiError && error.fieldErrors) {
+            for (const [field, message] of Object.entries(error.fieldErrors)) {
+              form.setError(field as keyof DashboardCreateInput, { message })
+            }
+            return
           }
-          return
-        }
-        form.setError('root', { message: error.message })
+          form.setError('root', { message: error.message })
+        },
       },
-    })
+    )
   }
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
-        if (!next) form.reset()
+        if (!next) {
+          form.reset()
+          setMode('blank')
+        }
         onOpenChange(next)
       }}
     >
@@ -88,6 +144,28 @@ export function NewDashboardDialog({
             onSubmit={form.handleSubmit(submit)}
             className="flex flex-col gap-4"
           >
+            {canUseAi && (
+              <div className="flex flex-col gap-2">
+                <Tabs
+                  value={mode}
+                  onValueChange={(value) => setMode(value as Mode)}
+                >
+                  <TabsList>
+                    <TabsTrigger value="blank">
+                      {MESSAGES.assistantBlankOption}
+                    </TabsTrigger>
+                    <TabsTrigger value="describe" disabled={!aiAvailable}>
+                      {MESSAGES.assistantDescribeOption}
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                {aiStatus.data?.configured === false && (
+                  <p className="text-muted-foreground text-sm">
+                    {MESSAGES.llmNotConfigured}
+                  </p>
+                )}
+              </div>
+            )}
             <FormField
               control={form.control}
               name="name"
@@ -125,6 +203,21 @@ export function NewDashboardDialog({
                 </FormItem>
               )}
             />
+            {describing && (
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{MESSAGES.assistantDescriptionLabel}</FormLabel>
+                    <FormControl>
+                      <Textarea {...field} rows={5} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             {noConnections && (
               <p role="alert" className="text-muted-foreground text-sm">
                 {MESSAGES.dashboardNeedsConnection}

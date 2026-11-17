@@ -472,9 +472,9 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes com gesto em `DescribeDashboard.test.tsx` (MSW): `GEN-01 Novo dashboard oferece Descrever para a IA com Nome, Conexão e Descrição` (as duas opções aparecem; "Em branco" continua com "Nome" e "Conexão" como antes), `GEN-10 Descrição vazia ou longa mostra a mensagem no campo` ("Informe a descrição" e "A descrição passa de 4.000 caracteres", sem `POST`), `GEN-11 sem provedor Descrever para a IA fica desabilitado com Nenhum provedor de IA configurado`, `GEN-02 Descrever para a IA cria o dashboard e abre o assistente com a descrição como primeira mensagem` (o `POST /api/dashboards` leva nome e conexão; a página abre em edição com o painel aberto; o `POST .../assistant/messages` leva a descrição como `message`; a mensagem aparece na conversa; a sidebar é invalidada; recarregar a página não envia de novo), `GEN-14 falha da geração inicial mantém o dashboard vazio em edição com o erro na conversa` (`provider_error` no stream: a página continua em edição com "Esta aba está vazia", a mensagem do provedor e "Tentar novamente" na conversa)
-- [ ] Testes de `NewDashboardDialog` de `dashboards-consultas` continuam verdes
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto em `DescribeDashboard.test.tsx` (MSW): `GEN-01 Novo dashboard oferece Descrever para a IA com Nome, Conexão e Descrição` (as duas opções aparecem; "Em branco" continua com "Nome" e "Conexão" como antes), `GEN-10 Descrição vazia ou longa mostra a mensagem no campo` ("Informe a descrição" e "A descrição passa de 4.000 caracteres", sem `POST`), `GEN-11 sem provedor Descrever para a IA fica desabilitado com Nenhum provedor de IA configurado`, `GEN-02 Descrever para a IA cria o dashboard e abre o assistente com a descrição como primeira mensagem` (o `POST /api/dashboards` leva nome e conexão; a página abre em edição com o painel aberto; o `POST .../assistant/messages` leva a descrição como `message`; a mensagem aparece na conversa; a sidebar é invalidada; recarregar a página não envia de novo), `GEN-14 falha da geração inicial mantém o dashboard vazio em edição com o erro na conversa` (`provider_error` no stream: a página continua em edição com "Esta aba está vazia", a mensagem do provedor e "Tentar novamente" na conversa)
+- [x] Testes de `NewDashboardDialog` de `dashboards-consultas` continuam verdes
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
