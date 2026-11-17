@@ -434,35 +434,8 @@ describe('Resultado da IA por tipo de conexão', () => {
   const SQL =
     'SELECT categoria, count(*) AS total FROM produto GROUP BY categoria -- $categoria'
 
-  it('SAI-07 resultado da IA abre no editor do tipo da conexão', async () => {
-    // O `$categoria` no comentário só é parâmetro para o Cypher: em SQL o resultado da IA vale.
-    server.use(http.post(URL_PATH, () => ndjson([doneEvent({ cypher: SQL })])))
-    const { result, queryClient } = setup(
-      makeDashboard({ filters: [CATEGORIA], connectionType: 'POSTGRES' }),
-      'SQL',
-    )
-    await act(() => result.current.ai.start('w-1', 'itens'))
-    expect(
-      queryClient.getQueryData<{ rows: unknown[] }>([
-        'query',
-        'd-1',
-        'c-1',
-        SQL,
-      ])?.rows,
-    ).toEqual([
-      ['A', 3],
-      ['B', 5],
-    ])
-
-    const cypher = setup(makeDashboard({ filters: [CATEGORIA] }), 'CYPHER')
-    await act(() => cypher.result.current.ai.start('w-1', 'itens'))
-    expect(
-      cypher.queryClient.getQueryData(['query', 'd-1', 'c-1', SQL]),
-    ).toBeUndefined()
-  })
-
-  it('SAI-07 consulta SQL gerada abre no editor Consulta SQL', async () => {
-    server.use(http.post(URL_PATH, () => ndjson([doneEvent({ cypher: SQL })])))
+  /** Pede a consulta à IA no dashboard e abre o widget gerado no editor. */
+  async function expectAiSqlInEditor() {
     const { user } = renderApp('/dashboards/d-1?editar=1', {
       handlers: [
         http.get('/api/ai/status', () =>
@@ -512,5 +485,40 @@ describe('Resultado da IA por tipo de conexão', () => {
     expect(
       await screen.findByRole('textbox', { name: 'Consulta SQL' }),
     ).toHaveValue(SQL)
+  }
+
+  it('SAI-07 resultado da IA abre no editor do tipo da conexão', async () => {
+    // O `$categoria` no comentário só é parâmetro para o Cypher: em SQL o resultado da IA vale.
+    server.use(http.post(URL_PATH, () => ndjson([doneEvent({ cypher: SQL })])))
+    const { result, queryClient } = setup(
+      makeDashboard({ filters: [CATEGORIA], connectionType: 'POSTGRES' }),
+      'SQL',
+    )
+    await act(() => result.current.ai.start('w-1', 'itens'))
+    expect(
+      queryClient.getQueryData<{ rows: unknown[] }>([
+        'query',
+        'd-1',
+        'c-1',
+        SQL,
+      ])?.rows,
+    ).toEqual([
+      ['A', 3],
+      ['B', 5],
+    ])
+
+    const cypher = setup(makeDashboard({ filters: [CATEGORIA] }), 'CYPHER')
+    await act(() => cypher.result.current.ai.start('w-1', 'itens'))
+    expect(
+      cypher.queryClient.getQueryData(['query', 'd-1', 'c-1', SQL]),
+    ).toBeUndefined()
+
+    // E no app a consulta abre no editor "Consulta SQL" com o texto da IA.
+    await expectAiSqlInEditor()
+  })
+
+  it('SAI-07 consulta SQL gerada abre no editor Consulta SQL', async () => {
+    server.use(http.post(URL_PATH, () => ndjson([doneEvent({ cypher: SQL })])))
+    await expectAiSqlInEditor()
   })
 })
