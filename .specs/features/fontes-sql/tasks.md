@@ -482,14 +482,14 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-03 PostgreSQL consulta termina em ROLLBACK e fecha a conexão` em apps/api/test
-- [ ] Teste `SQX-04 PostgreSQL abre a transação em modo leitura` em apps/api/test
-- [ ] Teste `SQX-10 PostgreSQL aplica o prazo e cancela ao estourar` em apps/api/test
-- [ ] Teste `SQX-11 PostgreSQL para a leitura em maxRows` em apps/api/test
-- [ ] Teste `SQX-21 PostgreSQL converte data, data com hora e decimal` em apps/api/test
-- [ ] Teste `SRC-12 PostgreSQL com SSL criptografa e valida o certificado` em apps/api/test
-- [ ] Teste `SRC-13 PostgreSQL sem SSL abre a conexão sem criptografia` em apps/api/test
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SQX-03 PostgreSQL consulta termina em ROLLBACK e fecha a conexão` em apps/api/test
+- [x] Teste `SQX-04 PostgreSQL abre a transação em modo leitura` em apps/api/test
+- [x] Teste `SQX-10 PostgreSQL aplica o prazo e cancela ao estourar` em apps/api/test
+- [x] Teste `SQX-11 PostgreSQL para a leitura em maxRows` em apps/api/test
+- [x] Teste `SQX-21 PostgreSQL converte data, data com hora e decimal` em apps/api/test
+- [x] Teste `SRC-12 PostgreSQL com SSL criptografa e valida o certificado` em apps/api/test
+- [x] Teste `SRC-13 PostgreSQL sem SSL abre a conexão sem criptografia` em apps/api/test
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
