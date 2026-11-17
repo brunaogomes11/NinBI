@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 6,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "ac_gap::ao validar texto de consulta leia a lexica do dialeto de verdade comentario escape barra invertida dollar quoting um tokenizador unico deixa o texto de uma instrucao parecer string ou comentario",
+      "text": "Ao validar texto de consulta, leia a lexica do dialeto de verdade (comentario #, escape barra invertida, dollar-quoting): um tokenizador unico deixa o texto de uma instrucao parecer string ou comentario.",
+      "signal": "ac_gap",
+      "scope": "sql-validator",
+      "status": "candidate",
+      "features": [
+        "fontes-sql"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F1 C28 C31 (sql-validator)"
+      ],
+      "created": "2026-11-17T13:12:11Z",
+      "last_seen": "2026-11-17T13:12:11Z"
+    },
+    {
+      "id": "L-002",
+      "key": "spec_deviation::uma regra de recusa com excecao palavra depois de ponto trim antes de recusar espaco precisa estar na spec senao o teste consagra o desvio e o verifier acha",
+      "text": "Uma regra de recusa com excecao (palavra depois de ponto, trim antes de recusar espaco) precisa estar na spec; senao o teste consagra o desvio e o Verifier acha.",
+      "signal": "spec_deviation",
+      "scope": "validation",
+      "status": "candidate",
+      "features": [
+        "fontes-sql"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F2 C30 F5 C9 (validation)"
+      ],
+      "created": "2026-11-17T13:12:12Z",
+      "last_seen": "2026-11-17T13:12:12Z"
+    },
+    {
+      "id": "L-003",
+      "key": "weak_test::o teste que o proof seleciona deve afirmar o valor do criterio inteiro padrao de 10 s editor na tela schema preservado rota de gravar nao um irmao nao selecionado",
+      "text": "O teste que o Proof seleciona deve afirmar o valor do criterio inteiro (padrao de 10 s, editor na tela, schema preservado, rota de gravar), nao um irmao nao selecionado.",
+      "signal": "weak_test",
+      "scope": "tests",
+      "status": "candidate",
+      "features": [
+        "fontes-sql"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F6 F7 F8 F9 C8 C60 C75 C76 C66 (tests)"
+      ],
+      "created": "2026-11-17T13:12:12Z",
+      "last_seen": "2026-11-17T13:12:12Z"
+    },
+    {
+      "id": "L-004",
+      "key": "ac_gap::ao ler valor por nome de um objeto simples use object hasown nomes como constructor e tostring herdam funcoes de object prototype",
+      "text": "Ao ler valor por nome de um objeto simples, use Object.hasOwn: nomes como constructor e toString herdam funcoes de Object.prototype.",
+      "signal": "ac_gap",
+      "scope": "params",
+      "status": "candidate",
+      "features": [
+        "fontes-sql"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F10 C39 (params)"
+      ],
+      "created": "2026-11-17T13:12:12Z",
+      "last_seen": "2026-11-17T13:12:12Z"
+    },
+    {
+      "id": "L-005",
+      "key": "spec_deviation::confirme na fase de design o que cada driver oferece decimal como texto rollback ao parar leitura limite de driver vira linha de assumptions e ad nao so comentario no codigo",
+      "text": "Confirme na fase de design o que cada driver oferece (decimal como texto, rollback ao parar leitura); limite de driver vira linha de Assumptions e AD, nao so comentario no codigo.",
+      "signal": "spec_deviation",
+      "scope": "drivers",
+      "status": "candidate",
+      "features": [
+        "fontes-sql"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F3 F4 C44 C25 (drivers)"
+      ],
+      "created": "2026-11-17T13:12:12Z",
+      "last_seen": "2026-11-17T13:12:12Z"
+    }
+  ]
+}

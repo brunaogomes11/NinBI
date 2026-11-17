@@ -1,6 +1,6 @@
 # fontes-sql proofs
 
-**HEAD**: c0f0e78
+**HEAD**: 545aab0
 **Tree**: clean
 **Shell**: C:/Program Files/Git\bin\bash.exe
 **Result**: 132 pass, 0 fail
@@ -145,19 +145,19 @@
 `Run contracts` - exit 0
 
 ```
- ✓ src/sharing.spec.ts > sharing contracts > SHARE-10 Visualizador só recebe Pode ver nas opções 0ms
- ✓ src/sharing.spec.ts > sharing contracts > TEAM-07 a confirmação de exclusão traz o nome e o número de dashboards 0ms
- ✓ src/sharing.spec.ts > sharing contracts > ACL-08 sharedBy traz o nome do dono 0ms
- ✓ src/sharing.spec.ts > sharing contracts > SHARE-06 shareUpsertSchema recusa type desconhecido e USER sem userId 3ms
- ✓ src/sharing.spec.ts > sharing contracts > TEAM-06 teamUpdateSchema vazio é recusado e membros repetidos também 1ms
- ✓ src/cypher-tokens.spec.ts > cypher tokens > FLT-09 extractParameterNames acha os parâmetros fora de strings e comentários 2ms
+ ✓ src/ai.spec.ts > ai contracts > AIQ-14 pedido vazio é recusado 6ms
+ ✓ src/ai.spec.ts > ai contracts > AIQ-15 pedido com mais de 4.000 caracteres dá a mensagem 1ms
+ ✓ src/ai.spec.ts > ai contracts > MESSAGES.aiGenerating(2) é "Gerando... tentativa 2 de 4" 0ms
+ ✓ src/ai.spec.ts > ai contracts > MESSAGES.aiProviderFailed('x') é "Erro do provedor de IA: x" 0ms
+ ✓ src/ai.spec.ts > ai contracts > widgetId que não é UUID é recusado 1ms
+ ✓ src/cypher-tokens.spec.ts > cypher tokens > FLT-09 extractParameterNames acha os parâmetros fora de strings e comentários 3ms
  ✓ src/cypher-tokens.spec.ts > cypher tokens > SMG-03 extractParameterNames sem linguagem segue o Cypher 0ms
  ✓ src/cypher-tokens.spec.ts > cypher tokens > SQX-16 extractParameterNames em SQL usa o tokenizador de SQL 1ms
 
  Test Files  12 passed (12)
       Tests  109 passed (109)
-   Start at  09:38:07
-   Duration  1.31s (import 65%, transform 28%, tests 5%, worker 3%)
+   Start at  09:55:30
+   Duration  848ms (import 69%, transform 20%, tests 7%, worker 3%)
 
 $ vitest run --reporter=verbose
 ```
@@ -185,16 +185,16 @@ The width(0) and height(0) of chart should be greater than 0,
 `Run api` - exit 0
 
 ```
- ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 chave diferente não decifra 1ms
- ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 sem NINBI_ENCRYPTION_KEY o backend não inicia e loga a mensagem 5ms
- ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 chave que não tem 32 bytes não inicia o backend 2ms
- ✓ test/ai/db-code.spec.ts > código de erro do banco para a IA > SQX-13 dbCode segue ao prompt e erro de execução SQL vai só com o código 3714ms
- ✓ test/web/web.spec.ts > servir o web pela API > FND-01 serve o index.html do web em GET / 3704ms
+ ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 duas cifras do mesmo texto diferem 1ms
+ ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 cifra adulterada lança 1ms
+ ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 chave diferente não decifra 0ms
+ ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 sem NINBI_ENCRYPTION_KEY o backend não inicia e loga a mensagem 2ms
+ ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 chave que não tem 32 bytes não inicia o backend 1ms
 
  Test Files  95 passed (95)
       Tests  496 passed (496)
-   Start at  09:40:43
-   Duration  304.25s (tests 67%, import 32%)
+   Start at  09:57:37
+   Duration  289.56s (tests 65%, import 34%)
 
 $ vitest run --reporter=verbose
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
@@ -205,16 +205,16 @@ Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
 `Run apiint` - exit 0
 
 ```
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > verify com as credenciais certas resolve 51ms
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > CONN-08 senha errada rejeita com a mensagem do Neo4j 13ms
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > CONN-12 sem banco a sessão usa o banco padrão do servidor 27ms
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > QRY-08 leitura para no limite sem ler o resto de um resultado gigante 38ms
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > SCH-12 leitura usa transação de leitura e recusa escrita 27ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > verify com as credenciais certas resolve 44ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > CONN-08 senha errada rejeita com a mensagem do Neo4j 12ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > CONN-12 sem banco a sessão usa o banco padrão do servidor 17ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > QRY-08 leitura para no limite sem ler o resto de um resultado gigante 30ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > SCH-12 leitura usa transação de leitura e recusa escrita 22ms
 
  Test Files  11 passed (11)
       Tests  28 passed (28)
-   Start at  09:45:57
-   Duration  53.93s (import 65%, tests 23%, transform 12%)
+   Start at  10:02:30
+   Duration  49.42s (import 70%, tests 25%, transform 5%)
 
 $ vitest run --config vitest.int.config.ts --reporter=verbose
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
@@ -226,18 +226,18 @@ Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
 
 ```
 apps/web test:              learn more: https://vitest.dev/guide/improving-performance#test-environments
+apps/web test: Done
+apps/api test:  ✓ test/web/web.spec.ts > servir o web pela API > FND-01 serve o index.html do web em GET / 2691ms
 apps/api test:  ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 cifra AES-256-GCM no formato v1 e decifra de volta 4ms
 apps/api test:  ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 duas cifras do mesmo texto diferem 1ms
 apps/api test:  ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 cifra adulterada lança 1ms
 apps/api test:  ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 chave diferente não decifra 1ms
 apps/api test:  ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 sem NINBI_ENCRYPTION_KEY o backend não inicia e loga a mensagem 2ms
 apps/api test:  ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 chave que não tem 32 bytes não inicia o backend 1ms
-apps/web test: Done
-apps/api test:  ✓ test/web/web.spec.ts > servir o web pela API > FND-01 serve o index.html do web em GET / 2235ms
 apps/api test:  Test Files  95 passed (95)
 apps/api test:       Tests  496 passed (496)
-apps/api test:    Start at  09:46:56
-apps/api test:    Duration  401.54s (tests 58%, import 41%)
+apps/api test:    Start at  10:03:24
+apps/api test:    Duration  415.30s (tests 55%, import 44%)
 apps/api test: Done
 $ pnpm -r test
 ```
