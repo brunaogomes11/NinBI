@@ -1,15 +1,41 @@
-import type {
-  ConnectionCreate,
-  ConnectionDto,
-  ConnectionSchemaDto,
-  ConnectionUpdate,
-  ExampleSetting,
-  SchemaStateDto,
+import {
+  CONNECTION_TYPE_LABELS,
+  type ConnectionCreate,
+  type ConnectionDto,
+  type ConnectionType,
+  type ConnectionUpdate,
+  connectionLanguage,
+  type ExampleSetting,
+  isRelationalSchema,
+  type QueryLanguage,
+  type SchemaDto,
+  type SchemaStateDto,
+  SQL_DEFAULT_PORTS,
 } from '@ninbi/contracts'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 
 export const CONNECTIONS_QUERY_KEY = ['connections'] as const
+
+/** Nome do tipo da conexão como a tela mostra ("PostgreSQL", "SQL Server"). */
+export function connectionTypeLabel(type: ConnectionType): string {
+  return CONNECTION_TYPE_LABELS[type]
+}
+
+/** Porta padrão do tipo SQL; Neo4j usa URI e não tem porta própria. */
+export function defaultPortFor(type: ConnectionType): number | null {
+  return type === 'NEO4J' ? null : SQL_DEFAULT_PORTS[type]
+}
+
+/** Linguagem da consulta escrita para o tipo de conexão. */
+export function queryLanguage(type: ConnectionType): QueryLanguage {
+  return connectionLanguage(type)
+}
+
+/** Rótulo do campo de consulta: "Consulta SQL" ou "Consulta Cypher". */
+export function queryLabel(type: ConnectionType): string {
+  return queryLanguage(type) === 'SQL' ? 'Consulta SQL' : 'Consulta Cypher'
+}
 
 export function useConnections() {
   return useQuery({
@@ -59,8 +85,7 @@ export const schemaQueryKey = (id: string) => ['connection-schema', id] as const
 export function useConnectionSchema(id: string) {
   return useQuery({
     queryKey: schemaQueryKey(id),
-    queryFn: () =>
-      apiFetch<ConnectionSchemaDto>(`/api/connections/${id}/schema`),
+    queryFn: () => apiFetch<SchemaDto>(`/api/connections/${id}/schema`),
     refetchInterval: (query) =>
       query.state.data?.status === 'READING' ? 2000 : false,
   })
@@ -75,9 +100,8 @@ export function useRefreshSchema(id: string) {
         method: 'POST',
       }),
     onSuccess: (state) => {
-      queryClient.setQueryData<ConnectionSchemaDto>(
-        schemaQueryKey(id),
-        (current) => (current ? { ...current, ...state } : current),
+      queryClient.setQueryData<SchemaDto>(schemaQueryKey(id), (current) =>
+        current ? { ...current, ...state } : current,
       )
       return queryClient.invalidateQueries({ queryKey: schemaQueryKey(id) })
     },
@@ -94,38 +118,53 @@ export function useSetExampleSetting(id: string) {
         body: setting,
       }),
     onSuccess: (_data, setting) => {
-      queryClient.setQueryData<ConnectionSchemaDto>(
-        schemaQueryKey(id),
-        (current) => {
-          if (!current) return current
-          const apply = <
-            T extends {
-              name: string
-              properties: { name: string; sendExample: boolean }[]
-            },
-          >(
-            elements: T[],
-          ): T[] =>
-            elements.map((element) =>
-              element.name === setting.element
+      queryClient.setQueryData<SchemaDto>(schemaQueryKey(id), (current) => {
+        if (!current) return current
+        if (isRelationalSchema(current)) {
+          if (setting.kind !== 'TABLE') return current
+          return {
+            ...current,
+            tables: current.tables.map((table) =>
+              table.name === setting.element
                 ? {
-                    ...element,
-                    properties: element.properties.map((property) =>
-                      property.name === setting.property
-                        ? { ...property, sendExample: setting.sendExample }
-                        : property,
+                    ...table,
+                    columns: table.columns.map((column) =>
+                      column.name === setting.property
+                        ? { ...column, sendExample: setting.sendExample }
+                        : column,
                     ),
                   }
-                : element,
-            )
-          return setting.kind === 'LABEL'
-            ? { ...current, labels: apply(current.labels) }
-            : {
-                ...current,
-                relationshipTypes: apply(current.relationshipTypes),
-              }
-        },
-      )
+                : table,
+            ),
+          }
+        }
+        const apply = <
+          T extends {
+            name: string
+            properties: { name: string; sendExample: boolean }[]
+          },
+        >(
+          elements: T[],
+        ): T[] =>
+          elements.map((element) =>
+            element.name === setting.element
+              ? {
+                  ...element,
+                  properties: element.properties.map((property) =>
+                    property.name === setting.property
+                      ? { ...property, sendExample: setting.sendExample }
+                      : property,
+                  ),
+                }
+              : element,
+          )
+        return setting.kind === 'LABEL'
+          ? { ...current, labels: apply(current.labels) }
+          : {
+              ...current,
+              relationshipTypes: apply(current.relationshipTypes),
+            }
+      })
     },
   })
 }

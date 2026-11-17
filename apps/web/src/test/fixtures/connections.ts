@@ -8,7 +8,11 @@ export function makeConnection(
   return {
     id: 'c-1',
     name: 'Vendas',
+    type: 'NEO4J',
     uri: 'neo4j+s://vendas.exemplo:7687',
+    host: null,
+    port: null,
+    ssl: false,
     database: null,
     username: 'neo4j',
     schemaStatus: 'READY',

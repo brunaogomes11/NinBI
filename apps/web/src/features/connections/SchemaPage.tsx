@@ -1,4 +1,8 @@
-import { type ConnectionSchemaDto, MESSAGES } from '@ninbi/contracts'
+import {
+  type ConnectionSchemaDto,
+  isRelationalSchema,
+  MESSAGES,
+} from '@ninbi/contracts'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { Button } from '@/components/ui/button'
@@ -87,7 +91,8 @@ export function SchemaPage() {
   const data = schema.data
   const reading = data?.status === 'READING'
   const hasRead = !!data?.readAt
-  const empty = !!data && hasRead && data.labels.length === 0
+  const graph = data && !isRelationalSchema(data) ? data : undefined
+  const empty = !!graph && hasRead && graph.labels.length === 0
 
   return (
     <div className="flex min-h-0 flex-col gap-4">
@@ -152,8 +157,8 @@ export function SchemaPage() {
           {MESSAGES.schemaEmpty}
         </Card>
       )}
-      {data && !empty && (
-        <SchemaDetail connectionId={connectionId} schema={data} />
+      {graph && !empty && (
+        <SchemaDetail connectionId={connectionId} schema={graph} />
       )}
     </div>
   )

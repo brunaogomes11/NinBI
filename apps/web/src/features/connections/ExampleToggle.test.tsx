@@ -1,4 +1,8 @@
-import type { ExampleSetting, Role } from '@ninbi/contracts'
+import {
+  type ExampleSetting,
+  isRelationalSchema,
+  type Role,
+} from '@ninbi/contracts'
 import { screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { describe, expect, it } from 'vitest'
@@ -16,7 +20,7 @@ import { SchemaPropertiesTable } from './SchemaPropertiesTable'
 
 function ClienteProperties() {
   const schema = useConnectionSchema('c-1')
-  if (!schema.data) return null
+  if (!schema.data || isRelationalSchema(schema.data)) return null
   const cliente = schema.data.labels[0]
   return (
     <SchemaPropertiesTable

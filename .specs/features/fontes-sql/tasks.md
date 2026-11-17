@@ -778,9 +778,9 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-02 rótulo e linguagem da consulta por tipo de conexão` em apps/web
-- [ ] Os testes web existentes seguem verdes e `pnpm --filter @ninbi/web typecheck` compila
-- [ ] Gate check passes: `pnpm --filter @ninbi/web typecheck && pnpm --filter @ninbi/web test`
+- [x] Teste `SQX-02 rótulo e linguagem da consulta por tipo de conexão` em apps/web
+- [x] Os testes web existentes seguem verdes e `pnpm --filter @ninbi/web typecheck` compila
+- [x] Gate check passes: `pnpm --filter @ninbi/web typecheck && pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
@@ -1292,5 +1292,5 @@ Proof: run web | ✓ SMG-08 filtro mostra Consulta SQL ou Consulta Cypher pelo t
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** MySQL e SQL Server sem container; só o PostgreSQL do compose tem teste real, e o usuário testa os outros dois à mão contra um banco remoto (user: "não precisa, só o postgres e eu vou pegar um banco remoto pra testar"). T21 removida.
-**Dispatched:** lotes 1 a 3 returned; lote 4 (T22 a T29, opus) em 9e90c65
+**Dispatched:** lotes 1 a 4 returned; lote 5 (T30 a T39, sonnet) em af286e5
 **Walked:** none

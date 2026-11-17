@@ -50,6 +50,7 @@ export function makeDashboard(
     ownerName: 'Ana Souza',
     connectionId: 'c-1',
     connectionName: 'Vendas',
+    connectionType: 'NEO4J',
     permissions: { edit: true, delete: true, share: true },
     tabs: [{ id: 't-1', name: 'Aba 1', widgets: [makeWidget()] }],
     filters: [],
