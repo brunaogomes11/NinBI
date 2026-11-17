@@ -153,9 +153,9 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SCS-16 ajuste de exemplo aceita o elemento TABLE` em packages/contracts
-- [ ] Os testes de `schemas.spec.ts` que existem continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts test`
+- [x] Teste `SCS-16 ajuste de exemplo aceita o elemento TABLE` em packages/contracts
+- [x] Os testes de `schemas.spec.ts` que existem continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick

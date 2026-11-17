@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import type { ZodType } from 'zod'
 import {
-  CONNECTION_TYPES,
   CONNECTION_TYPE_LABELS,
-  SQL_DEFAULT_PORTS,
+  CONNECTION_TYPES,
+  type ConnectionSchemaDto,
   connectionCreateSchema,
   connectionLanguage,
   connectionUpdateSchema,
+  exampleSettingSchema,
+  isRelationalSchema,
+  type RelationalSchemaDto,
+  SQL_DEFAULT_PORTS,
 } from './connections'
 
 function errorsOf(
@@ -222,5 +226,49 @@ describe('connection contracts: fontes SQL', () => {
     expect(
       errorsOf(connectionCreateSchema, { ...valid, type: 'NEO4J', uri: 'x' }),
     ).toEqual({ uri: 'URI inválida' })
+  })
+})
+
+describe('schema contracts: relacional', () => {
+  it('SCS-16 ajuste de exemplo aceita o elemento TABLE', () => {
+    const setting = {
+      kind: 'TABLE',
+      element: 'clientes',
+      property: 'email',
+      sendExample: false,
+    }
+    expect(exampleSettingSchema.safeParse(setting).success).toBe(true)
+    expect(
+      exampleSettingSchema.safeParse({ ...setting, kind: 'LABEL' }).success,
+    ).toBe(true)
+    expect(
+      exampleSettingSchema.safeParse({ ...setting, kind: 'VIEW' }).success,
+    ).toBe(false)
+  })
+
+  it('SCS-16 isRelationalSchema distingue o schema relacional do de grafo', () => {
+    const state = {
+      status: 'READY',
+      readAt: null,
+      startedAt: null,
+      error: null,
+    } as const
+    const relational: RelationalSchemaDto = {
+      ...state,
+      kind: 'RELATIONAL',
+      connectionId: 'c',
+      connectionName: 'n',
+      tables: [],
+      foreignKeys: [],
+    }
+    const graph: ConnectionSchemaDto = {
+      ...state,
+      connectionId: 'c',
+      connectionName: 'n',
+      labels: [],
+      relationshipTypes: [],
+    }
+    expect(isRelationalSchema(relational)).toBe(true)
+    expect(isRelationalSchema(graph)).toBe(false)
   })
 })
