@@ -682,7 +682,7 @@ Proof: run api | ✓ CHAT-29 log de cada pedido tem usuário, dashboard, ações
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, sonnet) - returned (ab6f4a6). Lote 2 (T8-T13, sonnet) - returned (473c49b). Lote 3 (T14-T18, sonnet) - em andamento.
+**Dispatched:** lote 1 (T1-T7, sonnet) - returned (ab6f4a6). Lote 2 (T8-T13, sonnet) - returned (473c49b). Lote 3 (T14-T18, sonnet) - returned (9734a23). Verifier (haiku) sobre 9734a23 - returned: FAIL, 6 findings fechados (a0e5a2d..eb2b2ab; AD-136). Round 2: 87 pass / 0 fail em 28c3007; `validate_verification.py` exit 0. Feature encerrada. Executada no worktree NinBI-wt-ia (branch feat/interatividade-ia-dashboard).
 **Walked:** dispensado por AD-023
 
 ---
