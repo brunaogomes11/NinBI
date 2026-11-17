@@ -4,6 +4,7 @@ import { asc, eq } from 'drizzle-orm'
 import { afterEach, describe, expect, it } from 'vitest'
 import { CryptoService } from '../../src/crypto/crypto.service'
 import { assistantMessages, connectionSchemas } from '../../src/database/schema'
+import { SourceGatewayError } from '../../src/sources/source'
 import { createConnection, createDashboard } from '../factories'
 import { FakeChatModelFactory } from '../fakes/fake-chat-model.factory'
 import { createTestApp } from '../harness'
@@ -360,5 +361,203 @@ describe('assistente em conexão SQL', () => {
     expect(graphActions[1]).toMatchObject({
       filter: { options: { source: 'QUERY', cypher: CYPHER_OPTIONS } },
     })
+  })
+
+  it('ASQ-06 consulta SQL gerada é validada, executada e corrigida', async () => {
+    const t = await setup()
+    t.sql.POSTGRES.whenRead(
+      'nme',
+      new SourceGatewayError('column "nme" does not exist', '42703'),
+    )
+    t.sql.POSTGRES.whenRead('FROM public.pedidos', [
+      { cidade: 'Recife', total: 3 },
+    ])
+    t.chatModels.script(
+      plan([createWidget('Pedidos por cidade')]),
+      widgetReply('SELECT * INTO copia FROM public.clientes'),
+      // ASQ-15: Cypher devolvido para uma conexão SQL falha na validação
+      widgetReply('MATCH (p:Pedido) RETURN p.categoria AS cidade'),
+      widgetReply('SELECT nme AS cidade FROM public.clientes'),
+      widgetReply(VALID_SQL),
+    )
+
+    const res = await t.post({
+      message: 'pedidos por cidade',
+      draft: t.draft('POSTGRES'),
+    })
+
+    expect(res.status).toBe(200)
+    const lines = events(res)
+    // As duas recusadas pelo validador de SQL não chegam ao banco.
+    expect(t.sql.POSTGRES.reads).toEqual([
+      'SELECT nme AS cidade FROM public.clientes',
+      VALID_SQL,
+    ])
+    expect(t.neo4jReads()).toEqual([])
+    const [, first, second, third, fourth] = t.chatModels.calls
+    expect(text(first)).toContain('Você escreve consultas PostgreSQL')
+    expect(text(second)).toContain(
+      'Somente consultas de leitura são permitidas. Cláusula bloqueada: INTO',
+    )
+    expect(text(third)).toContain(
+      'Somente consultas de leitura são permitidas. Comece por SELECT ou WITH',
+    )
+    expect(text(fourth)).toContain('column "nme" does not exist')
+    expect(lines.filter((e) => e.type === 'widget')).toEqual([
+      { type: 'widget', index: 1, total: 1, attempt: 1 },
+      { type: 'widget', index: 1, total: 1, attempt: 2 },
+      { type: 'widget', index: 1, total: 1, attempt: 3 },
+      { type: 'widget', index: 1, total: 1, attempt: 4 },
+    ])
+    expect(done(lines).actions[0]).toMatchObject({
+      type: 'create_widget',
+      cypher: VALID_SQL,
+      error: null,
+      result: { columns: ['cidade', 'total'], rows: [['Recife', 3]] },
+    })
+  })
+
+  it('ASQ-07 manter a consulta atual a executa pela conexão do rascunho', async () => {
+    const t = await setup({ saved: 'NEO4J' })
+    const CURRENT_SQL = 'SELECT count(*) AS total FROM public.pedidos'
+    const CURRENT_CYPHER = 'MATCH (p:Pedido) RETURN count(p) AS total'
+    const widget = (cypher: string) => ({
+      id: uuid(20),
+      title: 'Total de pedidos',
+      cypher,
+      visualization: 'TABLE',
+      mapping: null,
+      layout: { x: 0, y: 0, w: 4, h: 4 },
+    })
+    const keepQuery = () =>
+      t.chatModels.script(
+        plan([{ type: 'update_widget', widget: 'w1', visualization: 'KPI' }]),
+      )
+    t.sql.POSTGRES.whenRead('count(*)', [{ total: 9 }])
+    keepQuery()
+
+    const sqlRes = await t.post({
+      message: 'mostre como KPI',
+      draft: t.draft('POSTGRES', [widget(CURRENT_SQL)]),
+    })
+
+    expect(sqlRes.status).toBe(200)
+    // Sem novo prompt: só a chamada do plano, e a consulta atual roda no PostgreSQL.
+    expect(t.chatModels.calls).toHaveLength(1)
+    expect(t.sql.POSTGRES.reads).toEqual([CURRENT_SQL])
+    expect(t.neo4jReads()).toEqual([])
+    expect(done(events(sqlRes)).actions[0]).toMatchObject({
+      type: 'update_widget',
+      widgetId: uuid(20),
+      visualization: 'KPI',
+      result: { columns: ['total'], rows: [[9]] },
+      error: null,
+    })
+
+    // A consulta atual que falha no banco SQL traz o erro, sem tocar o Neo4j.
+    t.sql.POSTGRES.whenRead(
+      'count(*)',
+      new SourceGatewayError(
+        'relation "public.pedidos" does not exist',
+        '42P01',
+      ),
+    )
+    keepQuery()
+    const failing = await t.post({
+      message: 'mostre como KPI',
+      draft: t.draft('POSTGRES', [widget(CURRENT_SQL)]),
+    })
+    expect(done(events(failing)).actions[0]).toMatchObject({
+      type: 'update_widget',
+      visualization: 'KPI',
+      result: null,
+      error: expect.any(String),
+    })
+    expect(t.neo4jReads()).toEqual([])
+
+    // Rascunho em Neo4j: a consulta atual roda no Neo4j, como antes.
+    t.neo4j.whenRead('count(p)', [{ total: 4 }])
+    keepQuery()
+    const graphRes = await t.post({
+      message: 'mostre como KPI',
+      draft: t.draft('NEO4J', [widget(CURRENT_CYPHER)]),
+    })
+    expect(t.neo4jReads()).toEqual([CURRENT_CYPHER])
+    expect(t.sql.POSTGRES.reads).toEqual([CURRENT_SQL, CURRENT_SQL])
+    expect(done(events(graphRes)).actions[0]).toMatchObject({
+      result: { rows: [[4]] },
+      error: null,
+    })
+  })
+
+  it('ASQ-11 widget SQL que falha entra com erro e a última consulta', async () => {
+    const t = await setup()
+    t.sql.POSTGRES.whenRead('FROM public.pedidos', [
+      { cidade: 'Recife', total: 3 },
+    ])
+    t.sql.POSTGRES.whenRead(
+      'nme',
+      new SourceGatewayError('column "nme" does not exist', '42703'),
+    )
+    const LAST_SQL = 'SELECT nme AS cidade FROM public.clientes'
+    t.chatModels.script(
+      plan([createWidget('Um'), createWidget('Dois'), createWidget('Três')]),
+      widgetReply(VALID_SQL),
+      widgetReply('DELETE FROM public.clientes'),
+      widgetReply('MATCH (n) RETURN n'),
+      widgetReply('UPDATE public.clientes SET cidade = 1'),
+      widgetReply(LAST_SQL),
+      widgetReply(VALID_SQL),
+    )
+
+    const res = await t.post({
+      message: 'três widgets',
+      draft: t.draft('POSTGRES'),
+    })
+
+    expect(res.status).toBe(200)
+    const final = done(events(res))
+    const created = final.actions.filter((a) => a.type === 'create_widget')
+    expect(created).toHaveLength(3)
+    expect(created[0]).toMatchObject({ cypher: VALID_SQL, error: null })
+    expect(created[1]).toMatchObject({
+      cypher: LAST_SQL,
+      visualization: 'TABLE',
+      mapping: null,
+      result: null,
+    })
+    expect(created[1]?.error).toEqual(expect.any(String))
+    expect(created[2]).toMatchObject({
+      cypher: VALID_SQL,
+      visualization: 'BAR',
+      error: null,
+    })
+    expect(final.reply.details?.failedWidgets).toEqual(['Dois'])
+    expect(final.reply.details?.createdWidgets).toBe(3)
+
+    // Banco SQL fora do ar: os widgets entram com erro e o laço não repete.
+    t.sql.POSTGRES.whenRead(
+      'FROM public.pedidos',
+      new SourceGatewayError('connect ECONNREFUSED', 'ECONNREFUSED'),
+    )
+    const calls = t.chatModels.calls.length
+    t.chatModels.script(
+      plan([createWidget('Quatro'), createWidget('Cinco')]),
+      widgetReply(VALID_SQL),
+      widgetReply(VALID_SQL),
+    )
+    const down = await t.post({
+      message: 'mais dois',
+      draft: t.draft('POSTGRES'),
+    })
+    expect(t.chatModels.calls).toHaveLength(calls + 3)
+    const unavailable = done(events(down)).actions.filter(
+      (a) => a.type === 'create_widget',
+    )
+    expect(unavailable).toHaveLength(2)
+    for (const action of unavailable) {
+      expect(action).toMatchObject({ visualization: 'TABLE', result: null })
+      expect(action.error).toEqual(expect.any(String))
+    }
   })
 })

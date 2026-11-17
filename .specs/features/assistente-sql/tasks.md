@@ -141,10 +141,10 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Teste `ASQ-06 consulta SQL gerada é validada, executada e corrigida` em apps/api/test/assistant
-- [ ] Teste `ASQ-07 manter a consulta atual a executa pela conexão do rascunho` em apps/api/test/assistant
-- [ ] Teste `ASQ-11 widget SQL que falha entra com erro e a última consulta` em apps/api/test/assistant
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `ASQ-06 consulta SQL gerada é validada, executada e corrigida` em apps/api/test/assistant
+- [x] Teste `ASQ-07 manter a consulta atual a executa pela conexão do rascunho` em apps/api/test/assistant
+- [x] Teste `ASQ-11 widget SQL que falha entra com erro e a última consulta` em apps/api/test/assistant
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
