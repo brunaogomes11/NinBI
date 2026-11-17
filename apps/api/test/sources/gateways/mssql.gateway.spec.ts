@@ -266,6 +266,14 @@ describe('gateway do SQL Server', () => {
     )
     expect(mssqlValue('9007199254740993', 'bigint')).toBe(9007199254740993n)
     expect(mssqlValue(19.9, 'decimal')).toBe(19.9)
+    // Limite do driver (AD-140, Assumptions da spec): o `tedious` entrega o
+    // decimal como número, então mais de ~15 dígitos sai arredondado, não texto.
+    // O valor como o driver o entrega para `12345678901234567.89`.
+    const fromDriver = Number('12345678901234567.89')
+    const rounded = mssqlValue(fromDriver, 'decimal')
+    expect(typeof rounded).toBe('number')
+    expect(String(rounded)).toBe('12345678901234568')
+    expect(String(mssqlValue(fromDriver, 'numeric'))).toBe('12345678901234568')
     expect(mssqlValue(null, 'date')).toBeNull()
     // `useUTC` faz o driver ler a data sem fuso como gravada.
     expect(mssqlConfig(cfg, 1000).options?.useUTC).toBe(true)
