@@ -309,11 +309,11 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-21 tipos do resultado SQL viram ResultValue` em apps/api/test
-- [ ] Teste `SQX-22 inteiro fora do intervalo vira bigint e decimal inexato vira texto` em apps/api/test
-- [ ] Teste `SQX-23 colunas repetidas ganham _2 e _3` em apps/api/test
-- [ ] Teste `SQX-27 binário vira <binário N bytes>` em apps/api/test
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SQX-21 tipos do resultado SQL viram ResultValue` em apps/api/test
+- [x] Teste `SQX-22 inteiro fora do intervalo vira bigint e decimal inexato vira texto` em apps/api/test
+- [x] Teste `SQX-23 colunas repetidas ganham _2 e _3` em apps/api/test
+- [x] Teste `SQX-27 binário vira <binário N bytes>` em apps/api/test
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
