@@ -339,7 +339,19 @@ describe('resolver as ações do plano', () => {
       [filterWith('MATCH (c:Cliente) RETURN c.cidade AS value', 'cypher')],
       counter(),
     )
-    expect(cypherPlan.actions).toHaveLength(1)
+    expect(cypherPlan.actions).toEqual([
+      {
+        type: 'create_filter',
+        filter: expect.objectContaining({
+          parameter: 'cypher',
+          type: 'SINGLE_SELECT',
+          options: {
+            source: 'QUERY',
+            cypher: 'MATCH (c:Cliente) RETURN c.cidade AS value',
+          },
+        }),
+      },
+    ])
   })
 
   it('move_widget e resize_widget saem como set_layout sem sobreposição', () => {

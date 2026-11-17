@@ -279,27 +279,30 @@ describe('pedido do plano pela conexão do rascunho', () => {
 
   it('ASQ-02 plano para conexão Neo4j leva o schema de grafo como antes', () => {
     const draft = assistantDraftSchema.parse(rawDraft)
-    const withDialect = buildAssistantMessages({
-      schema,
-      dialect: 'Cypher',
-      draft,
-      history,
-      message: 'oi',
-    })
-    const withoutDialect = buildAssistantMessages({
+    // sem dialeto: o caminho padrão tem de ser o texto de Neo4j de antes da feature
+    const messages = buildAssistantMessages({
       schema,
       draft,
       history,
       message: 'oi',
     })
-    const system = systemOf(withDialect)
-    expect(system).toContain('Labels')
-    expect(system).toContain('(:Pedido)')
-    expect(system).toContain('Relacionamentos')
-    expect(system).not.toContain('Tabelas')
-    expect(withDialect.map((m) => String(m.content))).toEqual(
-      withoutDialect.map((m) => String(m.content)),
+    const system = systemOf(messages)
+    expect(
+      system.startsWith(
+        'Você é o assistente de um dashboard de dados em Neo4j: conversa com o usuário e altera o dashboard por ações.\n',
+      ),
+    ).toBe(true)
+    expect(system.endsWith('\n\nLabels\n(:Pedido)\n\nRelacionamentos')).toBe(
+      true,
     )
+    expect(system).not.toContain('Tabelas')
+    expect(system).not.toContain('PostgreSQL')
+    const last = String(messages.at(-1)?.content)
+    expect(last).toContain(
+      '  Cypher: ```cypher\nMATCH (p:Pedido) RETURN p.mes AS mes, count(p) AS total\n```\n',
+    )
+    expect(last).not.toContain('SQL:')
+    expect(last).not.toContain('```sql')
   })
 
   it('ASQ-03 sistema descreve o dashboard no banco da conexão', () => {
