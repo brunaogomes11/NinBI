@@ -57,7 +57,7 @@ export function AssistantPanel({
   return (
     <aside
       aria-label={MESSAGES.assistantToggle}
-      className="flex h-[calc(100vh-9rem)] w-96 shrink-0 flex-col overflow-hidden rounded-card border bg-card"
+      className="sticky top-4 flex h-[calc(100vh-9rem)] w-96 shrink-0 flex-col overflow-hidden rounded-card border bg-card"
     >
       <div className="flex items-center justify-between gap-2 border-b px-3 py-2">
         <h2 className="font-semibold text-base">{MESSAGES.assistantToggle}</h2>

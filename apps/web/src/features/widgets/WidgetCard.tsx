@@ -53,6 +53,8 @@ export interface WidgetCardEdit extends WidgetEditSource {
 export interface WidgetAi {
   /** Há provedor de IA configurado (AIQ-16). */
   available: boolean
+  /** O assistente está respondendo: um pedido por vez (CHAT-25). */
+  busy?: boolean
   state: AiGenerationState
   onStart: (prompt: string) => void
   onCancel: () => void
@@ -153,7 +155,9 @@ function WidgetMenu({
           {edit.ai && (
             <DropdownMenuItem
               disabled={
-                !edit.ai.available || edit.ai.state.running !== undefined
+                !edit.ai.available ||
+                edit.ai.busy === true ||
+                edit.ai.state.running !== undefined
               }
               onSelect={onAskAi}
             >

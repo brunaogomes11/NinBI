@@ -6,7 +6,7 @@ import {
   MESSAGES,
 } from '@ninbi/contracts'
 import { useQueryClient } from '@tanstack/react-query'
-import { MoreHorizontal, RefreshCw, Share2 } from 'lucide-react'
+import { MoreHorizontal, RefreshCw, Share2, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import {
@@ -38,6 +38,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAiStatus } from '@/features/ai/api'
 import { useAiGenerations } from '@/features/ai/useAiGenerations'
+import { AssistantPanel } from '@/features/assistant/AssistantPanel'
+import { useAssistant } from '@/features/assistant/useAssistant'
 import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
 import { FilterBar } from '@/features/filters/FilterBar'
@@ -93,6 +95,24 @@ function NotFound() {
       </Link>
     </Card>
   )
+}
+
+const ASSISTANT_OPEN_KEY = 'ninbi-assistant-open'
+
+function readAssistantOpen(): boolean {
+  try {
+    return localStorage.getItem(ASSISTANT_OPEN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function writeAssistantOpen(open: boolean) {
+  try {
+    localStorage.setItem(ASSISTANT_OPEN_KEY, open ? '1' : '0')
+  } catch {
+    // sem armazenamento o painel só não lembra (CHAT-03)
+  }
 }
 
 function isNotFound(error: unknown): boolean {
@@ -204,11 +224,23 @@ function DashboardViewBody({
   const [newWidgetId, setNewWidgetId] = useState<string | null>(null)
   const canUseAi = sessionUser ? can(sessionUser.role, 'ai.use') : false
   const aiStatus = useAiStatus(draft !== null && canUseAi)
+  const canUseAssistant = canUseAi && dashboard.permissions.edit
+  const [assistantOpen, setAssistantOpen] = useState(readAssistantOpen)
+  const assistant = useAssistant({
+    dashboardId: dashboard.id,
+    draft,
+    setDraft: editor.change,
+    ensureEditing: () => {
+      if (!draft) editor.start()
+    },
+    editing: draft !== null,
+  })
   const ai = useAiGenerations({
     dashboardId: dashboard.id,
     draft,
     setDraft: editor.change,
     editing: draft !== null,
+    assistantBusy: assistant.running,
     onFailed: (widgetId, failure) => {
       setAiFailure({ widgetId, ...failure })
       setEditingWidgetId(widgetId)
@@ -359,6 +391,20 @@ function DashboardViewBody({
               {MESSAGES.shareTitle}
             </Button>
           )}
+          {canUseAssistant && (
+            <Button
+              type="button"
+              variant="outline"
+              aria-pressed={assistantOpen}
+              onClick={() => {
+                setAssistantOpen(!assistantOpen)
+                writeAssistantOpen(!assistantOpen)
+              }}
+            >
+              <Sparkles aria-hidden="true" />
+              {MESSAGES.assistantToggle}
+            </Button>
+          )}
           <RefreshControl
             value={draft ? draft.refreshIntervalSec : session.intervalSec}
             onChange={(sec) =>
@@ -411,112 +457,135 @@ function DashboardViewBody({
           {editor.saveError}
         </p>
       )}
-      {shownTab && (
-        <>
-          <DashboardTabsBar
-            tabs={tabs}
-            activeTabId={shownTab.id}
-            onSelect={setSelectedTabId}
-            edit={
-              draft
-                ? {
-                    onAdd: () => {
-                      const id = crypto.randomUUID()
-                      editor.change((current) => addTab(current, id))
-                      setSelectedTabId(id)
-                    },
-                    onRename: (tabId, name) =>
-                      editor.change((current) =>
-                        renameTab(current, tabId, name),
-                      ),
-                    onRemove: (tabId) =>
-                      editor.change((current) => removeTab(current, tabId)),
+      <div className="flex items-start gap-4">
+        <div
+          data-slot="dashboard-main"
+          className="flex min-w-0 flex-1 flex-col gap-4"
+        >
+          {shownTab && (
+            <>
+              <DashboardTabsBar
+                tabs={tabs}
+                activeTabId={shownTab.id}
+                onSelect={setSelectedTabId}
+                edit={
+                  draft
+                    ? {
+                        onAdd: () => {
+                          const id = crypto.randomUUID()
+                          editor.change((current) => addTab(current, id))
+                          setSelectedTabId(id)
+                        },
+                        onRename: (tabId, name) =>
+                          editor.change((current) =>
+                            renameTab(current, tabId, name),
+                          ),
+                        onRemove: (tabId) =>
+                          editor.change((current) => removeTab(current, tabId)),
+                      }
+                    : undefined
+                }
+              />
+              <DashboardGrid
+                key={shownTab.id}
+                dashboardId={dashboard.id}
+                version={dashboard.version}
+                widgets={shownTab.widgets}
+                edit={
+                  draft && shownTab
+                    ? {
+                        connectionId: draft.connectionId,
+                        onLayoutChange: (layouts) =>
+                          editor.change((current) =>
+                            setLayout(current, shownTab.id, layouts),
+                          ),
+                        onEditWidget: setEditingWidgetId,
+                        ai: canUseAi
+                          ? {
+                              available: aiStatus.data?.configured === true,
+                              busy: assistant.running,
+                              stateOf: ai.stateOf,
+                              start: (widgetId, prompt) =>
+                                void ai.start(widgetId, prompt),
+                              cancel: ai.cancel,
+                            }
+                          : undefined,
+                        onRemoveWidget: (widgetId) =>
+                          editor.change((current) =>
+                            removeWidget(current, shownTab.id, widgetId),
+                          ),
+                        onAddWidget: () => {
+                          const id = crypto.randomUUID()
+                          editor.change((current) =>
+                            addWidget(current, shownTab.id, id),
+                          )
+                          setEditingWidgetId(id)
+                          setNewWidgetId(id)
+                        },
+                      }
+                    : undefined
+                }
+              />
+              {editingWidget && draft && (
+                <WidgetEditorDialog
+                  key={editingWidget.id}
+                  dashboardId={dashboard.id}
+                  connectionId={draft.connectionId}
+                  widget={editingWidget}
+                  initialCypher={
+                    aiFailure?.widgetId === editingWidget.id
+                      ? (aiFailure.cypher ?? undefined)
+                      : undefined
                   }
-                : undefined
-            }
-          />
-          <DashboardGrid
-            key={shownTab.id}
-            dashboardId={dashboard.id}
-            version={dashboard.version}
-            widgets={shownTab.widgets}
-            edit={
-              draft && shownTab
-                ? {
-                    connectionId: draft.connectionId,
-                    onLayoutChange: (layouts) =>
-                      editor.change((current) =>
-                        setLayout(current, shownTab.id, layouts),
+                  initialError={
+                    aiFailure?.widgetId === editingWidget.id
+                      ? aiFailure.message
+                      : undefined
+                  }
+                  onApply={(changes) =>
+                    editor.change((current) =>
+                      updateWidget(
+                        current,
+                        shownTab.id,
+                        editingWidget.id,
+                        changes,
                       ),
-                    onEditWidget: setEditingWidgetId,
-                    ai: canUseAi
+                    )
+                  }
+                  ai={
+                    canUseAi && newWidgetId === editingWidget.id
                       ? {
                           available: aiStatus.data?.configured === true,
-                          stateOf: ai.stateOf,
-                          start: (widgetId, prompt) =>
-                            void ai.start(widgetId, prompt),
-                          cancel: ai.cancel,
+                          state: ai.stateOf(editingWidget.id),
+                          onStart: (prompt) => {
+                            setAiFailure(null)
+                            void ai.start(editingWidget.id, prompt)
+                          },
+                          onCancel: () => ai.cancel(editingWidget.id),
                         }
-                      : undefined,
-                    onRemoveWidget: (widgetId) =>
-                      editor.change((current) =>
-                        removeWidget(current, shownTab.id, widgetId),
-                      ),
-                    onAddWidget: () => {
-                      const id = crypto.randomUUID()
-                      editor.change((current) =>
-                        addWidget(current, shownTab.id, id),
-                      )
-                      setEditingWidgetId(id)
-                      setNewWidgetId(id)
-                    },
+                      : undefined
                   }
-                : undefined
-            }
-          />
-          {editingWidget && draft && (
-            <WidgetEditorDialog
-              key={editingWidget.id}
-              dashboardId={dashboard.id}
-              connectionId={draft.connectionId}
-              widget={editingWidget}
-              initialCypher={
-                aiFailure?.widgetId === editingWidget.id
-                  ? (aiFailure.cypher ?? undefined)
-                  : undefined
-              }
-              initialError={
-                aiFailure?.widgetId === editingWidget.id
-                  ? aiFailure.message
-                  : undefined
-              }
-              onApply={(changes) =>
-                editor.change((current) =>
-                  updateWidget(current, shownTab.id, editingWidget.id, changes),
-                )
-              }
-              ai={
-                canUseAi && newWidgetId === editingWidget.id
-                  ? {
-                      available: aiStatus.data?.configured === true,
-                      state: ai.stateOf(editingWidget.id),
-                      onStart: (prompt) => {
-                        setAiFailure(null)
-                        void ai.start(editingWidget.id, prompt)
-                      },
-                      onCancel: () => ai.cancel(editingWidget.id),
-                    }
-                  : undefined
-              }
-              onClose={() => {
-                setEditingWidgetId(null)
-                setNewWidgetId(null)
-                setAiFailure(null)
-              }}
-            />
+                  onClose={() => {
+                    setEditingWidgetId(null)
+                    setNewWidgetId(null)
+                    setAiFailure(null)
+                  }}
+                />
+              )}
+            </>
           )}
-        </>
-      )}
+        </div>
+        {canUseAssistant && assistantOpen && (
+          <AssistantPanel
+            dashboardId={dashboard.id}
+            assistant={assistant}
+            onClose={() => {
+              setAssistantOpen(false)
+              writeAssistantOpen(false)
+            }}
+          />
+        )}
+      </div>
       <AlertDialog
         open={editor.discardOpen}
         onOpenChange={editor.setDiscardOpen}

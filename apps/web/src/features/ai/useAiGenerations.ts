@@ -31,6 +31,8 @@ export interface UseAiGenerationsOptions {
   draft: DashboardDraft | null
   setDraft: (change: (draft: DashboardDraft) => DashboardDraft) => void
   editing: boolean
+  /** O assistente está respondendo: o pedido por widget espera (CHAT-25). */
+  assistantBusy?: boolean
   /** A 4ª tentativa falhou: o editor abre com o último Cypher e a mensagem (FIX-06). */
   onFailed: (widgetId: string, failure: AiFailure) => void
 }
@@ -105,8 +107,9 @@ export function useAiGenerations(options: UseAiGenerationsOptions) {
 
   const start = useCallback(
     async (widgetId: string, prompt: string) => {
-      const { dashboardId, draft } = latest.current
+      const { dashboardId, draft, assistantBusy } = latest.current
       const found = findWidget(draft, widgetId)
+      if (assistantBusy) return
       if (!draft || !found || controllers.current.has(widgetId)) return
       const controller = new AbortController()
       controllers.current.set(widgetId, controller)
