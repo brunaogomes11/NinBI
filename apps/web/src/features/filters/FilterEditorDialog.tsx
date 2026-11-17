@@ -1,4 +1,5 @@
 import {
+  type ConnectionType,
   type DashboardFilter,
   dashboardFiltersSchema,
   FILTER_TYPE_LABELS,
@@ -30,6 +31,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { queryLabel, queryLanguage } from '@/features/connections/api'
 import { CypherEditor } from '@/features/widgets/CypherEditor'
 import { fetchDraftFilterOptions } from './api'
 import { FilterControl } from './FilterControl'
@@ -74,6 +76,7 @@ function Field({
 export function FilterEditorDialog({
   dashboardId,
   connectionId,
+  connectionType = 'NEO4J',
   filter,
   otherFilters,
   onApply,
@@ -81,6 +84,8 @@ export function FilterEditorDialog({
 }: {
   dashboardId: string
   connectionId: string
+  /** Tipo da conexão do dashboard: define o rótulo e a linguagem da consulta de opções. */
+  connectionType?: ConnectionType
   /** O filtro em edição; `null` cria um novo. */
   filter: DashboardFilter | null
   /** Os demais filtros do rascunho, para a regra de parâmetro repetido. */
@@ -237,7 +242,9 @@ export function FilterEditorDialog({
                   <SelectContent>
                     {OPTION_SOURCES.map((value) => (
                       <SelectItem key={value} value={value}>
-                        {OPTION_SOURCE_LABELS[value]}
+                        {value === 'QUERY'
+                          ? queryLabel(connectionType)
+                          : OPTION_SOURCE_LABELS[value]}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -253,7 +260,11 @@ export function FilterEditorDialog({
                 </Field>
               ) : (
                 <div className="flex flex-col gap-2">
-                  <CypherEditor value={cypher} onChange={setCypher} />
+                  <CypherEditor
+                    value={cypher}
+                    onChange={setCypher}
+                    language={queryLanguage(connectionType)}
+                  />
                   <div className="flex flex-wrap items-center gap-2">
                     <Button
                       type="button"

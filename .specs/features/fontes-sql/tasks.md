@@ -938,8 +938,8 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SMG-08 filtro mostra Consulta SQL ou Consulta Cypher pelo tipo` em apps/web
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `SMG-08 filtro mostra Consulta SQL ou Consulta Cypher pelo tipo` em apps/web
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

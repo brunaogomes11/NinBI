@@ -302,4 +302,33 @@ describe('FilterEditorDialog', () => {
       screen.queryByRole('textbox', { name: 'Categoria' }),
     ).not.toBeInTheDocument()
   })
+
+  it('SMG-08 filtro mostra Consulta SQL ou Consulta Cypher pelo tipo', async () => {
+    const sql = open(dashboardWith({ filters: [], connectionType: 'POSTGRES' }))
+    const sqlDialog = await openNew(sql)
+    await chooseType(sql, 'Seleção única')
+    await sql.user.click(
+      sqlDialog.getByRole('combobox', { name: 'Origem das opções' }),
+    )
+    expect(
+      (await screen.findAllByRole('option')).map(
+        (option) => option.textContent,
+      ),
+    ).toEqual(['Lista fixa', 'Consulta SQL'])
+    await sql.user.click(screen.getByRole('option', { name: 'Consulta SQL' }))
+    expect(sqlDialog.getByLabelText('Consulta SQL')).toBeInTheDocument()
+    sql.unmount()
+
+    const cypher = open(dashboardWith({ filters: [] }))
+    const cypherDialog = await openNew(cypher)
+    await chooseType(cypher, 'Seleção única')
+    await cypher.user.click(
+      cypherDialog.getByRole('combobox', { name: 'Origem das opções' }),
+    )
+    expect(
+      (await screen.findAllByRole('option')).map(
+        (option) => option.textContent,
+      ),
+    ).toEqual(['Lista fixa', 'Consulta Cypher'])
+  })
 })

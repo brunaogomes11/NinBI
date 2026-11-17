@@ -427,6 +427,7 @@ function DashboardViewBody({
         <FilterEditorDialog
           dashboardId={dashboard.id}
           connectionId={draft.connectionId}
+          connectionType={draftType}
           filter={filterDialog.filter}
           otherFilters={draft.filters}
           onApply={(filter) =>
