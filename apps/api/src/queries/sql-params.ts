@@ -1,4 +1,8 @@
-import { type SqlToken, tokenizeSql } from '@ninbi/contracts'
+import {
+  type SqlToken,
+  type SqlTokenDialect,
+  tokenizeSql,
+} from '@ninbi/contracts'
 
 export type PlaceholderStyle = 'dollar' | 'question' | 'at'
 
@@ -72,8 +76,9 @@ export function bindSqlParams(
   sql: string,
   params: Record<string, unknown>,
   style: PlaceholderStyle,
+  dialect?: SqlTokenDialect,
 ): BoundSql {
-  const tokens = tokenizeSql(sql)
+  const tokens = tokenizeSql(sql, { dialect })
   const values: unknown[] = []
   const numbered = new Map<string, string>()
   const replacements: Replacement[] = []

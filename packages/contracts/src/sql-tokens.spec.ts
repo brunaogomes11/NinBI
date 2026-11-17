@@ -66,6 +66,63 @@ describe('sql tokens', () => {
     expect(params("SELECT N'$x', 'it''s $y' FROM t")).toEqual([])
   })
 
+  it('SQX-08 no MySQL # comenta a linha e \\ escapa dentro de strings', () => {
+    const mysql = (sql: string) =>
+      tokenizeSql(sql, { dialect: 'MYSQL' })
+        .filter((token) => token.type === 'word')
+        .map((token) => token.value)
+    const commentHide = "SELECT 1 # '\n; DELETE FROM t WHERE 1=1 #'"
+    expect(mysql(commentHide)).toEqual([
+      'SELECT',
+      'DELETE',
+      'FROM',
+      't',
+      'WHERE',
+    ])
+    expect(
+      tokenizeSql(commentHide, { dialect: 'MYSQL' }).map((t) => t.type),
+    ).toContain('semicolon')
+    const escapeHide = `SELECT 'x${BS}' , '; DELETE FROM t -- '`
+    expect(mysql(escapeHide)).toEqual(['SELECT', 'DELETE', 'FROM', 't'])
+    expect(mysql(`SELECT "a${BS}" DROP" FROM t`)).toEqual([
+      'SELECT',
+      'FROM',
+      't',
+    ])
+    // `--` sem espaço depois não é comentário no MySQL.
+    expect(mysql('SELECT 1 --1; DELETE FROM t')).toEqual([
+      'SELECT',
+      'DELETE',
+      'FROM',
+      't',
+    ])
+    expect(mysql('SELECT 1 -- DELETE')).toEqual(['SELECT'])
+    // `/*! ... */` é executado pelo MySQL, então o corpo é lido como SQL.
+    expect(mysql('SELECT 1 /*!50000 DELETE */ FROM t')).toEqual([
+      'SELECT',
+      'DELETE',
+      'FROM',
+      't',
+    ])
+    // Sem dialeto, nada muda: # é símbolo e \ não escapa.
+    expect(words(commentHide)).toEqual(['SELECT'])
+    expect(words(escapeHide)).toEqual(['SELECT'])
+  })
+
+  it('SQX-09 $$ e $tag$ viram um delimitador só, fora de strings e comentários', () => {
+    const symbols = (sql: string) =>
+      tokenizeSql(sql)
+        .filter((token) => token.type === 'symbol')
+        .map((token) => token.value)
+    expect(symbols("SELECT $$it's$$; DELETE FROM t")).toEqual(['$$'])
+    expect(
+      symbols("SELECT $a$'$a$; DELETE FROM t WHERE 1=1; SELECT '1'"),
+    ).toEqual(['$a$'])
+    expect(params("SELECT $a$'$a$; DELETE FROM t")).toEqual([])
+    expect(symbols('SELECT \'$$\', "$a$" -- $b$')).toEqual([','])
+    expect(params('SELECT $a, $b FROM t')).toEqual(['a', 'b'])
+  })
+
   it('SQX-16 $1 e $$ não são parâmetros e $nome é', () => {
     expect(params('SELECT $1, $$, $nome, $_x2')).toEqual(['nome', '_x2'])
     expect(params('SELECT $$ $a $$')).toEqual(['a'])

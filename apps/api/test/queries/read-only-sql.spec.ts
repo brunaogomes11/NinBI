@@ -124,6 +124,81 @@ describe('validateReadOnlySql', () => {
     expect(validateReadOnlySql('SELECT 1; -- fim')).toEqual({ ok: true })
   })
 
+  it('SQX-09 no MySQL comentário # e escape \\ não escondem a segunda instrução', () => {
+    const multiple = {
+      ok: false,
+      code: 'QUERY_MULTIPLE_STATEMENTS',
+      message: 'Envie uma consulta por vez',
+    }
+    const BS = String.fromCharCode(92)
+    expect(
+      validateReadOnlySql(
+        "SELECT 1 # '\n; DELETE FROM t WHERE 1=1 #'",
+        'MYSQL',
+      ),
+    ).toEqual(multiple)
+    expect(
+      validateReadOnlySql(`SELECT 'x${BS}' , '; DELETE FROM t -- '`, 'MYSQL'),
+    ).toEqual(multiple)
+    expect(validateReadOnlySql('SELECT 1 --1; DELETE FROM t', 'MYSQL')).toEqual(
+      multiple,
+    )
+    expect(
+      validateReadOnlySql('SELECT 1 /*! ; DELETE FROM t */', 'MYSQL'),
+    ).toEqual(multiple)
+    expect(
+      validateReadOnlySql("SELECT 'it''s', 'a\\'b' # fim", 'MYSQL'),
+    ).toEqual({ ok: true })
+    expect(validateReadOnlySql('SELECT 1 -- ; DELETE', 'MYSQL')).toEqual({
+      ok: true,
+    })
+  })
+
+  it('SQX-06 no MySQL palavra bloqueada depois de # ou de escape \\ é recusada', () => {
+    const BS = String.fromCharCode(92)
+    expect(
+      validateReadOnlySql(
+        `SELECT 'a${BS}' , ' FROM t WHERE DROP -- '`,
+        'MYSQL',
+      ),
+    ).toEqual(blocked('DROP'))
+    expect(
+      validateReadOnlySql("SELECT 1 # x\nINTO OUTFILE '/tmp/x'", 'MYSQL'),
+    ).toEqual(blocked('INTO'))
+  })
+
+  it('SQX-09 texto entre $$ ou $tag$ é recusado em qualquer banco', () => {
+    const dollar = (delimiter: string) => ({
+      ok: false,
+      code: 'QUERY_WRITE_BLOCKED',
+      message: `Texto entre ${delimiter} não é aceito; use aspas simples`,
+      clause: delimiter,
+    })
+    for (const dialect of [
+      undefined,
+      'POSTGRES',
+      'MYSQL',
+      'SQLSERVER',
+    ] as const) {
+      expect(
+        validateReadOnlySql("SELECT $$it's$$; DELETE FROM t", dialect),
+      ).toEqual(dollar('$$'))
+      expect(
+        validateReadOnlySql(
+          "SELECT $a$'$a$; DELETE FROM t WHERE 1=1; SELECT '1'",
+          dialect,
+        ),
+      ).toEqual(dollar('$a$'))
+      expect(validateReadOnlySql('SELECT $$x$$', dialect)).toEqual(dollar('$$'))
+      expect(
+        validateReadOnlySql('SELECT \'$$\', "$a$" FROM t -- $b$', dialect),
+      ).toEqual({ ok: true })
+      expect(
+        validateReadOnlySql('SELECT * FROM t WHERE a = $a AND b = $b', dialect),
+      ).toEqual({ ok: true })
+    }
+  })
+
   it('SQX-12 consulta SQL com mais de 20.000 caracteres é recusada', () => {
     const limit = `SELECT '${'a'.repeat(20_000 - 'SELECT '.length - 2)}'`
     expect(limit).toHaveLength(20_000)

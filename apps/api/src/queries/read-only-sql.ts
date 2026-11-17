@@ -1,6 +1,8 @@
 import {
+  findDollarQuote,
   MAX_CYPHER_LENGTH,
   MESSAGES,
+  type SqlTokenDialect,
   type SqlToken as Token,
   tokenizeSql as tokenize,
 } from '@ninbi/contracts'
@@ -92,6 +94,7 @@ function findBlockedClause(tokens: Token[]): string | null {
  */
 export function validateReadOnlySql(
   query: string,
+  dialect?: SqlTokenDialect,
   maxLength = MAX_CYPHER_LENGTH,
 ): QueryCheck {
   if (query.length > maxLength) {
@@ -101,7 +104,18 @@ export function validateReadOnlySql(
       message: MESSAGES.cypherTooLong,
     }
   }
-  const tokens = tokenize(query)
+  const tokens = tokenize(query, { dialect })
+  // Texto entre cifrões (`$$` ou `$tag$`) fica fora do escopo (spec, Out of
+  // Scope): o validador não o lê como o PostgreSQL, então o recusa inteiro.
+  const dollarQuote = findDollarQuote(tokens)
+  if (dollarQuote !== null) {
+    return {
+      ok: false,
+      code: 'QUERY_WRITE_BLOCKED',
+      message: MESSAGES.queryDollarQuoteBlocked(dollarQuote.value),
+      clause: dollarQuote.value,
+    }
+  }
   if (hasSecondStatement(tokens)) {
     return {
       ok: false,

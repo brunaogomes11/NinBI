@@ -106,6 +106,8 @@ export const MESSAGES = {
     'Você não tem mais permissão para editar este dashboard',
   queryWriteBlocked: (clause: string) =>
     `Somente consultas de leitura são permitidas. Cláusula bloqueada: ${clause}`,
+  queryDollarQuoteBlocked: (delimiter: string) =>
+    `Texto entre ${delimiter} não é aceito; use aspas simples`,
   neo4jUnreachable: (name: string) =>
     `Não foi possível conectar ao banco ${name}`,
   connectionInUse: (count: number) =>

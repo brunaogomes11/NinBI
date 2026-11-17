@@ -76,7 +76,7 @@ export class SqlSource implements Source {
   }
 
   validate(query: string): QueryCheck {
-    return validateReadOnlySql(query)
+    return validateReadOnlySql(query, this.type)
   }
 
   parameterNames(query: string): string[] {
@@ -96,7 +96,12 @@ export class SqlSource implements Source {
     const wired = Object.fromEntries(
       Object.entries(params).map(([name, value]) => [name, dateParam(value)]),
     )
-    const bound = bindSqlParams(query, wired, this.sqlDialect.placeholder)
+    const bound = bindSqlParams(
+      query,
+      wired,
+      this.sqlDialect.placeholder,
+      this.type,
+    )
     const cfg = this.config(conn)
     const result = await guarded(() =>
       this.gateway.read(cfg, bound.text, bound.values, opts),
