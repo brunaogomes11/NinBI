@@ -1,6 +1,6 @@
 # fontes-sql proofs
 
-**HEAD**: 9053c87
+**HEAD**: c0f0e78
 **Tree**: clean
 **Shell**: C:/Program Files/Git\bin\bash.exe
 **Result**: 132 pass, 0 fail
@@ -145,19 +145,19 @@
 `Run contracts` - exit 0
 
 ```
- ✓ src/dashboards.spec.ts > dashboard contracts > GRID-03 layout do widget fora dos limites da grade é recusado 1ms
- ✓ src/dashboards.spec.ts > dashboard contracts > QRY-09 Cypher com mais de 20000 caracteres no contrato 2ms
- ✓ src/dashboards.spec.ts > dashboard contracts > dashboardSaveSchema sem abas é recusado e com abas e widgets é aceito 1ms
- ✓ src/dashboards.spec.ts > dashboard contracts > sidebarLayoutSchema com um dashboard repetido é recusado 1ms
- ✓ src/dashboards.spec.ts > dashboard contracts > MESSAGES formata o prazo e o corte de linhas 24ms
- ✓ src/cypher-tokens.spec.ts > cypher tokens > FLT-09 extractParameterNames acha os parâmetros fora de strings e comentários 4ms
- ✓ src/cypher-tokens.spec.ts > cypher tokens > SMG-03 extractParameterNames sem linguagem segue o Cypher 1ms
+ ✓ src/sharing.spec.ts > sharing contracts > SHARE-10 Visualizador só recebe Pode ver nas opções 0ms
+ ✓ src/sharing.spec.ts > sharing contracts > TEAM-07 a confirmação de exclusão traz o nome e o número de dashboards 0ms
+ ✓ src/sharing.spec.ts > sharing contracts > ACL-08 sharedBy traz o nome do dono 0ms
+ ✓ src/sharing.spec.ts > sharing contracts > SHARE-06 shareUpsertSchema recusa type desconhecido e USER sem userId 3ms
+ ✓ src/sharing.spec.ts > sharing contracts > TEAM-06 teamUpdateSchema vazio é recusado e membros repetidos também 1ms
+ ✓ src/cypher-tokens.spec.ts > cypher tokens > FLT-09 extractParameterNames acha os parâmetros fora de strings e comentários 2ms
+ ✓ src/cypher-tokens.spec.ts > cypher tokens > SMG-03 extractParameterNames sem linguagem segue o Cypher 0ms
  ✓ src/cypher-tokens.spec.ts > cypher tokens > SQX-16 extractParameterNames em SQL usa o tokenizador de SQL 1ms
 
  Test Files  12 passed (12)
-      Tests  107 passed (107)
-   Start at  08:50:40
-   Duration  1.11s (transform 55%, import 37%, tests 6%, worker 2%)
+      Tests  109 passed (109)
+   Start at  09:38:07
+   Duration  1.31s (import 65%, transform 28%, tests 5%, worker 3%)
 
 $ vitest run --reporter=verbose
 ```
@@ -186,15 +186,15 @@ The width(0) and height(0) of chart should be greater than 0,
 
 ```
  ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 chave diferente não decifra 1ms
- ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 sem NINBI_ENCRYPTION_KEY o backend não inicia e loga a mensagem 4ms
- ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 chave que não tem 32 bytes não inicia o backend 1ms
- ✓ test/auth/permission.guard.spec.ts > PermissionGuard > ROLE-01 cada papel recebe 200 ou 403 conforme a matriz 8390ms
- ✓ test/dashboards/dashboard-connection-type.spec.ts > tipo da conexão no dashboard > SMG-05 dashboard devolve o tipo da conexão 6106ms
+ ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 sem NINBI_ENCRYPTION_KEY o backend não inicia e loga a mensagem 5ms
+ ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 chave que não tem 32 bytes não inicia o backend 2ms
+ ✓ test/ai/db-code.spec.ts > código de erro do banco para a IA > SQX-13 dbCode segue ao prompt e erro de execução SQL vai só com o código 3714ms
+ ✓ test/web/web.spec.ts > servir o web pela API > FND-01 serve o index.html do web em GET / 3704ms
 
  Test Files  95 passed (95)
-      Tests  493 passed (493)
-   Start at  08:53:34
-   Duration  272.32s (tests 78%, import 22%)
+      Tests  496 passed (496)
+   Start at  09:40:43
+   Duration  304.25s (tests 67%, import 32%)
 
 $ vitest run --reporter=verbose
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
@@ -205,16 +205,16 @@ Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
 `Run apiint` - exit 0
 
 ```
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > verify com as credenciais certas resolve 45ms
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > CONN-08 senha errada rejeita com a mensagem do Neo4j 10ms
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > CONN-12 sem banco a sessão usa o banco padrão do servidor 22ms
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > QRY-08 leitura para no limite sem ler o resto de um resultado gigante 35ms
- ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > SCH-12 leitura usa transação de leitura e recusa escrita 39ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > verify com as credenciais certas resolve 51ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > CONN-08 senha errada rejeita com a mensagem do Neo4j 13ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > CONN-12 sem banco a sessão usa o banco padrão do servidor 27ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > QRY-08 leitura para no limite sem ler o resto de um resultado gigante 38ms
+ ✓ test-int/neo4j-gateway.int.spec.ts > gateway do Neo4j contra o Neo4j de dev > SCH-12 leitura usa transação de leitura e recusa escrita 27ms
 
  Test Files  11 passed (11)
       Tests  28 passed (28)
-   Start at  08:58:09
-   Duration  38.48s (import 60%, tests 33%, transform 7%)
+   Start at  09:45:57
+   Duration  53.93s (import 65%, tests 23%, transform 12%)
 
 $ vitest run --config vitest.int.config.ts --reporter=verbose
 (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
@@ -225,19 +225,19 @@ Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
 `pnpm test` - exit 0
 
 ```
-apps/web test:  ✓ src/features/filters/filter-values.test.ts > filter-values > FLT-09 relevantParams mantém só os parâmetros do widget 1ms
-apps/web test:  ✓ src/features/filters/filter-values.test.ts > filter-values > FLT-16 widgetsUsingFilter conta os widgets de todas as abas 1ms
-apps/web test:  ✓ src/features/filters/filter-values.test.ts > filter-values > FLT-25 intervalo invertido dá A data inicial é maior que a final 0ms
-apps/web test:  ✓ src/features/filters/filter-values.test.ts > filter-values > FLT-26 texto que não é número dá Digite um número 1ms
-apps/web test:  ✓ src/features/filters/filter-values.test.ts > filter-values > FLT-26 ponto de milhar ambíguo é recusado com Digite um número 1ms
-apps/web test:  ✓ src/features/connections/api.test.ts > connections api helpers > SQX-02 rótulo e linguagem da consulta por tipo de conexão 3ms
-apps/web test:  Test Files  97 passed (97)
-apps/web test:       Tests  580 passed (580)
-apps/web test:    Start at  08:58:54
-apps/web test:    Duration  381.90s (import 41%, environment 25%, tests 17%, setup 14%, transform 2%)
-apps/web test: Environment  jsdom was created 97 times · 1047.08s total, 25% of tracked time
-apps/web test:              create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
 apps/web test:              learn more: https://vitest.dev/guide/improving-performance#test-environments
+apps/api test:  ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 cifra AES-256-GCM no formato v1 e decifra de volta 4ms
+apps/api test:  ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 duas cifras do mesmo texto diferem 1ms
+apps/api test:  ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 cifra adulterada lança 1ms
+apps/api test:  ✓ test/crypto/crypto.spec.ts > cifra de segredos > CONN-13 chave diferente não decifra 1ms
+apps/api test:  ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 sem NINBI_ENCRYPTION_KEY o backend não inicia e loga a mensagem 2ms
+apps/api test:  ✓ test/crypto/crypto.spec.ts > chave de cifra na inicialização > CONN-21 chave que não tem 32 bytes não inicia o backend 1ms
 apps/web test: Done
+apps/api test:  ✓ test/web/web.spec.ts > servir o web pela API > FND-01 serve o index.html do web em GET / 2235ms
+apps/api test:  Test Files  95 passed (95)
+apps/api test:       Tests  496 passed (496)
+apps/api test:    Start at  09:46:56
+apps/api test:    Duration  401.54s (tests 58%, import 41%)
+apps/api test: Done
 $ pnpm -r test
 ```
