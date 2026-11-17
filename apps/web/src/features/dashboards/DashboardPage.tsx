@@ -34,6 +34,7 @@ import { useAiStatus } from '@/features/ai/api'
 import { useAiGenerations } from '@/features/ai/useAiGenerations'
 import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
+import { FilterBar } from '@/features/filters/FilterBar'
 import {
   FilterSessionProvider,
   useFilterSession,
@@ -151,11 +152,15 @@ function DashboardEditFields({
   )
 }
 
+type DashboardEditor = ReturnType<typeof useDashboardEditor>
+
 function DashboardViewBody({
   dashboard,
+  editor,
   onNotFound,
 }: {
   dashboard: DashboardDto
+  editor: DashboardEditor
   onNotFound: () => void
 }) {
   const queryClient = useQueryClient()
@@ -164,7 +169,6 @@ function DashboardViewBody({
   const { user: sessionUser } = useSession()
   const [selectedTabId, setSelectedTabId] = useState(dashboard.tabs[0]?.id)
   useNotFoundWatcher(dashboard.id, onNotFound)
-  const editor = useDashboardEditor(dashboard, onNotFound)
   const { draft } = editor
   const tabs = draft ? draft.tabs : dashboard.tabs
   const shownTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0]
@@ -248,6 +252,21 @@ function DashboardViewBody({
           )}
         </TopBarAction>
       )}
+      <FilterBar
+        dashboardId={dashboard.id}
+        version={dashboard.version}
+        filters={draft?.filters ?? dashboard.filters}
+        edit={
+          draft && dashboard.permissions.edit
+            ? {
+                connectionId: draft.connectionId,
+                onNew: () => {},
+                onEdit: () => {},
+                onRemove: () => {},
+              }
+            : undefined
+        }
+      />
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 flex-col">
           <h1 className="min-w-0 truncate font-semibold text-xl">
@@ -485,12 +504,14 @@ function DashboardView(props: {
   dashboard: DashboardDto
   onNotFound: () => void
 }) {
+  // Em edição a sessão acompanha os filtros do rascunho (FLT-17, FLT-19).
+  const editor = useDashboardEditor(props.dashboard, props.onNotFound)
   return (
     <FilterSessionProvider
-      filters={props.dashboard.filters}
+      filters={editor.draft?.filters ?? props.dashboard.filters}
       refreshIntervalSec={props.dashboard.refreshIntervalSec}
     >
-      <DashboardViewBody {...props} />
+      <DashboardViewBody {...props} editor={editor} />
     </FilterSessionProvider>
   )
 }
