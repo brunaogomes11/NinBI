@@ -730,6 +730,14 @@
 - **Date**: 2026-11-17
 - **Status**: active
 
+### AD-136 (active)
+- **Decision**: Em CHAT-10, "a resposta mais recente do assistente [que] alterou o rascunho" é lida como a resposta mais recente QUE alterou o rascunho. O "Desfazer" fica nessa resposta até o rascunho mudar, mesmo que uma resposta posterior sem ações venha depois; a guarda `draft === after` esconde o botão quando o rascunho foi editado à mão ou descartado, e só uma resposta tem o botão por vez.
+- **Reason**: Verificação de `ia-dashboard`: o texto do AC admitia a leitura "a última resposta, se alterou". Uma resposta sem ações (por exemplo, uma pergunta) não deve tirar de quem pediu a chance de desfazer a mudança anterior, e a guarda de identidade já impede desfazer sobre edições manuais. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Depois de uma resposta sem ações, o "Desfazer" aparece numa resposta que não é a última da conversa.
+- **Scope**: ia-dashboard.
+- **Date**: 2026-11-17
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:
