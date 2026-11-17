@@ -411,8 +411,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes com gesto em `AssistantComposer.test.tsx`: `CHAT-15 Enviar fica desabilitado com a mensagem vazia` (vazio e só espaços; digitar "troque para linha" habilita; Enter com o campo vazio não chama `onSubmit`), `CHAT-16 mensagem com mais de 4.000 caracteres mostra A mensagem passa de 4.000 caracteres` (e "Enviar" desabilitado), `CHAT-13 durante a resposta o campo fica desabilitado e mostra Cancelar` (com `running` e sem `progress`: "Pensando..."; clicar em "Cancelar" chama `onCancel`), `GEN-08 durante a geração mostra Gerando widget N de M e Cancelar` (com `progress` `{ index: 2, total: 5 }`: "Gerando widget 2 de 5"), Shift+Enter quebra a linha sem enviar
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `AssistantComposer.test.tsx`: `CHAT-15 Enviar fica desabilitado com a mensagem vazia` (vazio e só espaços; digitar "troque para linha" habilita; Enter com o campo vazio não chama `onSubmit`), `CHAT-16 mensagem com mais de 4.000 caracteres mostra A mensagem passa de 4.000 caracteres` (e "Enviar" desabilitado), `CHAT-13 durante a resposta o campo fica desabilitado e mostra Cancelar` (com `running` e sem `progress`: "Pensando..."; clicar em "Cancelar" chama `onCancel`), `GEN-08 durante a geração mostra Gerando widget N de M e Cancelar` (com `progress` `{ index: 2, total: 5 }`: "Gerando widget 2 de 5"), Shift+Enter quebra a linha sem enviar
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
