@@ -16,7 +16,7 @@ import {
 import { useSession } from '@/features/auth/useSession'
 import { TopBarAction } from '@/features/shell/TopBar'
 import { formatDateTime } from '@/lib/format'
-import { useConnections } from './api'
+import { connectionTypeLabel, useConnections } from './api'
 import { ConnectionFormDialog } from './ConnectionFormDialog'
 import { ConnectionRowActions } from './ConnectionRowActions'
 
@@ -29,12 +29,19 @@ function lastRead(connection: ConnectionDto): string {
     : 'Nunca lido'
 }
 
+/** A URI no Neo4j e `host:porta` nas conexões SQL. */
+function address(connection: ConnectionDto): string {
+  return connection.type === 'NEO4J'
+    ? (connection.uri ?? '')
+    : `${connection.host}:${connection.port}`
+}
+
 export function ConnectionsTab() {
   const { user } = useSession()
   const canManage = !!user && can(user.role, 'connections.manage')
   const connections = useConnections()
   const [newOpen, setNewOpen] = useState(false)
-  const columns = canManage ? 5 : 4
+  const columns = canManage ? 6 : 5
 
   return (
     <>
@@ -77,6 +84,7 @@ export function ConnectionsTab() {
                 <TableHead>URI</TableHead>
                 <TableHead>Banco</TableHead>
                 <TableHead>Última leitura do schema</TableHead>
+                <TableHead>Tipo</TableHead>
                 {canManage && (
                   <TableHead className="w-40">
                     <span className="sr-only">Ações</span>
@@ -117,11 +125,14 @@ export function ConnectionsTab() {
                         {connection.name}
                       </Link>
                     </TableCell>
-                    <TableCell>{connection.uri}</TableCell>
+                    <TableCell>{address(connection)}</TableCell>
                     <TableCell>
                       {connection.database ?? 'Padrão do servidor'}
                     </TableCell>
                     <TableCell>{lastRead(connection)}</TableCell>
+                    <TableCell>
+                      {connectionTypeLabel(connection.type)}
+                    </TableCell>
                     {canManage && (
                       <TableCell>
                         <ConnectionRowActions connection={connection} />

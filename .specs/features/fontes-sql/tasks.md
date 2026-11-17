@@ -828,8 +828,8 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SRC-15 lista mostra o tipo e host:porta das conexões SQL` em apps/web
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `SRC-15 lista mostra o tipo e host:porta das conexões SQL` em apps/web
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

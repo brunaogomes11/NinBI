@@ -170,4 +170,47 @@ describe('ConnectionsTab', () => {
       screen.queryByRole('button', { name: 'Excluir' }),
     ).not.toBeInTheDocument()
   })
+
+  it('SRC-15 lista mostra o tipo e host:porta das conexões SQL', async () => {
+    openConnections(
+      listHandler([
+        makeConnection(),
+        makeConnection({
+          id: 'c-2',
+          name: 'Estoque',
+          type: 'POSTGRES',
+          uri: null,
+          host: 'db.exemplo',
+          port: 5432,
+          database: 'estoque',
+        }),
+        makeConnection({
+          id: 'c-3',
+          name: 'Faturas',
+          type: 'SQLSERVER',
+          uri: null,
+          host: 'sql.exemplo',
+          port: 1433,
+          database: 'faturas',
+        }),
+      ]),
+    )
+
+    await screen.findByText('Estoque')
+    const rows = screen.getAllByRole('row').slice(1)
+    const cells = rows.map((row) =>
+      within(row)
+        .getAllByRole('cell')
+        .map((cell) => cell.textContent),
+    )
+    const type = screen
+      .getAllByRole('columnheader')
+      .findIndex((header) => header.textContent === 'Tipo')
+    expect(type).toBeGreaterThan(-1)
+    expect(cells.map((row) => [row[0], row[1], row[type]])).toEqual([
+      ['Vendas', 'neo4j+s://vendas.exemplo:7687', 'Neo4j'],
+      ['Estoque', 'db.exemplo:5432', 'PostgreSQL'],
+      ['Faturas', 'sql.exemplo:1433', 'SQL Server'],
+    ])
+  })
 })
