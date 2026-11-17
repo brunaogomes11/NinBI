@@ -77,6 +77,24 @@ export class AssistantHistoryService {
     return this.append(userId, dashboardId, 'ASSISTANT', text, details)
   }
 
+  /**
+   * "Tentar novamente" (CHAT-21): a mensagem `id` só é reaproveitada se for a mais recente do
+   * usuário neste dashboard e do próprio usuário, sem resposta depois dela.
+   */
+  async retryOf(
+    userId: string,
+    dashboardId: string,
+    id: string,
+  ): Promise<AssistantMessageDto | null> {
+    const [row] = await this.db
+      .select()
+      .from(assistantMessages)
+      .where(this.scope(userId, dashboardId))
+      .orderBy(desc(assistantMessages.seq))
+      .limit(1)
+    return row && row.id === id && row.role === 'USER' ? toDto(row) : null
+  }
+
   /** Apaga só as mensagens do usuário neste dashboard (HIST-05). */
   async clear(userId: string, dashboardId: string): Promise<void> {
     await this.db

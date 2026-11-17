@@ -157,11 +157,12 @@ export class AssistantService {
     }
 
     // 1. a mensagem do usuário fica gravada, mesmo que o pedido seja cancelado (HIST-01)
-    const userMessage = await this.history.appendUser(
-      userId,
-      dashboardId,
-      body.message,
-    )
+    const reused = body.retryOf
+      ? await this.history.retryOf(userId, dashboardId, body.retryOf)
+      : null
+    const userMessage =
+      reused ??
+      (await this.history.appendUser(userId, dashboardId, body.message))
     emit({ type: 'accepted', userMessage })
 
     // 2. o plano: schema, rascunho com refs, as mensagens recentes e a nova (CHAT-05)
