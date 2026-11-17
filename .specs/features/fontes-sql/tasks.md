@@ -352,10 +352,10 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SCS-03 consultas de catálogo excluem os schemas do sistema` em apps/api/test
-- [ ] Teste `SCS-06 dialetos declaram nomes qualificados só no PostgreSQL e no SQL Server` em apps/api/test
-- [ ] Teste `quote` dobra o fechamento do identificador nos três dialetos e `sampleQuery` usa `LIMIT` ou `TOP` conforme o dialeto, em `apps/api/test/sources/dialects.spec.ts`
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SCS-03 consultas de catálogo excluem os schemas do sistema` em apps/api/test
+- [x] Teste `SCS-06 dialetos declaram nomes qualificados só no PostgreSQL e no SQL Server` em apps/api/test
+- [x] Teste `quote` dobra o fechamento do identificador nos três dialetos e `sampleQuery` usa `LIMIT` ou `TOP` conforme o dialeto, em `apps/api/test/sources/dialects.spec.ts`
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
