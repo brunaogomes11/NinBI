@@ -332,8 +332,8 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SCS-14 exemplo de texto, número e data vira literal SQL` em apps/api/test
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SCS-14 exemplo de texto, número e data vira literal SQL` em apps/api/test
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
