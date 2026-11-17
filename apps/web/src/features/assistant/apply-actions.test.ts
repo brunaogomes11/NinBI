@@ -325,4 +325,33 @@ describe('applyAssistantActions', () => {
     expect(created(sql)?.parameters).toEqual(['categoria'])
     expect(created(cypher)?.parameters).toEqual(['comentado', 'categoria'])
   })
+
+  it('ASQ-12 alterar a consulta de um widget recalcula os parâmetros SQL', () => {
+    const query =
+      'SELECT categoria FROM pedidos -- $comentado\nWHERE cidade = $cidade'
+    const action: AssistantAction = {
+      type: 'update_widget',
+      widgetId: 'w-1',
+      cypher: query,
+      result: RESULT,
+      error: null,
+    }
+
+    const sql = applyAssistantActions(baseDraft(), [action], 'SQL')
+    const cypher = applyAssistantActions(baseDraft(), [action])
+    const titleOnly = applyAssistantActions(
+      baseDraft(),
+      [{ type: 'update_widget', widgetId: 'w-1', title: 'Outro' }],
+      'SQL',
+    )
+
+    expect(sql.tabs[0].widgets[0].parameters).toEqual(['cidade'])
+    expect(cypher.tabs[0].widgets[0].parameters).toEqual([
+      'comentado',
+      'cidade',
+    ])
+    expect(titleOnly.tabs[0].widgets[0].parameters).toEqual(
+      baseDraft().tabs[0].widgets[0].parameters,
+    )
+  })
 })

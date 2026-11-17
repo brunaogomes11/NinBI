@@ -106,10 +106,16 @@ function applyOne(
       if (!found) return draft // widget removido durante o pedido (CHAT-23)
       const { widget } = found
       const changes: Partial<
-        Pick<WidgetDto, 'title' | 'cypher' | 'visualization' | 'config'>
+        Pick<
+          WidgetDto,
+          'title' | 'cypher' | 'visualization' | 'config' | 'parameters'
+        >
       > = {}
       if (action.title !== undefined) changes.title = action.title
-      if (action.cypher !== undefined) changes.cypher = action.cypher
+      if (action.cypher !== undefined) {
+        changes.cypher = action.cypher
+        changes.parameters = extractParameterNames(action.cypher, language)
+      }
       const reshapes =
         action.visualization !== undefined ||
         action.mapping !== undefined ||
