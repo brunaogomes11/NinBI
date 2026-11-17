@@ -1,4 +1,5 @@
 import {
+  type ConnectionDto,
   type CrossFilterConfig,
   type DashboardDto,
   type DashboardFilter,
@@ -217,6 +218,29 @@ export function setConnection(
   connectionId: string,
 ): DashboardDraft {
   return { ...draft, connectionId }
+}
+
+/**
+ * Trocar para uma conexão de outro tipo pede confirmação quando há consulta escrita
+ * (de widget ou de filtro de seleção) que ficaria na linguagem errada.
+ */
+export function connectionSwitchNeedsConfirm(
+  draft: DashboardDraft,
+  connections: Pick<ConnectionDto, 'id' | 'type'>[],
+  nextId: string,
+): boolean {
+  const current = connections.find((item) => item.id === draft.connectionId)
+  const next = connections.find((item) => item.id === nextId)
+  if (!current || !next || current.type === next.type) return false
+  const widgetQuery = draft.tabs.some((tab) =>
+    tab.widgets.some((widget) => (widget.cypher ?? '').trim() !== ''),
+  )
+  const filterQuery = draft.filters.some(
+    (filter) =>
+      filter.options?.source === 'QUERY' &&
+      (filter.options.cypher ?? '').trim() !== '',
+  )
+  return widgetQuery || filterQuery
 }
 
 export function addFilter(

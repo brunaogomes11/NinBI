@@ -5,6 +5,7 @@ import {
   addFilter,
   addTab,
   addWidget,
+  connectionSwitchNeedsConfirm,
   fromDto,
   isDirty,
   removeFilter,
@@ -262,6 +263,64 @@ describe('draft', () => {
     expect(draft.tabs[0]?.widgets[1]?.config).toEqual({
       mapping,
       crossFilter: { filterId: uuid(51), column: 'categoria' },
+    })
+  })
+
+  describe('troca de conexão', () => {
+    const connections = [
+      { id: uuid(101), type: 'NEO4J' as const },
+      { id: uuid(102), type: 'POSTGRES' as const },
+      { id: uuid(103), type: 'NEO4J' as const },
+      { id: uuid(104), type: 'MYSQL' as const },
+    ]
+    const queryFilter: DashboardFilter = {
+      id: uuid(200),
+      label: 'Loja',
+      parameter: 'loja',
+      type: 'SINGLE_SELECT',
+      options: { source: 'QUERY', cypher: 'MATCH (l:Loja) RETURN l.nome' },
+      defaultValue: null,
+    }
+
+    it('SMG-05 trocar para outro tipo com consulta pergunta', () => {
+      const draft = fromDto(saved())
+      expect(connectionSwitchNeedsConfirm(draft, connections, uuid(102))).toBe(
+        true,
+      )
+
+      // só o filtro de seleção com consulta já basta
+      const onlyFilter = {
+        ...draft,
+        tabs: draft.tabs.map((tab) => ({
+          ...tab,
+          widgets: tab.widgets.map((widget) => ({ ...widget, cypher: null })),
+        })),
+        filters: [queryFilter],
+      }
+      expect(
+        connectionSwitchNeedsConfirm(onlyFilter, connections, uuid(104)),
+      ).toBe(true)
+
+      // sem consulta nenhuma, troca direto
+      const empty = {
+        ...onlyFilter,
+        filters: [{ ...queryFilter, options: null }],
+      }
+      expect(connectionSwitchNeedsConfirm(empty, connections, uuid(102))).toBe(
+        false,
+      )
+      // setConnection segue trocando
+      expect(setConnection(draft, uuid(102)).connectionId).toBe(uuid(102))
+    })
+
+    it('SMG-07 trocar para o mesmo tipo não pergunta', () => {
+      const draft = fromDto(saved())
+      expect(connectionSwitchNeedsConfirm(draft, connections, uuid(103))).toBe(
+        false,
+      )
+      expect(connectionSwitchNeedsConfirm(draft, connections, uuid(101))).toBe(
+        false,
+      )
     })
   })
 })

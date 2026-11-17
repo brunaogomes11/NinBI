@@ -896,8 +896,8 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste de unidade `SMG-07 trocar para o mesmo tipo não pergunta` e `SMG-05 trocar para outro tipo com consulta pergunta` em `apps/web/src/features/dashboards/draft.test.ts`
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste de unidade `SMG-07 trocar para o mesmo tipo não pergunta` e `SMG-05 trocar para outro tipo com consulta pergunta` em `apps/web/src/features/dashboards/draft.test.ts`
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
