@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common'
 import {
   type ConnectionCreate,
   type ConnectionDto,
+  type ConnectionType,
   type ConnectionUpdate,
   MESSAGES,
 } from '@ninbi/contracts'
@@ -10,14 +11,13 @@ import { AppError } from '../common/app-error'
 import { CryptoService } from '../crypto/crypto.service'
 import { type AppDatabase, DB } from '../database/database.module'
 import { connectionSchemas, connections, dashboards } from '../database/schema'
-import {
-  NEO4J_GATEWAY,
-  type Neo4jConnectionConfig,
-  type Neo4jGateway,
-  Neo4jGatewayError,
-  Neo4jTimeoutError,
-} from '../neo4j/neo4j.gateway'
 import { SchemaRefreshService } from '../schema/schema-refresh.service'
+import {
+  SourceGatewayError,
+  SourceTimeoutError,
+  toSourceConnection,
+} from '../sources/source'
+import { SourceRegistry } from '../sources/source-registry'
 import { connectionNotFound, isConnectionId } from './connection-errors'
 
 /** Prazo do teste de conexão (CONN-09). */
@@ -56,6 +56,21 @@ function connectionInUse(count: number): AppError {
   return new AppError(409, 'CONNECTION_IN_USE', MESSAGES.connectionInUse(count))
 }
 
+/** Campos de endereço que a conexão guarda, pelo tipo (AD-136). */
+type ConnectionInput = ConnectionCreate | ConnectionUpdate
+
+function addressOf(input: ConnectionInput) {
+  if (input.type === 'NEO4J') {
+    return { uri: input.uri, host: null, port: null, ssl: false }
+  }
+  return { uri: null, host: input.host, port: input.port, ssl: input.ssl }
+}
+
+/** O Neo4j mantém os códigos de hoje; as conexões SQL usam os das fontes. */
+function unavailableCode(type: ConnectionType) {
+  return type === 'NEO4J' ? 'NEO4J_UNAVAILABLE' : 'SOURCE_UNAVAILABLE'
+}
+
 function nameTaken(): AppError {
   return new AppError(
     409,
@@ -73,7 +88,11 @@ export function toConnectionDto(
   return {
     id: row.id,
     name: row.name,
+    type: row.type,
     uri: row.uri,
+    host: row.host,
+    port: row.port,
+    ssl: row.ssl,
     database: row.database,
     username: row.username,
     schemaStatus: row.schemaStatus,
@@ -86,7 +105,7 @@ export class ConnectionsService {
   constructor(
     @Inject(DB) private readonly db: AppDatabase,
     @Inject(CryptoService) private readonly crypto: CryptoService,
-    @Inject(NEO4J_GATEWAY) private readonly neo4j: Neo4jGateway,
+    @Inject(SourceRegistry) private readonly sources: SourceRegistry,
     @Inject(SchemaRefreshService)
     private readonly refresh: SchemaRefreshService,
     @Inject(CONNECTION_VERIFY_TIMEOUT_MS)
@@ -114,19 +133,26 @@ export class ConnectionsService {
       .where(sql`lower(${connections.name}) = lower(${input.name})`)
     if (existing) throw nameTaken()
 
-    await this.verify({
-      uri: input.uri,
-      database: input.database,
-      username: input.username,
-      password: input.password,
-    })
+    const address = addressOf(input)
+    await this.verify(
+      {
+        id: '',
+        name: input.name,
+        type: input.type,
+        ...address,
+        database: input.database,
+        username: input.username,
+      },
+      input.password,
+    )
 
     try {
       const [created] = await this.db
         .insert(connections)
         .values({
           name: input.name,
-          uri: input.uri,
+          type: input.type,
+          ...address,
           database: input.database,
           username: input.username,
           passwordEncrypted: this.crypto.encrypt(input.password),
@@ -146,6 +172,15 @@ export class ConnectionsService {
   /** Senha vazia ou ausente mantém a guardada (CONN-15); a conexão é testada de novo antes de gravar (CONN-16). */
   async update(id: string, input: ConnectionUpdate): Promise<ConnectionDto> {
     const current = await this.find(id)
+    // A consulta dos widgets está no idioma do tipo: o tipo não muda (SRC-16).
+    if (input.type !== current.type) {
+      throw new AppError(
+        422,
+        'CONNECTION_TYPE_LOCKED',
+        MESSAGES.connectionTypeLocked,
+        { type: MESSAGES.connectionTypeLocked },
+      )
+    }
     const newPassword = input.password || null
     let password: string
     if (newPassword) {
@@ -156,25 +191,31 @@ export class ConnectionsService {
       } catch {
         throw new AppError(
           422,
-          'NEO4J_UNAVAILABLE',
+          unavailableCode(current.type),
           MESSAGES.connectionPasswordUndecryptable,
         )
       }
     }
 
-    await this.verify({
-      uri: input.uri,
-      database: input.database,
-      username: input.username,
+    const address = addressOf(input)
+    await this.verify(
+      {
+        id,
+        name: input.name,
+        type: current.type,
+        ...address,
+        database: input.database,
+        username: input.username,
+      },
       password,
-    })
+    )
 
     try {
       const [updated] = await this.db
         .update(connections)
         .set({
           name: input.name,
-          uri: input.uri,
+          ...address,
           database: input.database,
           username: input.username,
           ...(newPassword
@@ -235,20 +276,29 @@ export class ConnectionsService {
     return row
   }
 
-  /** Testa a conexão no Neo4j; recusa e prazo viram 422 (CONN-06, CONN-08, CONN-09). */
-  private async verify(cfg: Neo4jConnectionConfig): Promise<void> {
+  /**
+   * Testa a conexão pela fonte do tipo; recusa e prazo viram 422 com a
+   * mensagem do banco (CONN-06, CONN-08, CONN-09, SRC-05, SRC-07, SRC-08).
+   */
+  private async verify(
+    row: Parameters<typeof toSourceConnection>[0],
+    password: string,
+  ): Promise<void> {
+    const source = this.sources.for(row.type)
     try {
-      await this.neo4j.verify(cfg, { timeoutMs: this.verifyTimeoutMs })
+      await source.verify(toSourceConnection(row, password), {
+        timeoutMs: this.verifyTimeoutMs,
+      })
     } catch (error) {
-      if (error instanceof Neo4jTimeoutError) {
+      if (error instanceof SourceTimeoutError) {
         throw new AppError(
           422,
-          'NEO4J_TIMEOUT',
+          row.type === 'NEO4J' ? 'NEO4J_TIMEOUT' : 'SOURCE_TIMEOUT',
           MESSAGES.connectionVerifyTimeout,
         )
       }
-      if (error instanceof Neo4jGatewayError) {
-        throw new AppError(422, 'NEO4J_UNAVAILABLE', error.message)
+      if (error instanceof SourceGatewayError) {
+        throw new AppError(422, unavailableCode(row.type), error.message)
       }
       throw error
     }

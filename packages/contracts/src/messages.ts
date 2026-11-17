@@ -36,6 +36,8 @@ export const MESSAGES = {
   connectionUsernameRequired: 'Informe o usuário',
   connectionNotFound: 'Conexão não encontrada',
   connectionVerifyTimeout: 'Não foi possível conectar em 10 s',
+  // SPEC_DEVIATION: texto da T24 (SRC-16) sem task de contrato; entra com a T24.
+  connectionTypeLocked: 'O tipo da conexão não muda',
   connectionPasswordUndecryptable:
     'Não foi possível decifrar a senha da conexão. Cadastre a senha de novo.',
   connectionsLoadFailed: 'Não foi possível carregar as conexões',

@@ -634,19 +634,19 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SRC-05 criar conexão SQL testa antes de salvar` em apps/api/test
-- [ ] Teste `SRC-06 teste que passa salva e a conexão aparece na lista` em apps/api/test
-- [ ] Teste `SRC-07 teste que falha não salva e devolve a mensagem do banco` em apps/api/test
-- [ ] Teste `SRC-08 banco SQL que não responde em 10 s devolve a mensagem de prazo` em apps/api/test
-- [ ] Teste `SRC-16 trocar o tipo de uma conexão é recusado` em apps/api/test
-- [ ] Teste `SRC-17 editar conexão SQL sem senha mantém a senha e testa de novo` em apps/api/test
-- [ ] Teste `SRC-18 senha SQL fica criptografada e nunca volta na resposta` em apps/api/test
-- [ ] Teste `SRC-19 nome repetido de conexão SQL é recusado com a mensagem no campo` em apps/api/test
-- [ ] Teste `SRC-20 Editor e Visualizador recebem 403 ao gerir conexão SQL` em apps/api/test
-- [ ] Teste `SRC-21 mensagem do driver sobre SSL chega ao formulário` em apps/api/test
-- [ ] Teste `SCS-01 criar conexão SQL inicia a leitura do schema` em apps/api/test
-- [ ] Os testes de `apps/api/test/connections/` de Neo4j seguem verdes (só a forma do DTO ganha os campos novos)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SRC-05 criar conexão SQL testa antes de salvar` em apps/api/test
+- [x] Teste `SRC-06 teste que passa salva e a conexão aparece na lista` em apps/api/test
+- [x] Teste `SRC-07 teste que falha não salva e devolve a mensagem do banco` em apps/api/test
+- [x] Teste `SRC-08 banco SQL que não responde em 10 s devolve a mensagem de prazo` em apps/api/test
+- [x] Teste `SRC-16 trocar o tipo de uma conexão é recusado` em apps/api/test
+- [x] Teste `SRC-17 editar conexão SQL sem senha mantém a senha e testa de novo` em apps/api/test
+- [x] Teste `SRC-18 senha SQL fica criptografada e nunca volta na resposta` em apps/api/test
+- [x] Teste `SRC-19 nome repetido de conexão SQL é recusado com a mensagem no campo` em apps/api/test
+- [x] Teste `SRC-20 Editor e Visualizador recebem 403 ao gerir conexão SQL` em apps/api/test
+- [x] Teste `SRC-21 mensagem do driver sobre SSL chega ao formulário` em apps/api/test
+- [x] Teste `SCS-01 criar conexão SQL inicia a leitura do schema` em apps/api/test
+- [x] Os testes de `apps/api/test/connections/` de Neo4j seguem verdes (só a forma do DTO ganha os campos novos)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
