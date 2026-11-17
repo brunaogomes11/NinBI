@@ -128,7 +128,12 @@ export type AssistantAction =
   | { type: 'remove_widget'; widgetId: string }
   | { type: 'set_layout'; widgetId: string; layout: WidgetLayoutDto }
   | { type: 'create_filter'; filter: DashboardFilter }
-  | { type: 'update_filter'; filter: DashboardFilter }
+  // SPEC_DEVIATION: o design traz o filtro inteiro, mas o rascunho enviado não tem opções nem valor padrão
+  // (CHAT-06); o servidor só conhece o que a IA mudou, então o web aplica a alteração parcial sobre o filtro.
+  | {
+      type: 'update_filter'
+      filter: Pick<DashboardFilter, 'id'> & Partial<Omit<DashboardFilter, 'id'>>
+    }
   | { type: 'remove_filter'; filterId: string }
   | { type: 'rename_dashboard'; name: string }
 
