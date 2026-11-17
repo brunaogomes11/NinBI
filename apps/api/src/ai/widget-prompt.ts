@@ -4,10 +4,13 @@ import {
   SystemMessage,
 } from '@langchain/core/messages'
 import {
-  type ConnectionSchemaDto,
   FILTER_TYPE_LABELS,
   type FilterPromptInfo,
+  isRelationalSchema,
   MAPPING_FIELD_LABELS,
+  type RelationalColumnDto,
+  type RelationalSchemaDto,
+  type SchemaDto,
   type SchemaPropertyDto,
   VISUALIZATION_LABELS,
   WIDGET_VISUALIZATIONS,
@@ -73,8 +76,38 @@ function property(p: SchemaPropertyDto): string {
   return `- ${p.name}: ${p.types.join(' | ')}${example}`
 }
 
-/** Schema inteiro, sem cortes; propriedade com envio desligado vai só com os tipos (AIQ-03, AIQ-04). */
-export function serializeSchema(schema: ConnectionSchemaDto): string {
+function column(c: RelationalColumnDto): string {
+  const example =
+    c.sendExample && c.example !== null && c.example !== undefined
+      ? ` = ${c.example}`
+      : ''
+  return `- ${c.name}: ${c.type}${example}`
+}
+
+/** Tabelas, colunas com o tipo e o exemplo permitido, e as chaves estrangeiras (SAI-02). */
+function serializeRelational(schema: RelationalSchemaDto): string {
+  const lines = ['Tabelas']
+  for (const table of schema.tables) {
+    lines.push(
+      table.isView ? `${table.name} (visão)` : table.name,
+      ...table.columns.map(column),
+    )
+  }
+  lines.push('', 'Chaves estrangeiras')
+  const side = (ref: { table: string; columns: string[] }) =>
+    ref.columns.map((name) => `${ref.table}.${name}`).join(', ')
+  for (const { from, to } of schema.foreignKeys) {
+    lines.push(`${side(from)} → ${side(to)}`)
+  }
+  return lines.join('\n')
+}
+
+/**
+ * Schema inteiro, sem cortes; propriedade ou coluna com envio desligado vai só
+ * com o tipo (AIQ-03, AIQ-04, SAI-02). O grafo sai como antes.
+ */
+export function serializeSchema(schema: SchemaDto): string {
+  if (isRelationalSchema(schema)) return serializeRelational(schema)
   const lines = ['Labels']
   for (const label of schema.labels) {
     lines.push(`(:${label.name})`, ...label.properties.map(property))
@@ -106,7 +139,26 @@ export function visualizationGuide(): string[] {
   ]
 }
 
-function systemText(schema: ConnectionSchemaDto): string {
+/** O pedido de SQL no dialeto do banco (SAI-01). */
+function sqlSystemText(schema: SchemaDto, dialect: PromptDialect): string {
+  return [
+    `Você escreve consultas ${dialect} para widgets de dashboard em um banco ${DATABASE_NAMES[dialect]}.`,
+    'Regras:',
+    '- Escreva só SQL de leitura, começando por SELECT ou WITH, com uma única instrução e sem ponto e vírgula no fim.',
+    '- Dê nome a cada coluna do resultado com AS.',
+    '- Use os nomes das tabelas como aparecem no schema; textos entre aspas simples, nunca entre $$.',
+    '- Use os parâmetros dos filtros do dashboard quando o pedido falar deles; um parâmetro vazio chega como null.',
+    '- Escolha a visualização que melhor mostra o resultado e descreva o mapeamento das colunas.',
+    '- O título do widget tem até 80 caracteres, em português.',
+    `- Responda só com um objeto JSON, com a consulta ${dialect} no campo "cypher": {"cypher": "...", "visualization": "...", "mapping": {...} ou null, "title": "..."}`,
+    ...visualizationGuide(),
+    '',
+    serializeSchema(schema),
+  ].join('\n')
+}
+
+function systemText(schema: SchemaDto, dialect: PromptDialect): string {
+  if (dialect !== 'Cypher') return sqlSystemText(schema, dialect)
   return [
     'Você escreve consultas Cypher para widgets de dashboard em um banco Neo4j.',
     'Regras:',
@@ -122,19 +174,26 @@ function systemText(schema: ConnectionSchemaDto): string {
   ].join('\n')
 }
 
-function currentWidgetText(widget: CurrentWidget): string {
+function currentWidgetText(
+  widget: CurrentWidget,
+  dialect: PromptDialect,
+): string {
   const mapping = (widget.config as { mapping?: unknown }).mapping
+  const language = dialect === 'Cypher' ? 'Cypher' : 'SQL'
   return [
     'Widget atual:',
     `Título: ${widget.title}`,
-    `Cypher: ${widget.cypher ?? 'nenhum'}`,
+    `${language}: ${widget.cypher ?? 'nenhum'}`,
     `Visualização: ${widget.visualization}`,
     `Mapeamento: ${mapping ? JSON.stringify(mapping) : 'nenhum'}`,
   ].join('\n')
 }
 
-/** Rótulo, parâmetro e tipo de cada filtro; nunca valores (FLT-20). */
-function filtersText(filters: FilterPromptInfo[]): string {
+/** Rótulo, parâmetro e tipo de cada filtro; nunca valores (FLT-20, SAI-06). */
+function filtersText(
+  filters: FilterPromptInfo[],
+  dialect: PromptDialect,
+): string {
   if (filters.length === 0) return 'Filtros do dashboard: nenhum'
   const lines = filters.map((filter) => {
     const names =
@@ -143,20 +202,29 @@ function filtersText(filters: FilterPromptInfo[]): string {
         : `$${filter.parameter}`
     return `- ${filter.label}: ${names} (${FILTER_TYPE_LABELS[filter.type]})`
   })
-  return ['Filtros do dashboard:', ...lines].join('\n')
+  const sqlUsage =
+    dialect === 'Cypher'
+      ? []
+      : [
+          'Em SQL, use um parâmetro de valor único como `$nome IS NULL OR coluna = $nome` e um de lista como `$nome IS NULL OR coluna IN ($nome)`.',
+        ]
+  return ['Filtros do dashboard:', ...lines, ...sqlUsage].join('\n')
 }
 
-/** Conversa inicial de uma geração: sistema com regras e schema, e o pedido (AIQ-01, AIQ-05). */
+/** Conversa inicial de uma geração: sistema com regras e schema, e o pedido (AIQ-01, AIQ-05, SAI-01). */
 export function buildWidgetMessages(input: {
-  schema: ConnectionSchemaDto
+  schema: SchemaDto
+  /** Idioma da consulta (o `dialect` da fonte da conexão); sem ele, Cypher como antes. */
+  dialect?: PromptDialect
   widget: CurrentWidget
   prompt: string
   filters?: FilterPromptInfo[]
 }): BaseMessage[] {
+  const dialect = input.dialect ?? 'Cypher'
   return [
-    new SystemMessage(systemText(input.schema)),
+    new SystemMessage(systemText(input.schema, dialect)),
     new HumanMessage(
-      `${currentWidgetText(input.widget)}\n\n${filtersText(input.filters ?? [])}\n\nPedido: ${input.prompt}`,
+      `${currentWidgetText(input.widget, dialect)}\n\n${filtersText(input.filters ?? [], dialect)}\n\nPedido: ${input.prompt}`,
     ),
   ]
 }

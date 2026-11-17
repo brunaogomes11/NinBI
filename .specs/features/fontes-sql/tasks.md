@@ -732,12 +732,12 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SAI-01 prompt pede consulta no dialeto do tipo` em apps/api/test
-- [ ] Teste `SAI-02 prompt SQL leva tabelas, colunas, exemplos permitidos e chaves estrangeiras` em apps/api/test
-- [ ] Teste `SAI-03 prompt de Neo4j segue como antes` em apps/api/test
-- [ ] Teste `SAI-06 prompt descreve os parâmetros dos filtros em SQL` em apps/api/test
-- [ ] Os testes de `widget-prompt.spec.ts` de Neo4j seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SAI-01 prompt pede consulta no dialeto do tipo` em apps/api/test
+- [x] Teste `SAI-02 prompt SQL leva tabelas, colunas, exemplos permitidos e chaves estrangeiras` em apps/api/test
+- [x] Teste `SAI-03 prompt de Neo4j segue como antes` em apps/api/test
+- [x] Teste `SAI-06 prompt descreve os parâmetros dos filtros em SQL` em apps/api/test
+- [x] Os testes de `widget-prompt.spec.ts` de Neo4j seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
