@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { Inject, Injectable } from '@nestjs/common'
 import {
+  connectionLanguage,
   type DashboardDto,
   type DashboardFilter,
   type DashboardSaveInput,
@@ -228,6 +229,7 @@ export class DashboardsService {
         ownerName: users.name,
         connectionId: dashboards.connectionId,
         connectionName: connections.name,
+        connectionType: connections.type,
         filters: dashboards.filters,
         refreshIntervalSec: dashboards.refreshIntervalSec,
       })
@@ -248,6 +250,8 @@ export class DashboardsService {
       .where(eq(widgets.dashboardId, dashboardId))
       .orderBy(asc(widgets.y), asc(widgets.x), asc(widgets.id))
 
+    // `$nome` dentro de string, comentário ou identificador não é parâmetro, no idioma da conexão (SQX-16).
+    const language = connectionLanguage(row.connectionType)
     return {
       id: row.id,
       name: row.name,
@@ -257,6 +261,7 @@ export class DashboardsService {
       ownerName: row.ownerName,
       connectionId: row.connectionId,
       connectionName: row.connectionName,
+      connectionType: row.connectionType,
       permissions: {
         edit: permissions.canEdit,
         delete: permissions.canDelete,
@@ -276,7 +281,7 @@ export class DashboardsService {
             config: widget.config,
             layout: { x: widget.x, y: widget.y, w: widget.w, h: widget.h },
             parameters: widget.cypher
-              ? extractParameterNames(widget.cypher)
+              ? extractParameterNames(widget.cypher, language)
               : [],
           })),
       })),

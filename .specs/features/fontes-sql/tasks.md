@@ -711,9 +711,9 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SMG-05 dashboard devolve o tipo da conexão` em apps/api/test
-- [ ] Os testes de `apps/api/test/dashboards/` seguem verdes (só a forma do DTO ganha `connectionType`)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SMG-05 dashboard devolve o tipo da conexão` em apps/api/test
+- [x] Os testes de `apps/api/test/dashboards/` seguem verdes (só a forma do DTO ganha `connectionType`)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
