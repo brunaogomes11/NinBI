@@ -367,4 +367,54 @@ describe('Assistente na página do dashboard', () => {
       first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
   })
+
+  const REPLY_ACTION: AssistantAction = {
+    type: 'update_widget',
+    widgetId: 'w-1',
+    title: 'Vendas em linha',
+    result: null,
+    error: null,
+  }
+  const replyPost = () =>
+    http.post(MESSAGES_URL, () =>
+      ndjson([
+        {
+          type: 'accepted',
+          userMessage: userMessage('m-1', 'troque para linha'),
+        },
+        {
+          type: 'done',
+          reply: userMessage('m-2', 'Troquei.', 'ASSISTANT'),
+          actions: [REPLY_ACTION],
+        },
+      ]),
+    )
+
+  it('HIST-09 respostas antigas aparecem sem Desfazer', async () => {
+    localStorage.setItem(OPEN_KEY, '1')
+    const first = open({ post: replyPost() })
+    await screen.findByText('Vendas por loja')
+    await first.user.type(
+      await screen.findByLabelText('Mensagem'),
+      'troque para linha',
+    )
+    await first.user.click(screen.getByRole('button', { name: 'Enviar' }))
+    expect(
+      await screen.findByRole('button', { name: 'Desfazer' }),
+    ).toBeInTheDocument()
+    first.unmount()
+
+    // reabre o dashboard: a conversa volta do servidor, sem o Desfazer
+    open({
+      stored: [
+        userMessage('m-1', 'troque para linha'),
+        userMessage('m-2', 'Troquei.', 'ASSISTANT'),
+      ],
+    })
+    const panel = await screen.findByRole('complementary', {
+      name: 'Assistente',
+    })
+    expect(await within(panel).findByText('Troquei.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Desfazer' })).toBeNull()
+  })
 })
