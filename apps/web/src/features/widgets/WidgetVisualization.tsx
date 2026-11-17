@@ -1,10 +1,13 @@
 import {
+  type CrossFilterConfig,
   MESSAGES,
   type QueryResultDto,
   type WidgetVisualization as Visualization,
   type WidgetMapping,
 } from '@ninbi/contracts'
 import { type ReactNode, useMemo } from 'react'
+import { clickValue, selectedRows } from '@/features/filters/cross-filter'
+import { useOptionalFilterSession } from '@/features/filters/filter-session'
 import { CartesianChartView } from './charts/CartesianChartView'
 import { PieChartView } from './charts/PieChartView'
 import { RadarChartView, RadialChartView } from './charts/PolarChartViews'
@@ -16,15 +19,83 @@ import {
   buildCartesian,
   buildCategories,
   buildRadar,
+  categoryRows,
 } from './mapping/chart-data'
-import { buildKpi, buildList, buildMapPoints } from './mapping/simple-data'
+import {
+  buildKpi,
+  buildList,
+  buildMapPoints,
+  mapPointRows,
+} from './mapping/simple-data'
 import { validateMapping } from './mapping/suggest'
 import { ResultTable } from './ResultTable'
+import type { RowInteraction } from './row-interaction'
 
 export interface WidgetVisualizationProps {
   result: QueryResultDto
   visualization: string
   config: Record<string, unknown>
+  /** O widget que clica: o "Ao clicar" só vale com `interactive` (visualização, não edição). */
+  widgetId?: string
+  interactive?: boolean
+}
+
+const NO_ROWS: number[] = []
+
+interface ClickBase {
+  selected: Set<number>
+  onRowClick: (rowIndex: number) => void
+}
+
+/** Clique e destaque do widget com "Ao clicar" (XFL-02 a XFL-08); `null` quando não há o que clicar. */
+function useClickBase(
+  result: QueryResultDto,
+  crossFilter: CrossFilterConfig | undefined,
+  widgetId: string | undefined,
+  interactive: boolean | undefined,
+): ClickBase | null {
+  const session = useOptionalFilterSession()
+  const filters = session?.filters
+  const selection = session?.selection ?? null
+  const toggleClick = session?.toggleClick
+  return useMemo(() => {
+    if (!interactive || !crossFilter || !widgetId || !filters || !toggleClick) {
+      return null
+    }
+    const filter = filters.find((f) => f.id === crossFilter.filterId)
+    if (!filter) return null
+    const selected =
+      selection?.widgetId === widgetId && selection.filterId === filter.id
+        ? selectedRows(result, crossFilter.column, filter.type, selection.value)
+        : new Set<number>()
+    return {
+      selected,
+      onRowClick: (rowIndex) => {
+        const value = clickValue(
+          result,
+          crossFilter.column,
+          rowIndex,
+          filter.type,
+        )
+        if (value !== undefined) toggleClick(widgetId, filter.id, value)
+      },
+    }
+  }, [
+    result,
+    crossFilter,
+    widgetId,
+    interactive,
+    filters,
+    selection,
+    toggleClick,
+  ])
+}
+
+function withRows(
+  base: ClickBase | null,
+  rows: number[],
+): RowInteraction | undefined {
+  return base ? { ...base, rows } : undefined
 }
 
 function Message({
@@ -73,17 +144,25 @@ function Drawn<T>({
 function MapBody({
   result,
   mapping,
+  base,
 }: {
   result: QueryResultDto
   mapping: WidgetMapping['MAP']
+  base: ClickBase | null
 }) {
   const built = useMemo(
     () => buildMapPoints(result, mapping),
     [result, mapping],
   )
+  const interaction = useMemo(
+    () => withRows(base, mapPointRows(result, mapping)),
+    [base, result, mapping],
+  )
   return (
     <Drawn built={built}>
-      {(points, notice) => <MapView points={points} notice={notice} />}
+      {(points, notice) => (
+        <MapView points={points} notice={notice} interaction={interaction} />
+      )}
     </Drawn>
   )
 }
@@ -93,7 +172,11 @@ export function WidgetVisualization({
   result,
   visualization,
   config,
+  widgetId,
+  interactive,
 }: WidgetVisualizationProps) {
+  const crossFilter = config.crossFilter as CrossFilterConfig | undefined
+  const base = useClickBase(result, crossFilter, widgetId, interactive)
   const v = visualization as Visualization
   const mapping = config.mapping as Record<string, unknown> | undefined
   if (
@@ -104,7 +187,7 @@ export function WidgetVisualization({
     return result.rows.length === 0 ? (
       <Message>{MESSAGES.queryNoData}</Message>
     ) : (
-      <ResultTable result={result} />
+      <ResultTable result={result} interaction={withRows(base, NO_ROWS)} />
     )
   }
 
@@ -116,7 +199,12 @@ export function WidgetVisualization({
       return (
         <Drawn built={buildCartesian(result, m)}>
           {(data) => (
-            <CartesianChartView visualization={v} data={data} mapping={m} />
+            <CartesianChartView
+              visualization={v}
+              data={data}
+              mapping={m}
+              interaction={withRows(base, NO_ROWS)}
+            />
           )}
         </Drawn>
       )
@@ -126,7 +214,12 @@ export function WidgetVisualization({
       return (
         <Drawn built={buildCategories(result, m, 'PIE')}>
           {(data, notice) => (
-            <PieChartView data={data} donut={m.donut} notice={notice} />
+            <PieChartView
+              data={data}
+              donut={m.donut}
+              notice={notice}
+              interaction={withRows(base, categoryRows(result, m, 'PIE'))}
+            />
           )}
         </Drawn>
       )
@@ -135,7 +228,13 @@ export function WidgetVisualization({
       const m = mapping as WidgetMapping['RADIAL']
       return (
         <Drawn built={buildCategories(result, m, 'RADIAL')}>
-          {(data, notice) => <RadialChartView data={data} notice={notice} />}
+          {(data, notice) => (
+            <RadialChartView
+              data={data}
+              notice={notice}
+              interaction={withRows(base, categoryRows(result, m, 'RADIAL'))}
+            />
+          )}
         </Drawn>
       )
     }
@@ -144,7 +243,12 @@ export function WidgetVisualization({
       return (
         <Drawn built={buildRadar(result, m)}>
           {(data, notice) => (
-            <RadarChartView data={data} series={m.series} notice={notice} />
+            <RadarChartView
+              data={data}
+              series={m.series}
+              notice={notice}
+              interaction={withRows(base, NO_ROWS)}
+            />
           )}
         </Drawn>
       )
@@ -158,12 +262,18 @@ export function WidgetVisualization({
     case 'LIST':
       return (
         <Drawn built={buildList(result, mapping as WidgetMapping['LIST'])}>
-          {(data) => <ListView data={data} />}
+          {(data) => (
+            <ListView data={data} interaction={withRows(base, NO_ROWS)} />
+          )}
         </Drawn>
       )
     case 'MAP':
       return (
-        <MapBody result={result} mapping={mapping as WidgetMapping['MAP']} />
+        <MapBody
+          result={result}
+          mapping={mapping as WidgetMapping['MAP']}
+          base={base}
+        />
       )
   }
 }

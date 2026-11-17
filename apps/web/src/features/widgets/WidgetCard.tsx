@@ -113,6 +113,8 @@ function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
         result={query.data}
         visualization={widget.visualization}
         config={widget.config}
+        widgetId={widget.id}
+        interactive={edit === undefined}
       />
       {refreshFailed}
     </>

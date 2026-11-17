@@ -5,6 +5,7 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Line,
   LineChart,
   XAxis,
@@ -23,6 +24,7 @@ import {
   seriesColor,
   tickInterval,
 } from '../mapping/chart-data'
+import { type RowInteraction, rowProps } from '../row-interaction'
 import { AXIS_PROPS, GRID_PROPS, NinbiTooltip } from './chart-theme'
 
 export interface CartesianMapping {
@@ -36,6 +38,31 @@ export interface CartesianChartViewProps {
   visualization: 'AREA' | 'BAR' | 'LINE'
   data: CartesianPoint[]
   mapping: CartesianMapping
+  /** Presente quando o widget tem "Ao clicar" e a página está em visualização. */
+  interaction?: RowInteraction
+}
+
+interface DotProps {
+  cx?: number
+  cy?: number
+  index?: number
+}
+
+/** Ponto clicável de linha e área (XFL-02). */
+function clickableDot(interaction: RowInteraction, color: string) {
+  return ({ cx, cy, index = 0 }: DotProps) => {
+    if (cx === undefined || cy === undefined) return <g key={`dot-${index}`} />
+    return (
+      <circle
+        key={`dot-${index}`}
+        cx={cx}
+        cy={cy}
+        r={5}
+        fill={color}
+        {...rowProps(interaction, index)}
+      />
+    )
+  }
 }
 
 /** Largura do elemento, atualizada quando o card muda de tamanho (CHART-08). */
@@ -58,6 +85,7 @@ export function CartesianChartView({
   visualization,
   data,
   mapping,
+  interaction,
 }: CartesianChartViewProps) {
   const { ref, width } = useWidth()
   const gradientId = `area-${useId().replace(/:/g, '')}`
@@ -155,7 +183,11 @@ export function CartesianChartView({
                 strokeWidth={2}
                 fill={oneSeries ? `url(#${gradientId})` : `var(--color-${key})`}
                 fillOpacity={oneSeries ? 1 : 0.35}
-                dot={single}
+                dot={
+                  interaction
+                    ? clickableDot(interaction, seriesColor(i))
+                    : single
+                }
                 connectNulls={false}
                 isAnimationActive={false}
               />
@@ -172,7 +204,11 @@ export function CartesianChartView({
                 type="monotone"
                 stroke={`var(--color-${key})`}
                 strokeWidth={2}
-                dot={single}
+                dot={
+                  interaction
+                    ? clickableDot(interaction, `var(--color-${key})`)
+                    : single
+                }
                 connectNulls={false}
                 isAnimationActive={false}
               />
@@ -190,7 +226,16 @@ export function CartesianChartView({
                 fill={`var(--color-${key})`}
                 radius={stackId ? 0 : 4}
                 isAnimationActive={false}
-              />
+              >
+                {interaction &&
+                  data.map((_, row) => (
+                    <Cell
+                      // biome-ignore lint/suspicious/noArrayIndexKey: a posição é a linha do resultado
+                      key={`${key}-${row}`}
+                      {...rowProps(interaction, row)}
+                    />
+                  ))}
+              </Bar>
             ))}
           </BarChart>
         )}

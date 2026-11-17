@@ -1,16 +1,23 @@
-import { Pie, PieChart } from 'recharts'
+import { Cell, Pie, PieChart } from 'recharts'
 import { ChartContainer, ChartTooltip } from '@/components/ui/chart'
 import { buildChartConfig, type CategoryItem } from '../mapping/chart-data'
+import { type RowInteraction, rowProps } from '../row-interaction'
 import { NinbiTooltip } from './chart-theme'
 
 export interface PieChartViewProps {
   data: CategoryItem[]
   donut: boolean
   notice?: string
+  interaction?: RowInteraction
 }
 
 /** Pizza com uma fatia por item; "Donut" vaza o centro (CHART-09, CHART-10). */
-export function PieChartView({ data, donut, notice }: PieChartViewProps) {
+export function PieChartView({
+  data,
+  donut,
+  notice,
+  interaction,
+}: PieChartViewProps) {
   const config = buildChartConfig(
     data.map((item) => item.label),
     'c',
@@ -33,7 +40,16 @@ export function PieChartView({ data, donut, notice }: PieChartViewProps) {
               outerRadius="80%"
               stroke="var(--card)"
               isAnimationActive={false}
-            />
+            >
+              {interaction &&
+                slices.map((slice, i) => (
+                  <Cell
+                    key={slice.key}
+                    fill={slice.fill}
+                    {...rowProps(interaction, i)}
+                  />
+                ))}
+            </Pie>
           </PieChart>
         </ChartContainer>
       </div>

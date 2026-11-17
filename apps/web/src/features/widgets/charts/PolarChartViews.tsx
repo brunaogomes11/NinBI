@@ -1,4 +1,5 @@
 import {
+  Cell,
   PolarAngleAxis,
   PolarGrid,
   Radar,
@@ -12,6 +13,7 @@ import {
   type CategoryItem,
   type RadarPoint,
 } from '../mapping/chart-data'
+import { type RowInteraction, rowProps } from '../row-interaction'
 import { NinbiTooltip } from './chart-theme'
 
 function Notice({ text }: { text?: string }) {
@@ -22,10 +24,43 @@ export interface RadarChartViewProps {
   data: RadarPoint[]
   series: string[]
   notice?: string
+  interaction?: RowInteraction
+}
+
+interface TickProps {
+  x?: number | string
+  y?: number | string
+  index?: number
+  textAnchor?: 'start' | 'middle' | 'end' | 'inherit'
+  payload?: { value?: string | number }
+}
+
+/** Rótulo de eixo clicável do radar (XFL-02). */
+function clickableTick(interaction: RowInteraction) {
+  return ({ x, y, index = 0, textAnchor, payload }: TickProps) => {
+    return (
+      <text
+        key={`tick-${index}`}
+        x={x}
+        y={y}
+        textAnchor={textAnchor}
+        fill="var(--muted-foreground)"
+        fontSize={12}
+        {...rowProps(interaction, index)}
+      >
+        {payload?.value}
+      </text>
+    )
+  }
 }
 
 /** Radar: um eixo por linha e um polígono por série (CHART-11). */
-export function RadarChartView({ data, series, notice }: RadarChartViewProps) {
+export function RadarChartView({
+  data,
+  series,
+  notice,
+  interaction,
+}: RadarChartViewProps) {
   const config = buildChartConfig(series)
   return (
     <div className="flex h-full min-h-0 w-full flex-col">
@@ -36,7 +71,11 @@ export function RadarChartView({ data, series, notice }: RadarChartViewProps) {
             <PolarGrid stroke="var(--border)" />
             <PolarAngleAxis
               dataKey="axis"
-              tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+              tick={
+                interaction
+                  ? clickableTick(interaction)
+                  : { fill: 'var(--muted-foreground)', fontSize: 12 }
+              }
             />
             {series.map((name, i) => (
               <Radar
@@ -60,10 +99,15 @@ export function RadarChartView({ data, series, notice }: RadarChartViewProps) {
 export interface RadialChartViewProps {
   data: CategoryItem[]
   notice?: string
+  interaction?: RowInteraction
 }
 
 /** Radial: uma barra por linha, com o comprimento do valor (CHART-12). */
-export function RadialChartView({ data, notice }: RadialChartViewProps) {
+export function RadialChartView({
+  data,
+  notice,
+  interaction,
+}: RadialChartViewProps) {
   const config = buildChartConfig(
     data.map((item) => item.label),
     'c',
@@ -85,7 +129,16 @@ export function RadialChartView({ data, notice }: RadialChartViewProps) {
           >
             <ChartTooltip content={<NinbiTooltip />} />
             <PolarAngleAxis type="number" tick={false} axisLine={false} />
-            <RadialBar dataKey="value" background isAnimationActive={false} />
+            <RadialBar dataKey="value" background isAnimationActive={false}>
+              {interaction &&
+                bars.map((bar, i) => (
+                  <Cell
+                    key={bar.key}
+                    fill={bar.fill}
+                    {...rowProps(interaction, i)}
+                  />
+                ))}
+            </RadialBar>
           </RadialBarChart>
         </ChartContainer>
       </div>

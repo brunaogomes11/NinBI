@@ -101,6 +101,22 @@ export interface MapPoint {
 const validCoordinate = (n: number | null, limit: number): n is number =>
   n !== null && Number.isFinite(n) && Math.abs(n) <= limit
 
+/** A linha do resultado de cada ponto de `buildMapPoints` (linhas com coordenada inválida ficam de fora). */
+export function mapPointRows(
+  result: QueryResultDto,
+  mapping: WidgetMapping['MAP'],
+): number[] {
+  const rows: number[] = []
+  result.rows.forEach((row, rowIndex) => {
+    const lat = toNumber(cell(result, row, mapping.lat))
+    const lon = toNumber(cell(result, row, mapping.lon))
+    if (validCoordinate(lat, 90) && validCoordinate(lon, 180)) {
+      rows.push(rowIndex)
+    }
+  })
+  return rows
+}
+
 export function buildMapPoints(
   result: QueryResultDto,
   mapping: WidgetMapping['MAP'],

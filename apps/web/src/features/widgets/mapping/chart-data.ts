@@ -89,6 +89,42 @@ function cutNotice(total: number): string | undefined {
     : undefined
 }
 
+interface CollectedCategory {
+  rowIndex: number
+  label: string
+  value: number
+}
+
+function collectCategories(
+  result: QueryResultDto,
+  mapping: { category: string; value: string },
+  visualization: 'PIE' | 'RADIAL',
+): CollectedCategory[] {
+  const items: CollectedCategory[] = []
+  result.rows.slice(0, MAX_CATEGORIES).forEach((row, rowIndex) => {
+    const value = toNumber(cell(result, row, mapping.value))
+    if (value === null) return
+    if (visualization === 'PIE' && value < 0) return
+    items.push({
+      rowIndex,
+      label: formatValue(cell(result, row, mapping.category)),
+      value,
+    })
+  })
+  return items
+}
+
+/** A linha do resultado de cada item de `buildCategories`, na mesma ordem. */
+export function categoryRows(
+  result: QueryResultDto,
+  mapping: { category: string; value: string },
+  visualization: 'PIE' | 'RADIAL',
+): number[] {
+  return collectCategories(result, mapping, visualization).map(
+    (item) => item.rowIndex,
+  )
+}
+
 export function buildCategories(
   result: QueryResultDto,
   mapping: { category: string; value: string },
@@ -100,16 +136,7 @@ export function buildCategories(
     { column: mapping.value, numeric: true },
   ])
   if (failure) return failure
-  const items: { label: string; value: number }[] = []
-  for (const row of result.rows.slice(0, MAX_CATEGORIES)) {
-    const value = toNumber(cell(result, row, mapping.value))
-    if (value === null) continue
-    if (visualization === 'PIE' && value < 0) continue
-    items.push({
-      label: formatValue(cell(result, row, mapping.category)),
-      value,
-    })
-  }
+  const items = collectCategories(result, mapping, visualization)
   const drawable =
     visualization === 'PIE'
       ? items.some((item) => item.value > 0)
@@ -117,7 +144,7 @@ export function buildCategories(
   if (!drawable) return { ok: false, reason: 'empty' }
   return {
     ok: true,
-    data: items.map((item, i) => ({ key: `c${i}`, ...item })),
+    data: items.map(({ label, value }, i) => ({ key: `c${i}`, label, value })),
     notice: cutNotice(result.rows.length),
   }
 }

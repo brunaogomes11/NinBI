@@ -1,12 +1,23 @@
 import type { ListItemData } from './mapping/simple-data'
+import { type RowInteraction, rowHtmlProps } from './row-interaction'
 
 /** Lista compacta: uma linha por linha do resultado, que rola dentro do card (LIST-01 a LIST-04). */
-export function ListView({ data }: { data: ListItemData[] }) {
+export function ListView({
+  data,
+  interaction,
+}: {
+  data: ListItemData[]
+  interaction?: RowInteraction
+}) {
   return (
     <ul className="min-h-0 flex-1 divide-y divide-border overflow-y-auto">
       {data.map((item, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: linhas do resultado não têm identidade própria
-        <li key={index} className="flex items-center gap-3 py-2">
+        <li
+          // biome-ignore lint/suspicious/noArrayIndexKey: linhas do resultado não têm identidade própria
+          key={index}
+          className="flex items-center gap-3 py-2"
+          {...rowHtmlProps(interaction, index)}
+        >
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-medium" title={item.primary}>
               {item.primary}

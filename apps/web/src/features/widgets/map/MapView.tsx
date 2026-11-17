@@ -13,18 +13,35 @@ import {
 } from 'react-leaflet'
 import { formatNumber } from '@/lib/format'
 import { type MapPoint, mapViewport } from '../mapping/simple-data'
+import { type RowInteraction, rowHtmlProps } from '../row-interaction'
 import { useMapConfig } from './useMapConfig'
 
 const FIT_PADDING: L.PointTuple = [24, 24]
 const FIT_MAX_ZOOM = 12
 
 /** Marcador em forma de chip com o rótulo; sem rótulo, um ponto (MAP-02). */
-function markerIcon(label: string | null): L.DivIcon {
+function markerIcon(
+  label: string | null,
+  dataIndex: number,
+  interaction?: RowInteraction,
+): L.DivIcon {
+  // O clique chega pelo marcador do Leaflet; aqui só ficam os atributos e o destaque.
+  const {
+    onClick: _click,
+    onKeyDown: _key,
+    ...attrs
+  } = rowHtmlProps(interaction, dataIndex) as Record<string, unknown>
   const html = renderToStaticMarkup(
     label === null ? (
-      <span className="block size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-primary" />
+      <span
+        {...attrs}
+        className="block size-3 -translate-x-1/2 -translate-y-1/2 rounded-full border border-border bg-primary"
+      />
     ) : (
-      <span className="inline-block -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-border bg-card-elevated px-2 py-0.5 text-xs font-medium text-foreground shadow">
+      <span
+        {...attrs}
+        className="inline-block -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-border bg-card-elevated px-2 py-0.5 text-xs font-medium text-foreground shadow"
+      >
         {label}
       </span>
     ),
@@ -81,15 +98,17 @@ function TileFailureNotice() {
 export interface MapViewProps {
   points: MapPoint[]
   notice?: string
+  interaction?: RowInteraction
 }
 
 /** Mapa de tiles com um marcador por ponto, zoom e arrasto (MAP-01 a MAP-09). */
-export function MapView({ points, notice }: MapViewProps) {
+export function MapView({ points, notice, interaction }: MapViewProps) {
   const config = useMapConfig()
   const [tilesFailed, setTilesFailed] = useState(false)
   const icons = useMemo(
-    () => points.map((point) => markerIcon(point.label)),
-    [points],
+    () =>
+      points.map((point, index) => markerIcon(point.label, index, interaction)),
+    [points, interaction],
   )
   const first = mapViewport(points)
   const initial =
@@ -129,6 +148,16 @@ export function MapView({ points, notice }: MapViewProps) {
               key={index}
               position={[point.lat, point.lon]}
               icon={icons[index]}
+              eventHandlers={
+                interaction
+                  ? {
+                      click: () =>
+                        interaction.onRowClick(
+                          interaction.rows[index] ?? index,
+                        ),
+                    }
+                  : undefined
+              }
             >
               <Tooltip direction="top">
                 <div className="flex flex-col text-xs">

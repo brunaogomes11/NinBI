@@ -9,12 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { type RowInteraction, rowHtmlProps } from './row-interaction'
 import {
   formatCell,
   nextSort,
   paginate,
   type SortState,
-  sortRows,
+  sortRowIndexes,
 } from './table-rules'
 
 function ariaSort(
@@ -42,13 +43,23 @@ function SortIcon({
   )
 }
 
-export function ResultTable({ result }: { result: QueryResultDto }) {
+/** Clique nas linhas da tabela: `rows` é indexado pela posição original da linha (XFL-02). */
+export function ResultTable({
+  result,
+  interaction,
+}: {
+  result: QueryResultDto
+  interaction?: RowInteraction
+}) {
   const [sort, setSort] = useState<SortState | null>(null)
   const [page, setPage] = useState(1)
 
+  // Posições originais das linhas, na ordem mostrada: o clique usa a linha de origem.
   const sorted = useMemo(
     () =>
-      sort ? sortRows(result.rows, sort.column, sort.direction) : result.rows,
+      sort
+        ? sortRowIndexes(result.rows, sort.column, sort.direction)
+        : result.rows.map((_, index) => index),
     [result.rows, sort],
   )
   const current = paginate(sorted, page)
@@ -85,10 +96,9 @@ export function ResultTable({ result }: { result: QueryResultDto }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {current.rows.map((row, index) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: linhas não têm identidade própria
-              <TableRow key={index}>
-                {row.map((value, column) => (
+            {current.rows.map((original) => (
+              <TableRow key={original} {...rowHtmlProps(interaction, original)}>
+                {(result.rows[original] ?? []).map((value, column) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: colunas repetidas só se distinguem pela posição
                   <TableCell key={column}>{formatCell(value)}</TableCell>
                 ))}

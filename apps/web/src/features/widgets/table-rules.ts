@@ -62,21 +62,34 @@ export function compareValues(
   )
 }
 
+/** Os índices das linhas na ordem da coluna; nulos por último nos dois sentidos. */
+export function sortRowIndexes(
+  rows: ResultValue[][],
+  column: number,
+  direction: SortDirection,
+): number[] {
+  const sign = direction === 'asc' ? 1 : -1
+  return rows
+    .map((_, index) => index)
+    .sort((indexA, indexB) => {
+      const a = rows[indexA]?.[column] ?? null
+      const b = rows[indexB]?.[column] ?? null
+      if (a === null && b === null) return 0
+      if (a === null) return 1
+      if (b === null) return -1
+      return sign * compareValues(a, b)
+    })
+}
+
 /** Ordena todas as linhas pela coluna; valores nulos ficam por último nos dois sentidos. */
 export function sortRows(
   rows: ResultValue[][],
   column: number,
   direction: SortDirection,
 ): ResultValue[][] {
-  const sign = direction === 'asc' ? 1 : -1
-  return [...rows].sort((rowA, rowB) => {
-    const a = rowA[column] ?? null
-    const b = rowB[column] ?? null
-    if (a === null && b === null) return 0
-    if (a === null) return 1
-    if (b === null) return -1
-    return sign * compareValues(a, b)
-  })
+  return sortRowIndexes(rows, column, direction).map(
+    (index) => rows[index] as ResultValue[],
+  )
 }
 
 /** Clique no cabeçalho: crescente, decrescente, ordem original; outra coluna começa crescente. */
