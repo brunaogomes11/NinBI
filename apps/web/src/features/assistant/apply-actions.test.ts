@@ -297,4 +297,32 @@ describe('applyAssistantActions', () => {
     expect(next.tabs[0].widgets[0].layout).toEqual({ x: 6, y: 2, w: 6, h: 3 })
     expect(draft).toEqual(before)
   })
+
+  it('ASQ-12 ações do assistente calculam parâmetros SQL', () => {
+    // em SQL o comentário `--` esconde o `$comentado`; em Cypher ele contaria como parâmetro
+    const query =
+      'SELECT categoria FROM pedidos -- $comentado\nWHERE categoria = $categoria'
+    const action: AssistantAction = {
+      type: 'create_widget',
+      tabId: 't-1',
+      widgetId: 'w-sql',
+      title: 'Pedidos',
+      cypher: query,
+      visualization: 'TABLE',
+      mapping: null,
+      layout: { x: 0, y: 0, w: 4, h: 4 },
+      result: RESULT,
+      error: null,
+    }
+    const draft = baseDraft()
+    const tabId = draft.tabs[0].id
+
+    const sql = applyAssistantActions(draft, [{ ...action, tabId }], 'SQL')
+    const cypher = applyAssistantActions(draft, [{ ...action, tabId }])
+
+    const created = (d: typeof sql) =>
+      d.tabs[0].widgets.find((w) => w.id === 'w-sql')
+    expect(created(sql)?.parameters).toEqual(['categoria'])
+    expect(created(cypher)?.parameters).toEqual(['comentado', 'categoria'])
+  })
 })

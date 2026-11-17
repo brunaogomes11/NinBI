@@ -3,6 +3,7 @@ import {
   type DashboardFilter,
   extractParameterNames,
   type FilterType,
+  type QueryLanguage,
   type QueryResultDto,
   type WidgetDto,
   type WidgetVisualization,
@@ -63,6 +64,7 @@ function defaultFor(type: FilterType): DashboardFilter['defaultValue'] {
 function applyOne(
   draft: DashboardDraft,
   action: AssistantAction,
+  language: QueryLanguage,
 ): DashboardDraft {
   const hasTab = (tabId: string) => draft.tabs.some((tab) => tab.id === tabId)
   switch (action.type) {
@@ -96,7 +98,7 @@ function applyOne(
         visualization: resolved.visualization,
         config: resolved.config,
         layout: action.layout,
-        parameters: extractParameterNames(action.cypher ?? ''),
+        parameters: extractParameterNames(action.cypher ?? '', language),
       })
     }
     case 'update_widget': {
@@ -178,6 +180,10 @@ function applyOne(
 export function applyAssistantActions(
   draft: DashboardDraft,
   actions: AssistantAction[],
+  language: QueryLanguage = 'CYPHER',
 ): DashboardDraft {
-  return actions.reduce(applyOne, draft)
+  return actions.reduce(
+    (current, action) => applyOne(current, action, language),
+    draft,
+  )
 }

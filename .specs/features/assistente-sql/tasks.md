@@ -163,9 +163,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Teste `ASQ-12 ações do assistente calculam parâmetros SQL` em apps/web/src
-- [ ] Os testes de `apply-actions.test.ts` seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `ASQ-12 ações do assistente calculam parâmetros SQL` em apps/web/src
+- [x] Os testes de `apply-actions.test.ts` seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
