@@ -163,8 +163,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/assistant-history.spec.ts`: `HIST-02 conversa volta na ordem em que aconteceu` (três mensagens gravadas pelo service com o relógio parado saem na ordem de gravação, com `role`, `text` e `details`), `HIST-03 cada usuário vê só a própria conversa` (dois Editores com "pode editar" no mesmo dashboard: cada `GET` traz só as suas; o Admin, sem mensagens, recebe `[]`), `HIST-05 limpar apaga só as mensagens do usuário nesse dashboard` (`DELETE` 204; as do outro usuário e as do mesmo usuário em outro dashboard ficam), `HIST-06 excluir o dashboard apaga as conversas` (`DELETE /api/dashboards/:id` pelo dono: nenhuma linha do dashboard em `assistant_messages`), `CHAT-17 Visualizador e quem não edita recebem 403 na conversa` (Visualizador com compartilhamento `edit` e Editor com `view` recebem 403 no `GET` e no `DELETE`; quem não alcança recebe 404), `recent` devolve as últimas N em ordem cronológica
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/assistant/assistant-history.spec.ts`: `HIST-02 conversa volta na ordem em que aconteceu` (três mensagens gravadas pelo service com o relógio parado saem na ordem de gravação, com `role`, `text` e `details`), `HIST-03 cada usuário vê só a própria conversa` (dois Editores com "pode editar" no mesmo dashboard: cada `GET` traz só as suas; o Admin, sem mensagens, recebe `[]`), `HIST-05 limpar apaga só as mensagens do usuário nesse dashboard` (`DELETE` 204; as do outro usuário e as do mesmo usuário em outro dashboard ficam), `HIST-06 excluir o dashboard apaga as conversas` (`DELETE /api/dashboards/:id` pelo dono: nenhuma linha do dashboard em `assistant_messages`), `CHAT-17 Visualizador e quem não edita recebem 403 na conversa` (Visualizador com compartilhamento `edit` e Editor com `view` recebem 403 no `GET` e no `DELETE`; quem não alcança recebe 404), `recent` devolve as últimas N em ordem cronológica
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
