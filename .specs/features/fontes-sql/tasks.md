@@ -665,13 +665,13 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SCS-10 leitura grava no lugar do schema anterior e falha ou 120 s o mantém` em apps/api/test
-- [ ] Teste `SCS-11 leitura em andamento não inicia outra` em apps/api/test
-- [ ] Teste `SCS-16 escolha de exemplo por coluna sobrevive à atualização` em apps/api/test
-- [ ] Teste `SCS-17 log da leitura SQL traz tipo, tabelas e relações sem exemplos` em apps/api/test
-- [ ] Teste `SCS-18 conexão excluída durante a leitura descarta o resultado` em apps/api/test
-- [ ] Os testes de `apps/api/test/schema/` de Neo4j seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SCS-10 leitura grava no lugar do schema anterior e falha ou 120 s o mantém` em apps/api/test
+- [x] Teste `SCS-11 leitura em andamento não inicia outra` em apps/api/test
+- [x] Teste `SCS-16 escolha de exemplo por coluna sobrevive à atualização` em apps/api/test
+- [x] Teste `SCS-17 log da leitura SQL traz tipo, tabelas e relações sem exemplos` em apps/api/test
+- [x] Teste `SCS-18 conexão excluída durante a leitura descarta o resultado` em apps/api/test
+- [x] Os testes de `apps/api/test/schema/` de Neo4j seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

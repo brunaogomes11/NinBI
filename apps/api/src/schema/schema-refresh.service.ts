@@ -11,9 +11,13 @@ import {
   connections,
   schemaExampleOptOuts,
 } from '../database/schema'
-import { Neo4jTimeoutError } from '../neo4j/neo4j.gateway'
-import { SchemaReader } from './schema-reader'
-import type { StoredSchema } from './types'
+import {
+  type SourceSchema,
+  SourceTimeoutError,
+  toSourceConnection,
+} from '../sources/source'
+import { SourceRegistry } from '../sources/source-registry'
+import type { StoredRelationalSchema } from './types'
 
 /** Prazo da leitura inteira do schema (SCH-10). */
 export const SCHEMA_READ_TIMEOUT_MS = Symbol('SCHEMA_READ_TIMEOUT_MS')
@@ -27,18 +31,41 @@ const UUID_PATTERN =
 
 type ReadResult = 'ok' | 'failed' | 'timeout' | 'discarded'
 
+function isRelational(schema: SourceSchema): schema is StoredRelationalSchema {
+  return 'kind' in schema && schema.kind === 'RELATIONAL'
+}
+
+/** A escolha de exemplo ainda aponta para algo que existe no schema novo (SCH-28, SCS-16). */
 function hasProperty(
-  schema: StoredSchema,
-  kind: 'LABEL' | 'RELATIONSHIP',
+  schema: SourceSchema,
+  kind: 'LABEL' | 'RELATIONSHIP' | 'TABLE',
   element: string,
   property: string,
 ): boolean {
+  if (isRelational(schema)) {
+    return (
+      kind === 'TABLE' &&
+      schema.tables.some(
+        (table) =>
+          table.name === element &&
+          table.columns.some((column) => column.name === property),
+      )
+    )
+  }
+  if (kind === 'TABLE') return false
   const elements = kind === 'LABEL' ? schema.labels : schema.relationshipTypes
   return elements.some(
     (candidate) =>
       candidate.name === element &&
       candidate.properties.some((p) => p.name === property),
   )
+}
+
+/** Contagens do log: tabelas e relações, ou labels e tipos de relacionamento (SCH-14, SCS-17). */
+function countsOf(schema: SourceSchema): string {
+  return isRelational(schema)
+    ? `tables=${schema.tables.length} foreignKeys=${schema.foreignKeys.length}`
+    : `labels=${schema.labels.length} relationshipTypes=${schema.relationshipTypes.length}`
 }
 
 /** Máquina de estados da leitura do schema e gravação do cache (SCH-01, SCH-06 a SCH-11, SCH-14...). */
@@ -51,7 +78,7 @@ export class SchemaRefreshService {
     @Inject(DB) private readonly db: AppDatabase,
     @Inject(Clock) private readonly clock: Clock,
     @Inject(CryptoService) private readonly crypto: CryptoService,
-    @Inject(SchemaReader) private readonly reader: SchemaReader,
+    @Inject(SourceRegistry) private readonly sources: SourceRegistry,
     @Inject(SCHEMA_READ_TIMEOUT_MS) private readonly timeoutMs: number,
   ) {}
 
@@ -130,7 +157,10 @@ export class SchemaRefreshService {
   private async execute(connection: ConnectionRow): Promise<void> {
     const startedAt = performance.now()
     let result: ReadResult = 'failed'
-    let counts = { labels: 0, relationshipTypes: 0 }
+    let counts =
+      connection.type === 'NEO4J'
+        ? 'labels=0 relationshipTypes=0'
+        : 'tables=0 foreignKeys=0'
     const abort = new AbortController()
     const timer = setTimeout(() => abort.abort(), this.timeoutMs)
     try {
@@ -141,22 +171,17 @@ export class SchemaRefreshService {
         await this.fail(connection.id, MESSAGES.connectionPasswordUndecryptable)
         return
       }
-      const schema = await this.reader.read(
-        {
-          uri: connection.uri,
-          database: connection.database,
-          username: connection.username,
-          password,
-        },
-        { deadline: Date.now() + this.timeoutMs, signal: abort.signal },
-      )
-      counts = {
-        labels: schema.labels.length,
-        relationshipTypes: schema.relationshipTypes.length,
-      }
+      const schema = await this.sources
+        .for(connection.type)
+        .readSchema(toSourceConnection(connection, password), {
+          deadline: Date.now() + this.timeoutMs,
+          signal: abort.signal,
+        })
+      counts = countsOf(schema)
       result = await this.store(connection.id, schema)
     } catch (error) {
-      const timedOut = error instanceof Neo4jTimeoutError
+      // O prazo do Neo4j (`Neo4jTimeoutError`) e o das fontes SQL estendem `SourceTimeoutError`.
+      const timedOut = error instanceof SourceTimeoutError
       const message = timedOut
         ? MESSAGES.schemaReadTimeout
         : error instanceof Error
@@ -170,7 +195,7 @@ export class SchemaRefreshService {
     } finally {
       clearTimeout(timer)
       this.logger.log(
-        `schema read connection=${connection.id} durationMs=${Math.round(performance.now() - startedAt)} labels=${counts.labels} relationshipTypes=${counts.relationshipTypes} result=${result}`,
+        `schema read connection=${connection.id} type=${connection.type} durationMs=${Math.round(performance.now() - startedAt)} ${counts} result=${result}`,
       )
     }
   }
@@ -188,7 +213,7 @@ export class SchemaRefreshService {
   /** Troca o documento, poda as escolhas órfãs e marca READY, tudo numa transação. */
   private async store(
     connectionId: string,
-    schema: StoredSchema,
+    schema: SourceSchema,
   ): Promise<ReadResult> {
     return this.db.transaction(async (tx) => {
       const [locked] = await tx
