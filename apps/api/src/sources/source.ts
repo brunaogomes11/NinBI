@@ -80,3 +80,17 @@ export class SourceGatewayError extends Error {
     this.name = 'SourceGatewayError'
   }
 }
+
+/**
+ * O banco não foi alcançado ou caiu no meio da operação (código de rede do
+ * driver); é um `SourceGatewayError` com a mesma mensagem e o mesmo código.
+ */
+// SPEC_DEVIATION: a T16 acrescenta esta classe ao contrato da T13 para "marcar
+// como indisponibilidade" o erro de rede (SQX-26), sem que o QueryService
+// precise conhecer os códigos de cada driver.
+export class SourceUnavailableError extends SourceGatewayError {
+  constructor(message: string, code?: string) {
+    super(message, code)
+    this.name = 'SourceUnavailableError'
+  }
+}

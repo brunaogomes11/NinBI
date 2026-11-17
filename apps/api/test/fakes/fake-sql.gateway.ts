@@ -1,22 +1,22 @@
+import type { ResultValue } from '@ninbi/contracts'
+import type {
+  SqlConnectionConfig,
+  SqlGateway,
+} from '../../src/sources/gateways/sql.gateway'
 import { SourceTimeoutError } from '../../src/sources/source'
 
-/** A configuração de `SqlConnectionConfig` do design (a T16 cria o tipo em `sql.gateway.ts`). */
-export interface FakeSqlConfig {
-  host: string
-  port: number
-  database: string
-  username: string
-  password: string
-  ssl: boolean
-}
+export type FakeSqlConfig = SqlConnectionConfig
 
+/** As linhas saem como foram programadas; o teste escolhe valores já em `ResultValue`. */
 export interface FakeSqlResult {
   keys: string[]
-  rows: unknown[][]
+  rows: ResultValue[][]
 }
 
 /** Linhas como objetos (as chaves da primeira linha viram as colunas) ou o resultado pronto. */
-export type FakeSqlRows = Record<string, unknown>[] | FakeSqlResult
+export type FakeSqlRows =
+  | Record<string, unknown>[]
+  | { keys: string[]; rows: unknown[][] }
 type Programmed<T> = T | Error | 'hang'
 
 interface ReadRule {
@@ -33,9 +33,12 @@ export interface FakeSqlCall {
 }
 
 function toResult(rows: FakeSqlRows): FakeSqlResult {
-  if (!Array.isArray(rows)) return rows
+  if (!Array.isArray(rows)) return rows as FakeSqlResult
   const keys = Object.keys(rows[0] ?? {})
-  return { keys, rows: rows.map((row) => keys.map((key) => row[key])) }
+  return {
+    keys,
+    rows: rows.map((row) => keys.map((key) => row[key] as ResultValue)),
+  }
 }
 
 /**
@@ -46,7 +49,7 @@ function toResult(rows: FakeSqlRows): FakeSqlResult {
  */
 // SPEC_DEVIATION: a T13 tocou este arquivo (fora do seu `Where`) para que o
 // prazo estourado rejeite com `SourceTimeoutError`, o erro de prazo das fontes.
-export class FakeSqlGateway {
+export class FakeSqlGateway implements SqlGateway {
   readonly calls: FakeSqlCall[] = []
   private verifyAnswer: Programmed<undefined> = undefined
   private readonly rules: ReadRule[] = []

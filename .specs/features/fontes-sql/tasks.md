@@ -461,9 +461,9 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-26 erro de rede do driver é indisponibilidade` em apps/api/test
-- [ ] Teste `SQX-15 SqlSource envia ao gateway texto e valores separados` em apps/api/test
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SQX-26 erro de rede do driver é indisponibilidade` em apps/api/test
+- [x] Teste `SQX-15 SqlSource envia ao gateway texto e valores separados` em apps/api/test
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
