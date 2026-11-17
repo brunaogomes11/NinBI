@@ -495,8 +495,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `useAiGenerations.test.tsx`: `FLT-20 pedido à IA leva os filtros do rascunho sem valores` (rascunho com "Categoria" padrão "Livros" e valor de sessão "Jogos": o corpo enviado tem `filters: [{ label: 'Categoria', parameter: 'categoria', type: 'SINGLE_SELECT' }]` e nenhum "Livros" nem "Jogos"), Cypher gerado sem parâmetro de filtro mostra o resultado da IA sem nova execução, Cypher gerado com `$categoria` executa por `.../query` com `{ categoria: 'Jogos' }`; testes de AIQ-09 e AIQ-10 continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `useAiGenerations.test.tsx`: `FLT-20 pedido à IA leva os filtros do rascunho sem valores` (rascunho com "Categoria" padrão "Livros" e valor de sessão "Jogos": o corpo enviado tem `filters: [{ label: 'Categoria', parameter: 'categoria', type: 'SINGLE_SELECT' }]` e nenhum "Livros" nem "Jogos"), Cypher gerado sem parâmetro de filtro mostra o resultado da IA sem nova execução, Cypher gerado com `$categoria` executa por `.../query` com `{ categoria: 'Jogos' }`; testes de AIQ-09 e AIQ-10 continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

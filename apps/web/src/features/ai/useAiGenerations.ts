@@ -1,5 +1,8 @@
 import {
   type AiWidgetEvent,
+  extractParameterNames,
+  filterParameterNames,
+  filtersForPrompt,
   MESSAGES,
   type QueryResultDto,
   type WidgetDto,
@@ -85,10 +88,17 @@ export function useAiGenerations(options: UseAiGenerationsOptions) {
           config: resolved.config,
         }),
       )
-      queryClient.setQueryData<QueryResultDto>(
-        ['query', dashboardId, draft.connectionId, event.cypher],
-        event.result,
+      // Com parâmetro de filtro o resultado da IA não vale para os valores atuais: o widget executa (FLT-20).
+      const filterNames = new Set(draft.filters.flatMap(filterParameterNames))
+      const usesFilter = extractParameterNames(event.cypher).some((name) =>
+        filterNames.has(name),
       )
+      if (!usesFilter) {
+        queryClient.setQueryData<QueryResultDto>(
+          ['query', dashboardId, draft.connectionId, event.cypher],
+          event.result,
+        )
+      }
     },
     [queryClient],
   )
@@ -109,6 +119,7 @@ export function useAiGenerations(options: UseAiGenerationsOptions) {
             prompt,
             widgetId,
             connectionId: draft.connectionId,
+            filters: filtersForPrompt(draft.filters),
             widget: {
               title: widget.title,
               cypher: widget.cypher,

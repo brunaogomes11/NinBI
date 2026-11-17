@@ -1,11 +1,23 @@
 import { type AiWidgetEvent, MESSAGES } from '@ninbi/contracts'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { act, renderHook, waitFor } from '@testing-library/react'
+import { act, renderHook, screen, waitFor } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { type ReactNode, useState } from 'react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { type DashboardDraft, fromDto } from '@/features/dashboards/draft'
-import { makeDashboard, makeQueryResult } from '@/test/fixtures/dashboards'
+import { mockElementSize } from '@/test/element-size'
+import { connectionsHandler, makeConnection } from '@/test/fixtures/connections'
+import {
+  makeDashboard,
+  makeQueryResult,
+  sidebarHandler,
+} from '@/test/fixtures/dashboards'
+import {
+  makeUser,
+  renderApp,
+  sessionHandler,
+  setupStatusHandler,
+} from '@/test/renderApp'
 import { server } from '@/test/server'
 import { type AiFailure, useAiGenerations } from './useAiGenerations'
 
@@ -47,7 +59,16 @@ function doneEvent(
   }
 }
 
-function setup() {
+const CATEGORIA = {
+  id: 'f-categoria',
+  label: 'Categoria',
+  parameter: 'categoria',
+  type: 'SINGLE_SELECT' as const,
+  options: { source: 'STATIC' as const, values: ['Livros', 'Jogos'] },
+  defaultValue: 'Livros',
+}
+
+function setup(dashboard = makeDashboard()) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
@@ -58,7 +79,7 @@ function setup() {
   const hook = renderHook(
     ({ editing }: { editing: boolean }) => {
       const [draft, setDraft] = useState<DashboardDraft>(() =>
-        fromDto(makeDashboard()),
+        fromDto(dashboard),
       )
       const ai = useAiGenerations({
         dashboardId: 'd-1',
@@ -281,5 +302,116 @@ describe('useAiGenerations', () => {
     ])
     expect(result.current.draft).toBe(before)
     expect(result.current.ai.stateOf('w-1')).toEqual({})
+  })
+})
+
+describe('useAiGenerations com filtros', () => {
+  it('FLT-20 pedido à IA leva os filtros do rascunho sem valores', async () => {
+    const bodies: string[] = []
+    server.use(
+      http.post(URL_PATH, async ({ request }) => {
+        bodies.push(await request.text())
+        return ndjson([doneEvent()])
+      }),
+    )
+    const { result } = setup(makeDashboard({ filters: [CATEGORIA] }))
+    await act(() => result.current.ai.start('w-1', 'itens por categoria'))
+    expect(JSON.parse(bodies[0] as string).filters).toEqual([
+      { label: 'Categoria', parameter: 'categoria', type: 'SINGLE_SELECT' },
+    ])
+    expect(bodies[0]).not.toContain('Livros')
+    expect(bodies[0]).not.toContain('Jogos')
+  })
+
+  it('FLT-20 Cypher gerado sem parâmetro de filtro mostra o resultado da IA sem nova execução', async () => {
+    server.use(http.post(URL_PATH, () => ndjson([doneEvent()])))
+    const { result, queryClient } = setup(
+      makeDashboard({ filters: [CATEGORIA] }),
+    )
+    await act(() => result.current.ai.start('w-1', 'itens'))
+    const widget = widgetOf(result.current.draft)
+    expect(
+      queryClient.getQueryData<{ rows: unknown[] }>([
+        'query',
+        'd-1',
+        'c-1',
+        widget.cypher,
+      ])?.rows,
+    ).toEqual([
+      ['A', 3],
+      ['B', 5],
+    ])
+  })
+
+  it('FLT-20 Cypher gerado com parâmetro de filtro não semeia o resultado da IA', async () => {
+    const cypher =
+      'MATCH (p:Produto) WHERE p.categoria = $categoria RETURN p.categoria AS categoria, count(*) AS total'
+    server.use(http.post(URL_PATH, () => ndjson([doneEvent({ cypher })])))
+    const { result, queryClient } = setup(
+      makeDashboard({ filters: [CATEGORIA] }),
+    )
+    await act(() => result.current.ai.start('w-1', 'itens'))
+    expect(
+      queryClient.getQueryData(['query', 'd-1', 'c-1', cypher]),
+    ).toBeUndefined()
+  })
+})
+
+describe('Pedir à IA com filtros na página', () => {
+  let restoreSize: () => void
+  beforeEach(() => {
+    restoreSize = mockElementSize(600, 300)
+  })
+  afterEach(() => restoreSize())
+
+  it('FLT-20 Cypher gerado com parâmetro de filtro executa com os valores atuais', async () => {
+    const cypher =
+      'MATCH (p:Produto) WHERE p.categoria = $categoria RETURN p.categoria AS categoria, count(*) AS total'
+    const queries: Record<string, unknown>[] = []
+    const { user } = renderApp('/dashboards/d-1?editar=1', {
+      handlers: [
+        http.get('/api/ai/status', () =>
+          HttpResponse.json({ configured: true }),
+        ),
+        http.post(URL_PATH, () => ndjson([doneEvent({ cypher })])),
+        setupStatusHandler(false),
+        sessionHandler(makeUser({ role: 'ADMIN' })),
+        sidebarHandler([{ type: 'dashboard', id: 'd-1', name: 'Vendas' }]),
+        connectionsHandler([makeConnection({ id: 'c-1', name: 'Vendas' })]),
+        http.get('/api/dashboards/d-1', () =>
+          HttpResponse.json(makeDashboard({ filters: [CATEGORIA] })),
+        ),
+        http.post('/api/dashboards/:id/query', async ({ request }) => {
+          queries.push((await request.json()) as Record<string, unknown>)
+          return HttpResponse.json(makeQueryResult())
+        }),
+      ],
+    })
+    await user.click(await screen.findByRole('combobox', { name: 'Categoria' }))
+    await user.click(await screen.findByRole('option', { name: 'Jogos' }))
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Ações do widget Vendas por loja',
+      }),
+    )
+    await user.click(
+      await screen.findByRole('menuitem', { name: /Pedir à IA/ }),
+    )
+    await user.type(
+      await screen.findByLabelText('Descreva o que você quer ver'),
+      'itens por categoria',
+    )
+    await user.click(screen.getByRole('button', { name: 'Enviar' }))
+
+    await waitFor(() =>
+      expect(
+        queries.some(
+          (body) =>
+            body.cypher === cypher &&
+            JSON.stringify(body.params) ===
+              JSON.stringify({ categoria: 'Jogos' }),
+        ),
+      ).toBe(true),
+    )
   })
 })
