@@ -14,6 +14,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -42,7 +43,11 @@ import { AssistantPanel } from '@/features/assistant/AssistantPanel'
 import { useAssistantMessages } from '@/features/assistant/api'
 import { useAssistant } from '@/features/assistant/useAssistant'
 import { useSession } from '@/features/auth/useSession'
-import { queryLanguage, useConnections } from '@/features/connections/api'
+import {
+  connectionTypeLabel,
+  queryLanguage,
+  useConnections,
+} from '@/features/connections/api'
 import { FilterBar } from '@/features/filters/FilterBar'
 import { FilterEditorDialog } from '@/features/filters/FilterEditorDialog'
 import {
@@ -73,6 +78,7 @@ import {
   addFilter,
   addTab,
   addWidget,
+  connectionSwitchNeedsConfirm,
   type DashboardDraft,
   removeFilter,
   removeTab,
@@ -155,6 +161,21 @@ function DashboardEditFields({
   onChange: (apply: (current: DashboardDraft) => DashboardDraft) => void
 }) {
   const connections = useConnections()
+  const [pendingId, setPendingId] = useState<string | null>(null)
+  const list = connections.data ?? []
+  const pending = list.find((connection) => connection.id === pendingId)
+  const current = list.find(
+    (connection) => connection.id === draft.connectionId,
+  )
+
+  function choose(connectionId: string) {
+    if (connectionSwitchNeedsConfirm(draft, list, connectionId)) {
+      setPendingId(connectionId)
+      return
+    }
+    onChange((state) => setConnection(state, connectionId))
+  }
+
   return (
     <div className="flex flex-wrap items-end gap-4">
       <div className="flex min-w-48 flex-1 flex-col gap-1.5">
@@ -171,12 +192,7 @@ function DashboardEditFields({
       </div>
       <div className="flex min-w-48 flex-1 flex-col gap-1.5">
         <Label htmlFor="dashboard-connection">Conexão</Label>
-        <Select
-          value={draft.connectionId}
-          onValueChange={(connectionId) =>
-            onChange((current) => setConnection(current, connectionId))
-          }
-        >
+        <Select value={draft.connectionId} onValueChange={choose}>
           <SelectTrigger id="dashboard-connection" className="w-full">
             <SelectValue />
           </SelectTrigger>
@@ -189,6 +205,36 @@ function DashboardEditFields({
           </SelectContent>
         </Select>
       </div>
+      <AlertDialog
+        open={pending !== undefined}
+        onOpenChange={(open) => {
+          if (!open) setPendingId(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pending &&
+                `Trocar para ${pending.name} (${connectionTypeLabel(pending.type)})?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {`As consultas estão escritas em ${current && queryLanguage(current.type) === 'SQL' ? 'SQL' : 'Cypher'} e precisarão ser reescritas`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (pending) {
+                  onChange((state) => setConnection(state, pending.id))
+                }
+              }}
+            >
+              Trocar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

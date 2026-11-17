@@ -916,10 +916,10 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SMG-05 trocar para outro tipo pede confirmação` em apps/web
-- [ ] Teste `SMG-06 Cancelar mantém a conexão anterior` em apps/web
-- [ ] Teste `SMG-07 trocar para o mesmo tipo não pergunta` em apps/web
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `SMG-05 trocar para outro tipo pede confirmação` em apps/web
+- [x] Teste `SMG-06 Cancelar mantém a conexão anterior` em apps/web
+- [x] Teste `SMG-07 trocar para o mesmo tipo não pergunta` em apps/web
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
