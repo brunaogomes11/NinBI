@@ -1,138 +1,9 @@
 {
-  "id": "42b2c6c6-59e3-414b-9126-659647601d61",
+  "id": "3a44d6fd-9d1a-432d-a2c1-dd669424ed56",
   "prevId": "8133e083-be27-460d-ba3c-3a93c6858a16",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.assistant_messages": {
-      "name": "assistant_messages",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "seq": {
-          "name": "seq",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "assistant_messages_seq_seq",
-            "schema": "public",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "9223372036854775807",
-            "cache": "1",
-            "cycle": false
-          }
-        },
-        "dashboard_id": {
-          "name": "dashboard_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "assistant_role",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "text": {
-          "name": "text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "details": {
-          "name": "details",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "assistant_messages_dashboard_user_seq_idx": {
-          "name": "assistant_messages_dashboard_user_seq_idx",
-          "columns": [
-            {
-              "expression": "dashboard_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "seq",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "assistant_messages_dashboard_id_dashboards_id_fk": {
-          "name": "assistant_messages_dashboard_id_dashboards_id_fk",
-          "tableFrom": "assistant_messages",
-          "tableTo": "dashboards",
-          "columnsFrom": [
-            "dashboard_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "assistant_messages_user_id_users_id_fk": {
-          "name": "assistant_messages_user_id_users_id_fk",
-          "tableFrom": "assistant_messages",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.connection_schemas": {
       "name": "connection_schemas",
       "schema": "",
@@ -195,11 +66,38 @@
           "primaryKey": false,
           "notNull": true
         },
+        "type": {
+          "name": "type",
+          "type": "connection_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'NEO4J'"
+        },
         "uri": {
           "name": "uri",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "host": {
+          "name": "host",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "port": {
+          "name": "port",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ssl": {
+          "name": "ssl",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "database": {
           "name": "database",
@@ -1364,12 +1262,14 @@
     }
   },
   "enums": {
-    "public.assistant_role": {
-      "name": "assistant_role",
+    "public.connection_type": {
+      "name": "connection_type",
       "schema": "public",
       "values": [
-        "USER",
-        "ASSISTANT"
+        "NEO4J",
+        "POSTGRES",
+        "MYSQL",
+        "SQLSERVER"
       ]
     },
     "public.llm_provider": {
@@ -1397,7 +1297,8 @@
       "schema": "public",
       "values": [
         "LABEL",
-        "RELATIONSHIP"
+        "RELATIONSHIP",
+        "TABLE"
       ]
     },
     "public.schema_status": {

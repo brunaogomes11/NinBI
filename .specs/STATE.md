@@ -16,7 +16,7 @@
 - **Trade-off**: Não há conectores SQL nem camada de driver plugável. Quem tem dados fora do Neo4j não usa o MVP.
 - **Scope**: conexoes-schema, dashboards-consultas, ia-cypher, ia-dashboard.
 - **Date**: 2026-11-15
-- **Status**: active
+- **Status**: superseded by AD-135
 
 ### AD-003 (active)
 - **Decision**: Frontend em React, backend em NestJS, metadados do NinBI (dashboards, widgets, conexões, usuários, cache de schema) em PostgreSQL.
@@ -723,6 +723,30 @@
 - **Status**: active
 
 ### AD-135 (active)
+- **Decision**: O NinBI conecta direto em PostgreSQL, MySQL e SQL Server, além do Neo4j. Cada conexão tem um tipo, e o tipo define a linguagem da consulta (SQL no dialeto do banco, ou Cypher), o leitor de schema e o prompt da IA. O Neo4j continua como um tipo de conexão. Substitui o AD-002.
+- **Reason**: Pergunta do usuário ao tentar cadastrar o Postgres do Sortify: "no caso o intuito era conectar qualquer banco, como faremos então?"; depois: "o plano é começar com mysql, postgres, sql server". Importar para o Neo4j (AD-002) não atende quem quer consultar o banco de origem ao vivo.
+- **Trade-off**: Há uma camada de driver por tipo de banco, e o código que assume Cypher (validador de somente leitura, parâmetros, leitor de schema, prompts) passa a ser escolhido pelo tipo. Cada banco novo exige um driver, um validador e um leitor de schema.
+- **Scope**: fontes-sql; altera conexoes-schema, dashboards-consultas, ia-cypher, interatividade e ia-dashboard.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-136 (active)
+- **Decision**: O formulário de conexão tem um seletor de tipo. Os bancos SQL informam host e porta em campos separados e uma caixa "Usar SSL" (criptografa a conexão e valida o certificado do servidor; desmarcada por padrão).
+- **Reason**: Perguntas ao usuário: "Como o usuário informa onde está o banco SQL?" - escolheu "Tipo + host + porta"; "O formulário deve ter uma opção de SSL/TLS?" - escolheu "Caixa 'Usar SSL'".
+- **Trade-off**: Bancos remotos que exigem SSL com certificado autoassinado não conectam; aceitar esse certificado fica fora desta feature.
+- **Scope**: fontes-sql.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-137 (active)
+- **Decision**: O acesso aos bancos do usuário passa por uma `Source` por tipo de conexão, escolhida por um `SourceRegistry`. Os campos `cypher` do fio, do banco e dos contratos mantêm o nome e passam a significar "o texto da consulta"; a linguagem vem do tipo da conexão.
+- **Reason**: Design de `fontes-sql`: renomear `cypher` para `query` tocaria ~40 arquivos e todos os testes de widget e filtro, sem ganho para o usuário; manter o nome preserva o comportamento do Neo4j (SMG-03).
+- **Trade-off**: O nome `cypher` fica enganoso para conexões SQL; quem lê o código precisa saber disso.
+- **Scope**: fontes-sql; ia-dashboard e as demais features futuras.
+- **Date**: 2026-11-16
+- **Status**: active
+
+### AD-138 (active)
 - **Decision**: O campo numérico de um filtro recusa, com `MESSAGES.filterNumberInvalid` ("Digite um número"), o texto sem vírgula no padrão de milhar pt-BR (`1.234`, `1.000`, `12.345`, `1.234.567`). Aceita `1234`, `-3`, `1234,5`, `1.234,5` e `1234.5`; `0.001` e `1.5` seguem como decimais.
 - **Reason**: Verificação de `interatividade` (F4): `1.234` virava 1,234 e `1.000` virava 1 sem aviso, um erro silencioso para quem digita no padrão brasileiro. Recusar evita adivinhar a intenção. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
 - **Trade-off**: Quem queria `1.234` como decimal (ponto) precisa digitar `1,234`.
@@ -730,7 +754,7 @@
 - **Date**: 2026-11-17
 - **Status**: active
 
-### AD-136 (active)
+### AD-139 (active)
 - **Decision**: Em CHAT-10, "a resposta mais recente do assistente [que] alterou o rascunho" é lida como a resposta mais recente QUE alterou o rascunho. O "Desfazer" fica nessa resposta até o rascunho mudar, mesmo que uma resposta posterior sem ações venha depois; a guarda `draft === after` esconde o botão quando o rascunho foi editado à mão ou descartado, e só uma resposta tem o botão por vez.
 - **Reason**: Verificação de `ia-dashboard`: o texto do AC admitia a leitura "a última resposta, se alterou". Uma resposta sem ações (por exemplo, uma pergunta) não deve tirar de quem pediu a chance de desfazer a mudança anterior, e a guarda de identidade já impede desfazer sobre edições manuais. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
 - **Trade-off**: Depois de uma resposta sem ações, o "Desfazer" aparece numa resposta que não é a última da conversa.
@@ -753,6 +777,7 @@
 - **Completed**: none (nenhuma task; só specs)
 - **In-progress** (file:line): none
 - **Next step**: Design e Tasks de `fundacao-auth`, depois as demais features na ordem acima. A verificação de telas está dispensada (AD-023).
+- **Fontes SQL** (2026-11-16): `features/fontes-sql` tem spec aprovada, design e tasks (39 tasks, 83 checks) em rascunho aguardando aprovação; só começa depois de `interatividade` terminar (mesmos módulos). Decisões: AD-135 (substitui AD-002), AD-136, AD-137.
 - **Blockers**: none
 - **Uncommitted files**: `.specs/` inteiro (o projeto ainda não é um repositório git)
 - **Branch**: none

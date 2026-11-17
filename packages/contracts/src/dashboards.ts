@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { ConnectionType } from './connections'
 import {
   CROSS_FILTER_TYPES,
   type DashboardFilter,
@@ -46,6 +47,7 @@ export interface DashboardDto {
   ownerName: string
   connectionId: string
   connectionName: string
+  connectionType: ConnectionType
   permissions: { edit: boolean; delete: boolean; share: boolean }
   tabs: DashboardTabDto[]
   filters: DashboardFilter[]
