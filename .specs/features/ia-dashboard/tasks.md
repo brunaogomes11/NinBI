@@ -140,9 +140,9 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/database/assistant-messages-schema.spec.ts`: migrações aplicam no PGlite; `HIST-01 tabela assistant_messages guarda mensagens por dashboard e usuário` (duas linhas inseridas com o mesmo `created_at` saem por `seq` na ordem de inserção; `role` fora do enum é recusado; `dashboard_id` inexistente viola a chave estrangeira)
-- [ ] `drizzle-kit generate` não gera diferença depois do commit
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/database/assistant-messages-schema.spec.ts`: migrações aplicam no PGlite; `HIST-01 tabela assistant_messages guarda mensagens por dashboard e usuário` (duas linhas inseridas com o mesmo `created_at` saem por `seq` na ordem de inserção; `role` fora do enum é recusado; `dashboard_id` inexistente viola a chave estrangeira)
+- [x] `drizzle-kit generate` não gera diferença depois do commit
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build
