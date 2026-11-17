@@ -241,6 +241,10 @@ describe('Assistente na página do dashboard', () => {
     })
     const cases: Array<[Options, boolean]> = [
       [{ role: 'VIEWER', dashboard: readOnly }, false],
+      // Visualizador com compartilhamento de edição: só `ai.use` esconde o controle
+      [{ role: 'VIEWER', dashboard: makeDashboard() }, false],
+      // Visualizador com compartilhamento de edição: só `ai.use` esconde o controle
+      [{ role: 'VIEWER', dashboard: makeDashboard() }, false],
       [{ role: 'EDITOR', dashboard: readOnly }, false],
       [{ role: 'EDITOR' }, true],
       [{ role: 'ADMIN' }, true],
