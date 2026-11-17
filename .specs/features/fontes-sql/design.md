@@ -141,7 +141,7 @@ sequenceDiagram
 - **Location**: `apps/api/src/queries/read-only-sql.ts`
 - **Interfaces**: `validateReadOnlySql(query: string): QueryCheck` com os mesmos códigos de `validateReadOnlyCypher` (`QUERY_TOO_LONG`, `QUERY_MULTIPLE_STATEMENTS`, `QUERY_WRITE_BLOCKED`) mais `QUERY_NOT_SELECT`
 - **Dependencies**: `tokenizeSql`
-- **Reuses**: a estrutura de `read-only-cypher.ts` (tokens, exceção para nome depois de `.`, pares)
+- **Reuses**: a estrutura de `read-only-cypher.ts` (tokens, pares); ao contrário do Cypher, palavra bloqueada depois de `.` também é recusada (coluna com esse nome vai entre aspas)
 
 ### tokenizeSql e extractParameterNames
 

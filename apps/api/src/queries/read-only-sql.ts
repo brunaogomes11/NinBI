@@ -60,16 +60,14 @@ function startsWithRead(tokens: Token[]): boolean {
   return first?.type === 'word' && READ_STARTS.has(first.value.toUpperCase())
 }
 
-/** Palavra logo depois de `.` é parte de um nome qualificado (`t.update`), não uma cláusula. */
-function isQualifiedPart(tokens: Token[], index: number): boolean {
-  const before = tokens[index - 1]
-  return before?.type === 'symbol' && before.value === '.'
-}
-
+/**
+ * Palavra bloqueada vale também depois de `.` (`t.update`): coluna com esse
+ * nome vai entre aspas (SQX-06, SQX-08).
+ */
 function findBlockedClause(tokens: Token[]): string | null {
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i] as Token
-    if (token.type !== 'word' || isQualifiedPart(tokens, i)) continue
+    if (token.type !== 'word') continue
     const upper = token.value.toUpperCase()
     if (upper === 'FOR') {
       const following = tokens[i + 1]

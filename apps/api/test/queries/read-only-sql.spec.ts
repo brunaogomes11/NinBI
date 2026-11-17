@@ -74,6 +74,16 @@ describe('validateReadOnlySql', () => {
     expect(validateReadOnlySql('SELECT * FROM t FOR SHARE')).toEqual({
       ok: true,
     })
+    // Nome qualificado sem aspas também é recusado; com aspas, é aceito (SQX-08).
+    const qualified: [string, string][] = [
+      ['SELECT t.set, t.update FROM t', 'SET'],
+      ['SELECT t.update FROM t', 'UPDATE'],
+      ['SELECT * FROM public.delete', 'DELETE'],
+      ['SELECT u.id FROM users u WHERE u.into = 1', 'INTO'],
+    ]
+    for (const [sql, clause] of qualified) {
+      expect(validateReadOnlySql(sql), sql).toEqual(blocked(clause))
+    }
   })
 
   it('SQX-07 palavras bloqueadas valem sem diferenciar maiúsculas', () => {
@@ -103,8 +113,9 @@ describe('validateReadOnlySql', () => {
       'SELECT [delete] FROM t',
       'SELECT `insert` FROM t',
       'SELECT created_at, updated_at, deleted, inserted_by FROM t',
-      'SELECT t.set, t.update FROM t',
-      'SELECT u.delete FROM users u WHERE u.into = 1',
+      'SELECT t."set", t."update" FROM t',
+      'SELECT u.`delete` FROM users u WHERE u.`into` = 1',
+      'SELECT u.[set], [public].[delete] FROM users u',
       'SELECT $update AS a',
     ]) {
       expect(validateReadOnlySql(sql), sql).toEqual({ ok: true })
