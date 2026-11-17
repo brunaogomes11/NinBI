@@ -37,6 +37,15 @@ function queryLanguage(dialect: PromptDialect): {
     : { label: 'SQL', fence: 'sql' }
 }
 
+/** Cerca de crases mais longa que qualquer sequência de crases da consulta, no mínimo 3 (ASQ-04). */
+function fenceFor(query: string): string {
+  const longest = Math.max(
+    0,
+    ...(query.match(/`+/g) ?? []).map((run) => run.length),
+  )
+  return '`'.repeat(Math.max(3, longest + 1))
+}
+
 /**
  * Estrutura do rascunho com refs curtas; nunca valores de filtro nem
  * resultados (CHAT-05, CHAT-06). A consulta sai na linguagem da conexão (ASQ-04).
@@ -60,10 +69,11 @@ export function serializeDraft(
       const ref = `w${++widgetNumber}`
       refs[ref] = { kind: 'widget', id: widget.id }
       const { x, y, w, h } = widget.layout
+      const fence = fenceFor(widget.cypher ?? '')
       const query =
         widget.cypher === null
           ? 'nenhum'
-          : `\`\`\`${language.fence}\n${widget.cypher}\n\`\`\``
+          : `${fence}${language.fence}\n${widget.cypher}\n${fence}`
       lines.push(
         `  ${ref} "${widget.title}" visualização=${widget.visualization} posição x=${x} y=${y} tamanho ${w}x${h}`,
         `  ${language.label}: ${query}`,

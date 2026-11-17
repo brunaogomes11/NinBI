@@ -357,4 +357,24 @@ describe('pedido do plano pela conexão do rascunho', () => {
     }).at(-1)
     expect(String(last?.content)).toContain('SQL: ```sql')
   })
+
+  it('ASQ-04 consulta com três crases não fecha o bloco do rascunho', () => {
+    const query = "SELECT '```' AS x"
+    const draft = assistantDraftSchema.parse({
+      ...sqlDraft,
+      tabs: [
+        {
+          ...sqlDraft.tabs[0],
+          widgets: [{ ...sqlDraft.tabs[0]?.widgets[0], cypher: query }],
+        },
+      ],
+    })
+    const { text } = serializeDraft(draft, 'PostgreSQL')
+    expect(text).toContain(`  SQL: \`\`\`\`sql\n${query}\n\`\`\`\`\n`)
+    // a cerca de abertura e a de fechamento têm o mesmo tamanho, maior que a da consulta
+    const lines = text.split('\n')
+    const open = lines.findIndex((line) => line.startsWith('  SQL: ````sql'))
+    expect(lines[open + 2]).toBe('````')
+    expect(lines[open + 3]).toContain('Mapeamento:')
+  })
 })
