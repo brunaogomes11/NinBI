@@ -34,9 +34,21 @@ import { useAiStatus } from '@/features/ai/api'
 import { useAiGenerations } from '@/features/ai/useAiGenerations'
 import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
+import {
+  FilterSessionProvider,
+  useFilterSession,
+} from '@/features/filters/filter-session'
+import {
+  RefreshControl,
+  useLastUpdate,
+} from '@/features/refresh/RefreshControl'
+import { useAutoRefresh } from '@/features/refresh/useAutoRefresh'
 import { ShareDialog } from '@/features/sharing/ShareDialog'
 import { TopBarAction } from '@/features/shell/TopBar'
-import { widgetResultKey } from '@/features/widgets/useWidgetResult'
+import {
+  hasWidgetQuery,
+  widgetResultKey,
+} from '@/features/widgets/useWidgetResult'
 import { WidgetEditorDialog } from '@/features/widgets/WidgetEditorDialog'
 import { ApiError } from '@/lib/api'
 import { useDashboard } from './api'
@@ -53,6 +65,7 @@ import {
   setConnection,
   setLayout,
   setName,
+  setRefreshInterval,
   updateWidget,
 } from './draft'
 import { useDashboardEditor } from './useDashboardEditor'
@@ -138,7 +151,7 @@ function DashboardEditFields({
   )
 }
 
-function DashboardView({
+function DashboardViewBody({
   dashboard,
   onNotFound,
 }: {
@@ -178,6 +191,25 @@ function DashboardView({
       setEditingWidgetId(widgetId)
     },
   })
+
+  const session = useFilterSession()
+  const { setInterval: setSessionInterval } = session
+  // O intervalo salvo vira o da sessão (ao abrir e depois de salvar a edição).
+  useEffect(() => {
+    setSessionInterval(dashboard.refreshIntervalSec)
+  }, [dashboard.refreshIntervalSec, setSessionInterval])
+  const activeKeys = (shownTab?.widgets ?? [])
+    .filter((widget) => hasWidgetQuery(widget, edit))
+    .map((widget) =>
+      widgetResultKey(dashboard.id, dashboard.version, widget, edit),
+    )
+  useAutoRefresh({
+    intervalSec: session.intervalSec,
+    paused: draft !== null,
+    resetKey: session.paramsVersion,
+    queryKeys: activeKeys,
+  })
+  const updatedAt = useLastUpdate(activeKeys)
 
   function refresh() {
     for (const widget of shownTab?.widgets ?? []) {
@@ -247,6 +279,15 @@ function DashboardView({
               {MESSAGES.shareTitle}
             </Button>
           )}
+          <RefreshControl
+            value={draft ? draft.refreshIntervalSec : session.intervalSec}
+            onChange={(sec) =>
+              draft
+                ? editor.change((current) => setRefreshInterval(current, sec))
+                : session.setInterval(sec)
+            }
+            updatedAt={updatedAt}
+          />
           <Button type="button" variant="outline" onClick={refresh}>
             <RefreshCw aria-hidden="true" />
             Atualizar
@@ -437,6 +478,20 @@ function DashboardView({
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  )
+}
+
+function DashboardView(props: {
+  dashboard: DashboardDto
+  onNotFound: () => void
+}) {
+  return (
+    <FilterSessionProvider
+      filters={props.dashboard.filters}
+      refreshIntervalSec={props.dashboard.refreshIntervalSec}
+    >
+      <DashboardViewBody {...props} />
+    </FilterSessionProvider>
   )
 }
 

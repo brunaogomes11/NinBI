@@ -413,8 +413,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes em `RefreshControl.test.tsx` (MSW conta as execuções por widget; timers falsos): `RFR-01 Atualização automática oferece Desligada a 1 h` (abrir o select mostra "Desligada", "10 s", "30 s", "1 min", "5 min", "15 min", "1 h"), `RFR-03 intervalo escolhido em edição e salvo vira o inicial` (em edição escolher "30 s" e "Salvar": o `PUT` leva `refreshIntervalSec: 30`; outro usuário que abre o dashboard com `refreshIntervalSec: 30` vê "30 s" e os widgets executam de novo 30 s depois), `RFR-04 intervalo escolhido em visualização não grava o dashboard` (escolher "10 s" em visualização: nenhum `PUT`; os widgets da aba executam de novo em 10 s; reabrir o dashboard volta ao intervalo salvo), `RFR-11 atualização terminada mostra Atualizado às` (relógio em 14:05:09, as execuções da aba terminam: "Atualizado às 14:05:09")
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `RefreshControl.test.tsx` (MSW conta as execuções por widget; timers falsos): `RFR-01 Atualização automática oferece Desligada a 1 h` (abrir o select mostra "Desligada", "10 s", "30 s", "1 min", "5 min", "15 min", "1 h"), `RFR-03 intervalo escolhido em edição e salvo vira o inicial` (em edição escolher "30 s" e "Salvar": o `PUT` leva `refreshIntervalSec: 30`; outro usuário que abre o dashboard com `refreshIntervalSec: 30` vê "30 s" e os widgets executam de novo 30 s depois), `RFR-04 intervalo escolhido em visualização não grava o dashboard` (escolher "10 s" em visualização: nenhum `PUT`; os widgets da aba executam de novo em 10 s; reabrir o dashboard volta ao intervalo salvo), `RFR-11 atualização terminada mostra Atualizado às` (relógio em 14:05:09, as execuções da aba terminam: "Atualizado às 14:05:09")
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
