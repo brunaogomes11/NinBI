@@ -216,9 +216,9 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SMG-03 extractParameterNames sem linguagem segue o Cypher` em packages/contracts
-- [ ] `extractParameterNames('SELECT $a, $b', 'SQL')` devolve `['a', 'b']` sem repetir nomes
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts test`
+- [x] Teste `SMG-03 extractParameterNames sem linguagem segue o Cypher` em packages/contracts
+- [x] `extractParameterNames('SELECT $a, $b', 'SQL')` devolve `['a', 'b']` sem repetir nomes
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick

@@ -1,3 +1,6 @@
+import type { QueryLanguage } from './connections'
+import { tokenizeSql } from './sql-tokens'
+
 export type CypherToken =
   | { type: 'word'; value: string }
   | { type: 'param'; value: string }
@@ -63,9 +66,13 @@ export function tokenizeCypher(cypher: string): CypherToken[] {
 }
 
 /** Nomes dos `$parametros`, sem repetição, na ordem em que aparecem. */
-export function extractParameterNames(cypher: string): string[] {
+export function extractParameterNames(
+  query: string,
+  language: QueryLanguage = 'CYPHER',
+): string[] {
+  const tokens = language === 'SQL' ? tokenizeSql(query) : tokenizeCypher(query)
   const names: string[] = []
-  for (const token of tokenizeCypher(cypher)) {
+  for (const token of tokens) {
     if (token.type === 'param' && !names.includes(token.value)) {
       names.push(token.value)
     }
