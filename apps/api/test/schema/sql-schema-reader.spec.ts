@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest'
-import { Neo4jTimeoutError } from '../../src/neo4j/neo4j.gateway'
 import { validateReadOnlySql } from '../../src/queries/read-only-sql'
 import { SqlSchemaReader } from '../../src/schema/sql-schema-reader'
 import {
@@ -8,6 +7,7 @@ import {
   SQLSERVER_DIALECT,
   type SqlDialect,
 } from '../../src/sources/dialects'
+import { SourceTimeoutError } from '../../src/sources/source'
 import { type FakeSqlConfig, FakeSqlGateway } from '../fakes/fake-sql.gateway'
 
 const cfg: FakeSqlConfig = {
@@ -345,7 +345,7 @@ describe('SqlSchemaReader', () => {
         deadline: Date.now() - 1,
         signal: new AbortController().signal,
       }),
-    ).rejects.toBeInstanceOf(Neo4jTimeoutError)
+    ).rejects.toBeInstanceOf(SourceTimeoutError)
     expect(late.calls).toEqual([])
 
     const hanging = new FakeSqlGateway()
@@ -358,13 +358,13 @@ describe('SqlSchemaReader', () => {
     })
     await new Promise((resolve) => setTimeout(resolve, 10))
     abort.abort()
-    await expect(reading).rejects.toBeInstanceOf(Neo4jTimeoutError)
+    await expect(reading).rejects.toBeInstanceOf(SourceTimeoutError)
 
     const slow = new FakeSqlGateway()
     catalog(slow, POSTGRES_DIALECT, [['public', 'a', false, 'id', 'int']])
     sample(slow, POSTGRES_DIALECT, 'public', 'a', 'hang')
     const call = read(slow, POSTGRES_DIALECT, 50)
-    await expect(call).rejects.toBeInstanceOf(Neo4jTimeoutError)
+    await expect(call).rejects.toBeInstanceOf(SourceTimeoutError)
     const timeouts = slow.calls.map((c) => c.opts?.timeoutMs ?? 0)
     expect(Math.max(...timeouts)).toBeLessThanOrEqual(50)
   })

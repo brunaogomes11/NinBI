@@ -400,9 +400,9 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SRC-22 erros do Neo4j são SourceTimeoutError e SourceGatewayError` em `apps/api/test/sources/source.spec.ts` (instanceof nos dois sentidos, `name` e `message` iguais aos de antes)
-- [ ] Os testes de `driver-neo4j.gateway.spec.ts` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SRC-22 erros do Neo4j são SourceTimeoutError e SourceGatewayError` em `apps/api/test/sources/source.spec.ts` (instanceof nos dois sentidos, `name` e `message` iguais aos de antes)
+- [x] Os testes de `driver-neo4j.gateway.spec.ts` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
@@ -1292,5 +1292,5 @@ Proof: run web | ✓ SMG-08 filtro mostra Consulta SQL ou Consulta Cypher pelo t
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** MySQL e SQL Server sem container; só o PostgreSQL do compose tem teste real, e o usuário testa os outros dois à mão contra um banco remoto (user: "não precisa, só o postgres e eu vou pegar um banco remoto pra testar"). T21 removida.
-**Dispatched:** lote 1 (T1 a T6, sonnet) returned em 41b2fc3; lote 2 (T7 a T12, opus) em 7771e17
+**Dispatched:** lote 1 (T1 a T6, sonnet) returned; lote 2 (T7 a T12, opus) returned; lote 3 (T13 a T20, opus) em ed98240
 **Walked:** none

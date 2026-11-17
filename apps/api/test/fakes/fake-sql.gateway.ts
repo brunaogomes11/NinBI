@@ -1,4 +1,4 @@
-import { Neo4jTimeoutError } from '../../src/neo4j/neo4j.gateway'
+import { SourceTimeoutError } from '../../src/sources/source'
 
 /** A configuração de `SqlConnectionConfig` do design (a T16 cria o tipo em `sql.gateway.ts`). */
 export interface FakeSqlConfig {
@@ -44,9 +44,8 @@ function toResult(rows: FakeSqlRows): FakeSqlResult {
  * expressão. `'hang'` espera até `release()`, ou até o prazo e o `signal` da
  * própria chamada.
  */
-// SPEC_DEVIATION: o prazo estourado rejeita com `Neo4jTimeoutError('O banco não
-// respondeu no prazo')` porque `SourceTimeoutError` só nasce na T13, que faz o
-// `Neo4jTimeoutError` estendê-lo; a T16 troca pelo erro da fonte.
+// SPEC_DEVIATION: a T13 tocou este arquivo (fora do seu `Where`) para que o
+// prazo estourado rejeite com `SourceTimeoutError`, o erro de prazo das fontes.
 export class FakeSqlGateway {
   readonly calls: FakeSqlCall[] = []
   private verifyAnswer: Programmed<undefined> = undefined
@@ -119,8 +118,7 @@ export class FakeSqlGateway {
   ): Promise<T> {
     if (answer === 'hang') {
       await new Promise<void>((resolve, reject) => {
-        const timeout = () =>
-          reject(new Neo4jTimeoutError('O banco não respondeu no prazo'))
+        const timeout = () => reject(new SourceTimeoutError())
         const timer = setTimeout(timeout, timeoutMs)
         if (signal?.aborted) timeout()
         signal?.addEventListener('abort', timeout, { once: true })

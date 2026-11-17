@@ -1,5 +1,5 @@
-import { Neo4jTimeoutError } from '../neo4j/neo4j.gateway'
 import type { SqlDialect, SqlTableRef } from '../sources/dialects'
+import { SourceTimeoutError } from '../sources/source'
 import type { SchemaReadOptions } from './schema-reader'
 import { toSqlLiteral } from './sql-literal'
 import type {
@@ -65,11 +65,10 @@ export class SqlSchemaReader {
       options.signal.aborted || options.deadline - Date.now() <= 0
     const query = (sql: string, maxRows?: number) => {
       const timeoutMs = options.deadline - Date.now()
-      // SPEC_DEVIATION: `SourceTimeoutError` nasce na T13 (e o
-      // `Neo4jTimeoutError` passa a estendê-lo); até lá o prazo usa o erro que
-      // o refresh do schema já reconhece como estouro.
+      // SPEC_DEVIATION: a T13 tocou este arquivo (fora do seu `Where`) para
+      // trocar o erro de prazo provisório pelo `SourceTimeoutError` das fontes.
       if (timeoutMs <= 0 || options.signal.aborted) {
-        throw new Neo4jTimeoutError('O banco não respondeu no prazo')
+        throw new SourceTimeoutError()
       }
       return gateway.read(cfg, sql, [], {
         timeoutMs,
@@ -152,7 +151,7 @@ export class SqlSchemaReader {
         sample = await query(dialect.sampleQuery(ref, SAMPLE_ROWS), SAMPLE_ROWS)
       } catch (error) {
         // Sem permissão de ler a tabela: ela fica sem exemplos (SCS-07); o prazo não.
-        if (error instanceof Neo4jTimeoutError || expired()) throw error
+        if (error instanceof SourceTimeoutError || expired()) throw error
         continue
       }
       for (const column of table.columns) {

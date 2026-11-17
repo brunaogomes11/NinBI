@@ -1,3 +1,5 @@
+import { SourceGatewayError, SourceTimeoutError } from '../sources/source'
+
 /** Único contrato de acesso ao Neo4j do usuário; o resto do backend nunca importa o driver. */
 export interface Neo4jConnectionConfig {
   uri: string
@@ -28,21 +30,20 @@ export interface Neo4jGateway {
 export const NEO4J_GATEWAY = Symbol('NEO4J_GATEWAY')
 
 /** O Neo4j não respondeu no prazo (ou a operação foi cancelada). */
-export class Neo4jTimeoutError extends Error {
+export class Neo4jTimeoutError extends SourceTimeoutError {
   constructor(message = 'O Neo4j não respondeu no prazo') {
     super(message)
     this.name = 'Neo4jTimeoutError'
   }
 }
 
-/** O Neo4j recusou ou falhou; `message` é a do Neo4j, sem alteração. */
-export class Neo4jGatewayError extends Error {
-  constructor(
-    message: string,
-    /** `code` do erro do driver (`Neo.ClientError...`, `ServiceUnavailable`...), quando houver. */
-    readonly code?: string,
-  ) {
-    super(message)
+/**
+ * O Neo4j recusou ou falhou; `message` é a do Neo4j, sem alteração, e `code` o
+ * do driver (`Neo.ClientError...`, `ServiceUnavailable`...), quando houver.
+ */
+export class Neo4jGatewayError extends SourceGatewayError {
+  constructor(message: string, code?: string) {
+    super(message, code)
     this.name = 'Neo4jGatewayError'
   }
 }
