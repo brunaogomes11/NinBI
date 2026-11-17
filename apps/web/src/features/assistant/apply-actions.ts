@@ -114,7 +114,10 @@ function applyOne(
       if (action.title !== undefined) changes.title = action.title
       if (action.cypher !== undefined) {
         changes.cypher = action.cypher
-        changes.parameters = extractParameterNames(action.cypher, language)
+        changes.parameters = extractParameterNames(
+          action.cypher ?? '',
+          language,
+        )
       }
       const reshapes =
         action.visualization !== undefined ||

@@ -341,7 +341,15 @@ describe('applyAssistantActions', () => {
     const cypher = applyAssistantActions(baseDraft(), [action])
     const titleOnly = applyAssistantActions(
       baseDraft(),
-      [{ type: 'update_widget', widgetId: 'w-1', title: 'Outro' }],
+      [
+        {
+          type: 'update_widget',
+          widgetId: 'w-1',
+          title: 'Outro',
+          result: null,
+          error: null,
+        },
+      ],
       'SQL',
     )
 
