@@ -183,8 +183,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/widget-placement.spec.ts`: `GEN-04 widgets ficam na grade de 12 colunas sem sobreposição e com no mínimo 2 por 2` (seis pedidos todos em `x: 0, y: 0` com `w` de 1 a 14 e `h` 0, 1 e 5: cada resultado tem `0 ≤ x`, `x + w ≤ 12`, `w ≥ 2`, `h ≥ 2`, e nenhum par se sobrepõe; um pedido sem posição fica abaixo do último ocupado; `x: 11, w: 4` vira `x: 8`; números quebrados são arredondados)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/assistant/widget-placement.spec.ts`: `GEN-04 widgets ficam na grade de 12 colunas sem sobreposição e com no mínimo 2 por 2` (seis pedidos todos em `x: 0, y: 0` com `w` de 1 a 14 e `h` 0, 1 e 5: cada resultado tem `0 ≤ x`, `x + w ≤ 12`, `w ≥ 2`, `h ≥ 2`, e nenhum par se sobrepõe; um pedido sem posição fica abaixo do último ocupado; `x: 11, w: 4` vira `x: 8`; números quebrados são arredondados)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
