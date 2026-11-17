@@ -194,10 +194,10 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-08 comentários e strings de SQL ficam fora das palavras` em packages/contracts
-- [ ] Teste `SQX-16 $nome em string, comentário ou identificador não é parâmetro` em packages/contracts
-- [ ] Teste `SQX-16 $1 e $$ não são parâmetros e $nome é` em packages/contracts
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts test`
+- [x] Teste `SQX-08 comentários e strings de SQL ficam fora das palavras` em packages/contracts
+- [x] Teste `SQX-16 $nome em string, comentário ou identificador não é parâmetro` em packages/contracts
+- [x] Teste `SQX-16 $1 e $$ não são parâmetros e $nome é` em packages/contracts
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick
