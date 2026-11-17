@@ -1,5 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
+  CROSS_FILTER_TYPES,
+  type CrossFilterConfig,
+  type DashboardFilter,
+  extractParameterNames,
   MESSAGES,
   type QueryResultDto,
   type WidgetVisualization as Visualization,
@@ -27,8 +31,21 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { AskAiPanel } from '@/features/ai/AskAiPanel'
 import { runQuery } from '@/features/dashboards/api'
+import {
+  useFilterParams,
+  useOptionalFilterSession,
+} from '@/features/filters/filter-session'
+import { relevantParams } from '@/features/filters/filter-values'
 import { CypherEditor } from './CypherEditor'
 import {
   emptyMapping,
@@ -93,6 +110,82 @@ function Preview({
   )
 }
 
+const NONE = '__none__'
+
+/** "Ao clicar": o filtro que o clique define e a coluna que dá o valor (XFL-01). */
+function CrossFilterSection({
+  filters,
+  columns,
+  value,
+  error,
+  onChange,
+}: {
+  filters: DashboardFilter[]
+  columns: string[] | null
+  value: Partial<CrossFilterConfig>
+  error: boolean
+  onChange: (value: Partial<CrossFilterConfig>) => void
+}) {
+  const options = filters.filter((filter) =>
+    CROSS_FILTER_TYPES.includes(filter.type),
+  )
+  const columnList = [
+    ...new Set([...(columns ?? []), ...(value.column ? [value.column] : [])]),
+  ]
+  return (
+    <fieldset className="flex min-w-0 flex-col gap-2">
+      <legend className="mb-1 font-medium text-sm">Ao clicar</legend>
+      <div className="flex flex-wrap gap-4">
+        <div className="flex min-w-48 flex-1 flex-col gap-1.5">
+          <Label htmlFor="cross-filter-filter">Filtro</Label>
+          <Select
+            value={value.filterId ?? NONE}
+            onValueChange={(next) =>
+              onChange(next === NONE ? {} : { filterId: next })
+            }
+          >
+            <SelectTrigger id="cross-filter-filter" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>Nenhum</SelectItem>
+              {options.map((filter) => (
+                <SelectItem key={filter.id} value={filter.id}>
+                  {filter.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex min-w-48 flex-1 flex-col gap-1.5">
+          <Label htmlFor="cross-filter-column">Coluna</Label>
+          <Select
+            value={value.column ?? ''}
+            disabled={columns === null}
+            onValueChange={(column) => onChange({ ...value, column })}
+          >
+            <SelectTrigger id="cross-filter-column" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {columnList.map((column) => (
+                <SelectItem key={column} value={column}>
+                  {column}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      {error && (
+        <p role="alert" className="text-destructive text-sm">
+          {MESSAGES.crossFilterInvalid}
+        </p>
+      )}
+    </fieldset>
+  )
+}
+
 function initialVisualization(widget: WidgetDto): Visualization {
   return (WIDGET_VISUALIZATIONS as readonly string[]).includes(
     widget.visualization,
@@ -144,6 +237,12 @@ export function WidgetEditorDialog({
     initialMapping(widget, initialVisualization(widget)),
   )
   const [result, setResult] = useState<QueryResultDto | null>(null)
+  const filters = useOptionalFilterSession()?.filters ?? []
+  const allParams = useFilterParams()
+  const [crossFilter, setCrossFilter] = useState<Partial<CrossFilterConfig>>(
+    () => (widget.config.crossFilter as CrossFilterConfig | undefined) ?? {},
+  )
+  const [crossFilterError, setCrossFilterError] = useState(false)
   const [aiError, setAiError] = useState(initialError ?? null)
   const [mappingError, setMappingError] = useState<MappingError | null>(null)
   const form = useForm<TitleInput>({
@@ -153,7 +252,13 @@ export function WidgetEditorDialog({
   const run = useMutation({
     mutationFn: () => {
       setAiError(null)
-      return runQuery(dashboardId, { cypher, connectionId })
+      // Os valores atuais dos filtros que o Cypher usa (FLT-19).
+      const params = relevantParams(extractParameterNames(cypher), allParams)
+      return runQuery(dashboardId, {
+        cypher,
+        connectionId,
+        ...(Object.keys(params).length > 0 && { params }),
+      })
     },
     onSuccess: (data) => {
       setResult(data)
@@ -207,11 +312,19 @@ export function WidgetEditorDialog({
                 setMappingError(problem)
                 return
               }
+              const clickable = visualization !== 'KPI' && crossFilter.filterId
+              if (clickable && !crossFilter.column) {
+                setCrossFilterError(true)
+                return
+              }
               onApply({
                 title: values.title.trim(),
                 cypher: empty ? null : cypher,
                 visualization,
-                config: visualization === 'TABLE' ? {} : { mapping },
+                config: {
+                  ...(visualization === 'TABLE' ? {} : { mapping }),
+                  ...(clickable && { crossFilter }),
+                },
               })
               onClose()
             })}
@@ -270,6 +383,18 @@ export function WidgetEditorDialog({
                 setMappingError(null)
               }}
             />
+            {visualization !== 'KPI' && (
+              <CrossFilterSection
+                filters={filters}
+                columns={result?.columns ?? null}
+                value={crossFilter}
+                error={crossFilterError}
+                onChange={(next) => {
+                  setCrossFilter(next)
+                  setCrossFilterError(false)
+                }}
+              />
+            )}
             <section aria-label="Prévia" className="flex min-w-0 flex-col">
               {!run.isPending && (
                 <Preview

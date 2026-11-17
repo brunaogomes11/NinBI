@@ -535,8 +535,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes com gesto em `WidgetEditorDialog.filters.test.tsx` (dashboard em edição com os filtros "Categoria" `SINGLE_SELECT` em "Jogos", "Tags" `MULTI_SELECT` e "Dia" `DATE`): `FLT-19 Executar no editor envia os valores atuais dos filtros` (Cypher com `$categoria`: "Executar" envia `.../query` com `params: { categoria: 'Jogos' }`), `XFL-01 editor oferece Ao clicar com filtro e coluna` (widget "Barras" executado com `RETURN categoria, total`: "Filtro" lista "Nenhum", "Categoria" e "Dia", sem "Tags"; "Coluna" lista `categoria` e `total`; escolher "Categoria" e `categoria`, aplicar e salvar envia `config.crossFilter` `{ filterId: <id de Categoria>, column: 'categoria' }`; widget "KPI" não mostra "Ao clicar"; sem resultado "Coluna" fica desabilitada); testes do `WidgetEditorDialog` de `dashboards-consultas`, `widgets-graficos` e `ia-cypher` continuam verdes
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto em `WidgetEditorDialog.filters.test.tsx` (dashboard em edição com os filtros "Categoria" `SINGLE_SELECT` em "Jogos", "Tags" `MULTI_SELECT` e "Dia" `DATE`): `FLT-19 Executar no editor envia os valores atuais dos filtros` (Cypher com `$categoria`: "Executar" envia `.../query` com `params: { categoria: 'Jogos' }`), `XFL-01 editor oferece Ao clicar com filtro e coluna` (widget "Barras" executado com `RETURN categoria, total`: "Filtro" lista "Nenhum", "Categoria" e "Dia", sem "Tags"; "Coluna" lista `categoria` e `total`; escolher "Categoria" e `categoria`, aplicar e salvar envia `config.crossFilter` `{ filterId: <id de Categoria>, column: 'categoria' }`; widget "KPI" não mostra "Ao clicar"; sem resultado "Coluna" fica desabilitada); testes do `WidgetEditorDialog` de `dashboards-consultas`, `widgets-graficos` e `ia-cypher` continuam verdes
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
