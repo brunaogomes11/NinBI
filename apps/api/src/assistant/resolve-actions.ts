@@ -458,13 +458,15 @@ export function resolveActions(
           invalid()
           break
         }
+        const typeChanged = merged.type !== current.type
         Object.assign(current, merged)
         const patch: Partial<Omit<DashboardFilter, 'id'>> = {}
         if (a.label !== undefined) patch.label = merged.label
         if (a.parameter !== undefined) patch.parameter = merged.parameter
         if (a.filterType !== undefined) patch.type = merged.type
         if (a.options !== undefined) patch.options = merged.options
-        if (a.defaultValue !== undefined || a.filterType !== undefined) {
+        // o padrão salvo só muda se a ação o trouxe ou se o tipo mudou (o servidor não o conhece)
+        if (a.defaultValue !== undefined || typeChanged) {
           patch.defaultValue = merged.defaultValue
         }
         accept(

@@ -199,6 +199,20 @@ describe('applyAssistantActions', () => {
     expect(next.tabs).toHaveLength(1)
   })
 
+  it('CHAT-07 update_filter com o mesmo tipo e sem defaultValue mantém o padrão salvo', () => {
+    const draft = fromDto(makeDashboard({ filters: [CATEGORIA] }))
+
+    const next = applyAssistantActions(draft, [
+      {
+        type: 'update_filter',
+        filter: { id: 'f-1', label: 'Tipo', type: 'SINGLE_SELECT' },
+      },
+    ])
+
+    expect(next.filters[0]).toEqual({ ...CATEGORIA, label: 'Tipo' })
+    expect(next.filters[0].defaultValue).toBe('A')
+  })
+
   it('set_layout move o widget e o rascunho original não é mutado', () => {
     const draft = baseDraft()
     const before = structuredClone(draft)

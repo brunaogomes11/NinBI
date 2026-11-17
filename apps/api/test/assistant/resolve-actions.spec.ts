@@ -179,6 +179,30 @@ describe('resolver as ações do plano', () => {
     ])
   })
 
+  it('CHAT-07 update_filter com o mesmo filterType não manda defaultValue e com tipo novo manda', () => {
+    const same = run([
+      {
+        type: 'update_filter',
+        filter: 'f1',
+        filterType: 'TEXT',
+        label: 'Tipo',
+      },
+    ])
+    expect(same.actions).toEqual([
+      {
+        type: 'update_filter',
+        filter: { id: id(30), label: 'Tipo', type: 'TEXT' },
+      },
+    ])
+    const changed = run([
+      { type: 'update_filter', filter: 'f1', filterType: 'NUMBER' },
+    ])
+    expect(changed.actions[0]).toMatchObject({
+      type: 'update_filter',
+      filter: { id: id(30), type: 'NUMBER', defaultValue: null },
+    })
+  })
+
   it('CHAT-23 ação que cita widget, aba ou filtro inexistente é ignorada e informada', () => {
     const plan = run([
       { type: 'update_widget', widget: 'w9', title: 'x' },
