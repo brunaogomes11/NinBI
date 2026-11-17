@@ -41,7 +41,9 @@ export function WidgetExportMenu({
   // Mesma chave do corpo do card: usa o resultado em cache, sem nova execução.
   const query = useWidgetResult(dashboardId, version, widget)
   const result = hasWidgetQuery(widget) ? query.data : undefined
-  const canExport = result !== undefined && result.rows.length > 0
+  // Atualização que falha mantém os dados antigos na tela, mas não se exporta (EXP-08).
+  const canExport =
+    !query.isError && result !== undefined && result.rows.length > 0
 
   function exportCsv() {
     if (!result) return

@@ -169,4 +169,45 @@ export const MESSAGES = {
   refreshFailedAt: (hhmm: string) => `Não foi possível atualizar às ${hhmm}`,
   updatedAt: (hhmmss: string) => `Atualizado às ${hhmmss}`,
   exportImageFailed: 'Não foi possível exportar a imagem',
+  assistantToggle: 'Assistente',
+  assistantEmpty: 'Descreva o que você quer ver ou mudar neste dashboard',
+  assistantPlaceholder: 'Escreva uma mensagem',
+  assistantMessageTooLong: 'A mensagem passa de 4.000 caracteres',
+  assistantDescribeOption: 'Descrever para a IA',
+  assistantBlankOption: 'Em branco',
+  assistantDescriptionLabel: 'Descrição',
+  assistantDescriptionRequired: 'Informe a descrição',
+  assistantDescriptionTooLong: 'A descrição passa de 4.000 caracteres',
+  assistantThinking: 'Pensando...',
+  assistantGeneratingWidget: (n: number, m: number) =>
+    `Gerando widget ${n} de ${m}`,
+  assistantUndo: 'Desfazer',
+  assistantClear: 'Limpar conversa',
+  assistantClearConfirm: 'Apagar toda a conversa deste dashboard?',
+  assistantLoadFailed: 'Não foi possível carregar a conversa',
+  assistantWidgetsCreated: (n: number) =>
+    n === 1 ? '1 widget criado' : `${n} widgets criados`,
+  assistantWidgetsFailed: (titles: string[]) =>
+    `Widgets com erro: ${titles.join(', ')}`,
+  assistantWidgetsDiscarded: (n: number) =>
+    `${n} widgets descartados: o limite é 20 por pedido`,
+  assistantTabCreated: (name: string) => `Aba criada: ${name}`,
+  assistantTabRenamed: (from: string, to: string) =>
+    `Aba renomeada: ${from} → ${to}`,
+  assistantTabRemoved: (name: string) => `Aba removida: ${name}`,
+  assistantWidgetCreated: (title: string) => `Widget criado: ${title}`,
+  assistantWidgetUpdated: (title: string) => `Widget alterado: ${title}`,
+  assistantWidgetRemoved: (title: string) => `Widget removido: ${title}`,
+  assistantWidgetMoved: (title: string) =>
+    `Widget movido ou redimensionado: ${title}`,
+  assistantFilterCreated: (label: string) => `Filtro criado: ${label}`,
+  assistantFilterUpdated: (label: string) => `Filtro alterado: ${label}`,
+  assistantFilterRemoved: (label: string) => `Filtro removido: ${label}`,
+  assistantDashboardRenamed: (name: string) => `Dashboard renomeado: ${name}`,
+  assistantMissingTarget: (ref: string) => `Não aplicado: ${ref} não existe`,
+  assistantLastTab: 'Não aplicado: o dashboard precisa de ao menos uma aba',
+  assistantUnknownAction: (type: string) =>
+    `Não aplicado: a ação ${type} não é permitida`,
+  assistantInvalidAction: (type: string) =>
+    `Não aplicado: a ação ${type} veio com dados inválidos`,
 } as const

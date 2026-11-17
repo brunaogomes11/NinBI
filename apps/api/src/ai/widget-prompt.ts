@@ -72,7 +72,8 @@ export function serializeSchema(schema: ConnectionSchemaDto): string {
   return lines.join('\n')
 }
 
-function systemText(schema: ConnectionSchemaDto): string {
+/** Visualizações aceitas, o formato do mapping e os campos (texto comum aos pedidos de IA). */
+export function visualizationGuide(): string[] {
   const visualizations = WIDGET_VISUALIZATIONS.map(
     (code) =>
       `- ${code} (${VISUALIZATION_LABELS[code]}): mapping ${MAPPING_SHAPES[code]}`,
@@ -80,6 +81,14 @@ function systemText(schema: ConnectionSchemaDto): string {
   const fields = Object.entries(MAPPING_FIELD_LABELS)
     .map(([key, label]) => `${key} = ${label}`)
     .join('; ')
+  return [
+    'Visualizações aceitas e o formato do mapping (col = nome de uma coluna do RETURN):',
+    visualizations,
+    `Campos do mapping: ${fields}.`,
+  ]
+}
+
+function systemText(schema: ConnectionSchemaDto): string {
   return [
     'Você escreve consultas Cypher para widgets de dashboard em um banco Neo4j.',
     'Regras:',
@@ -89,9 +98,7 @@ function systemText(schema: ConnectionSchemaDto): string {
     '- Escolha a visualização que melhor mostra o resultado e descreva o mapeamento das colunas.',
     '- O título do widget tem até 80 caracteres, em português.',
     '- Responda só com um objeto JSON: {"cypher": "...", "visualization": "...", "mapping": {...} ou null, "title": "..."}',
-    'Visualizações aceitas e o formato do mapping (col = nome de uma coluna do RETURN):',
-    visualizations,
-    `Campos do mapping: ${fields}.`,
+    ...visualizationGuide(),
     '',
     serializeSchema(schema),
   ].join('\n')

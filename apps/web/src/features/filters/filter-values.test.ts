@@ -129,4 +129,17 @@ describe('filter-values', () => {
     }
     expect(parseNumberInput('')).toEqual({ ok: true, value: null })
   })
+
+  it('FLT-26 ponto de milhar ambíguo é recusado com Digite um número', () => {
+    for (const text of ['1.234', '1.000', '-12.345', '1.234.567']) {
+      expect(parseNumberInput(text)).toEqual({
+        ok: false,
+        message: 'Digite um número',
+      })
+    }
+    expect(parseNumberInput('1234')).toEqual({ ok: true, value: 1234 })
+    expect(parseNumberInput('-3')).toEqual({ ok: true, value: -3 })
+    expect(parseNumberInput('1.5')).toEqual({ ok: true, value: 1.5 })
+    expect(parseNumberInput('0.001')).toEqual({ ok: true, value: 0.001 })
+  })
 })

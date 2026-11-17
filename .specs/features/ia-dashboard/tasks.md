@@ -120,8 +120,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `packages/contracts/src/assistant.spec.ts`: `GEN-10 descrição vazia ou com mais de 4.000 caracteres é recusada` (vazia e só espaços dão "Informe a descrição"; 4.001 caracteres dão "A descrição passa de 4.000 caracteres"; 4.000 passa), `CHAT-16 mensagem com mais de 4.000 caracteres dá A mensagem passa de 4.000 caracteres` (no caminho `message` de `assistantRequestSchema`; 4.000 passa), `CHAT-06 contexto do rascunho descarta valores e opções dos filtros e resultados` (filtro com `defaultValue` e `options`, widget com `result` e `config.crossFilter`: o objeto validado não tem essas chaves; `mapping` e `layout` ficam), `MESSAGES.assistantWidgetsCreated(1)` é "1 widget criado" e `(3)` é "3 widgets criados", `MESSAGES.assistantGeneratingWidget(2, 5)` é "Gerando widget 2 de 5"
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] Testes em `packages/contracts/src/assistant.spec.ts`: `GEN-10 descrição vazia ou com mais de 4.000 caracteres é recusada` (vazia e só espaços dão "Informe a descrição"; 4.001 caracteres dão "A descrição passa de 4.000 caracteres"; 4.000 passa), `CHAT-16 mensagem com mais de 4.000 caracteres dá A mensagem passa de 4.000 caracteres` (no caminho `message` de `assistantRequestSchema`; 4.000 passa), `CHAT-06 contexto do rascunho descarta valores e opções dos filtros e resultados` (filtro com `defaultValue` e `options`, widget com `result` e `config.crossFilter`: o objeto validado não tem essas chaves; `mapping` e `layout` ficam), `MESSAGES.assistantWidgetsCreated(1)` é "1 widget criado" e `(3)` é "3 widgets criados", `MESSAGES.assistantGeneratingWidget(2, 5)` é "Gerando widget 2 de 5"
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick
@@ -140,9 +140,9 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/database/assistant-messages-schema.spec.ts`: migrações aplicam no PGlite; `HIST-01 tabela assistant_messages guarda mensagens por dashboard e usuário` (duas linhas inseridas com o mesmo `created_at` saem por `seq` na ordem de inserção; `role` fora do enum é recusado; `dashboard_id` inexistente viola a chave estrangeira)
-- [ ] `drizzle-kit generate` não gera diferença depois do commit
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/database/assistant-messages-schema.spec.ts`: migrações aplicam no PGlite; `HIST-01 tabela assistant_messages guarda mensagens por dashboard e usuário` (duas linhas inseridas com o mesmo `created_at` saem por `seq` na ordem de inserção; `role` fora do enum é recusado; `dashboard_id` inexistente viola a chave estrangeira)
+- [x] `drizzle-kit generate` não gera diferença depois do commit
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build
@@ -163,8 +163,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/assistant-history.spec.ts`: `HIST-02 conversa volta na ordem em que aconteceu` (três mensagens gravadas pelo service com o relógio parado saem na ordem de gravação, com `role`, `text` e `details`), `HIST-03 cada usuário vê só a própria conversa` (dois Editores com "pode editar" no mesmo dashboard: cada `GET` traz só as suas; o Admin, sem mensagens, recebe `[]`), `HIST-05 limpar apaga só as mensagens do usuário nesse dashboard` (`DELETE` 204; as do outro usuário e as do mesmo usuário em outro dashboard ficam), `HIST-06 excluir o dashboard apaga as conversas` (`DELETE /api/dashboards/:id` pelo dono: nenhuma linha do dashboard em `assistant_messages`), `CHAT-17 Visualizador e quem não edita recebem 403 na conversa` (Visualizador com compartilhamento `edit` e Editor com `view` recebem 403 no `GET` e no `DELETE`; quem não alcança recebe 404), `recent` devolve as últimas N em ordem cronológica
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/assistant/assistant-history.spec.ts`: `HIST-02 conversa volta na ordem em que aconteceu` (três mensagens gravadas pelo service com o relógio parado saem na ordem de gravação, com `role`, `text` e `details`), `HIST-03 cada usuário vê só a própria conversa` (dois Editores com "pode editar" no mesmo dashboard: cada `GET` traz só as suas; o Admin, sem mensagens, recebe `[]`), `HIST-05 limpar apaga só as mensagens do usuário nesse dashboard` (`DELETE` 204; as do outro usuário e as do mesmo usuário em outro dashboard ficam), `HIST-06 excluir o dashboard apaga as conversas` (`DELETE /api/dashboards/:id` pelo dono: nenhuma linha do dashboard em `assistant_messages`), `CHAT-17 Visualizador e quem não edita recebem 403 na conversa` (Visualizador com compartilhamento `edit` e Editor com `view` recebem 403 no `GET` e no `DELETE`; quem não alcança recebe 404), `recent` devolve as últimas N em ordem cronológica
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
@@ -183,8 +183,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/widget-placement.spec.ts`: `GEN-04 widgets ficam na grade de 12 colunas sem sobreposição e com no mínimo 2 por 2` (seis pedidos todos em `x: 0, y: 0` com `w` de 1 a 14 e `h` 0, 1 e 5: cada resultado tem `0 ≤ x`, `x + w ≤ 12`, `w ≥ 2`, `h ≥ 2`, e nenhum par se sobrepõe; um pedido sem posição fica abaixo do último ocupado; `x: 11, w: 4` vira `x: 8`; números quebrados são arredondados)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/assistant/widget-placement.spec.ts`: `GEN-04 widgets ficam na grade de 12 colunas sem sobreposição e com no mínimo 2 por 2` (seis pedidos todos em `x: 0, y: 0` com `w` de 1 a 14 e `h` 0, 1 e 5: cada resultado tem `0 ≤ x`, `x + w ≤ 12`, `w ≥ 2`, `h ≥ 2`, e nenhum par se sobrepõe; um pedido sem posição fica abaixo do último ocupado; `x: 11, w: 4` vira `x: 8`; números quebrados são arredondados)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
@@ -203,8 +203,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/assistant-prompt.spec.ts`: `CHAT-05 pedido traz schema, estrutura do rascunho, 20 mensagens recentes e a mensagem nova` (a mensagem de sistema tem `(:Pedido)` do schema e os 12 tipos de ação; a última `HumanMessage` tem `t1 "Vendas"`, `w1 "Total por mês"`, o Cypher, `BAR`, o mapeamento, posição e tamanho, `f1 "Categoria" $categoria SINGLE_SELECT` e a mensagem nova; a conversa entra como `HumanMessage` e `AIMessage` na ordem, com as mudanças da resposta), `CHAT-06 rascunho serializado não leva nada além da estrutura` (rascunho vindo de `assistantDraftSchema.parse` de um objeto com `defaultValue` `VALOR-DE-FILTRO-c41d` e `result` com `VALOR-DE-LINHA-5b2e`: nenhuma mensagem contém esses textos), refs seguem a ordem das abas, dos widgets e dos filtros
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/assistant/assistant-prompt.spec.ts`: `CHAT-05 pedido traz schema, estrutura do rascunho, 20 mensagens recentes e a mensagem nova` (a mensagem de sistema tem `(:Pedido)` do schema e os 12 tipos de ação; a última `HumanMessage` tem `t1 "Vendas"`, `w1 "Total por mês"`, o Cypher, `BAR`, o mapeamento, posição e tamanho, `f1 "Categoria" $categoria SINGLE_SELECT` e a mensagem nova; a conversa entra como `HumanMessage` e `AIMessage` na ordem, com as mudanças da resposta), `CHAT-06 rascunho serializado não leva nada além da estrutura` (rascunho vindo de `assistantDraftSchema.parse` de um objeto com `defaultValue` `VALOR-DE-FILTRO-c41d` e `result` com `VALOR-DE-LINHA-5b2e`: nenhuma mensagem contém esses textos), refs seguem a ordem das abas, dos widgets e dos filtros
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
@@ -223,8 +223,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/assistant-reply.spec.ts`: `CHAT-12 texto sem JSON vira resposta sem ações` ("Este dashboard mostra vendas." dá `reply` com esse texto e `actions: []`), JSON em cerca ```` ```json ```` com texto antes e depois é lido, `actions` que não é lista vira `[]`, `reply` ausente vira `''`
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/assistant/assistant-reply.spec.ts`: `CHAT-12 texto sem JSON vira resposta sem ações` ("Este dashboard mostra vendas." dá `reply` com esse texto e `actions: []`), JSON em cerca ```` ```json ```` com texto antes e depois é lido, `actions` que não é lista vira `[]`, `reply` ausente vira `''`
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
@@ -243,8 +243,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/resolve-actions.spec.ts`: `GEN-03 plano com abas, widgets e filtros vira ações com ids novos` (`rename_tab t1`, `create_tab {ref: "nova"}`, dois `create_widget` em `nova` e em `t1`, `create_filter` `SINGLE_SELECT`: ações com ids de `newId`, widgets na aba certa e com `prompt`), `CHAT-07 só as ações da lista fechada são aceitas` (`delete_dashboard` e `run_query` dão "Não aplicado: a ação <tipo> não é permitida"; `create_widget` sem `title` dá "veio com dados inválidos"; as demais ações do plano seguem), `CHAT-09 cada ação aceita gera a descrição da mudança` (uma de cada tipo: "Aba criada: ...", "Aba renomeada: A → B", "Widget criado: ...", "Widget alterado: ...", "Widget removido: ...", "Widget movido ou redimensionado: ...", "Filtro criado: ...", "Filtro removido: ...", "Dashboard renomeado: ..."), `CHAT-23 ação que cita widget, aba ou filtro inexistente é ignorada e informada` (`w9`, `t9`, `f9` e `w1` depois de `remove_widget w1` dão "Não aplicado: <ref> não existe"; as demais ações são aplicadas), `CHAT-24 remover a última aba é ignorado e informado` (rascunho com uma aba: "Não aplicado: o dashboard precisa de ao menos uma aba"; com duas abas, remover as duas aplica a primeira e recusa a segunda), `GEN-12 mais de 20 widgets novos ficam nos 20 primeiros e contam os descartados` (23 `create_widget`: 20 ações com os 20 primeiros títulos e `discardedWidgets: 3`), filtro com parâmetro repetido e opções `QUERY` com `CREATE` são recusados, `move_widget` e `resize_widget` saem como `set_layout` sem sobreposição
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/assistant/resolve-actions.spec.ts`: `GEN-03 plano com abas, widgets e filtros vira ações com ids novos` (`rename_tab t1`, `create_tab {ref: "nova"}`, dois `create_widget` em `nova` e em `t1`, `create_filter` `SINGLE_SELECT`: ações com ids de `newId`, widgets na aba certa e com `prompt`), `CHAT-07 só as ações da lista fechada são aceitas` (`delete_dashboard` e `run_query` dão "Não aplicado: a ação <tipo> não é permitida"; `create_widget` sem `title` dá "veio com dados inválidos"; as demais ações do plano seguem), `CHAT-09 cada ação aceita gera a descrição da mudança` (uma de cada tipo: "Aba criada: ...", "Aba renomeada: A → B", "Widget criado: ...", "Widget alterado: ...", "Widget removido: ...", "Widget movido ou redimensionado: ...", "Filtro criado: ...", "Filtro removido: ...", "Dashboard renomeado: ..."), `CHAT-23 ação que cita widget, aba ou filtro inexistente é ignorada e informada` (`w9`, `t9`, `f9` e `w1` depois de `remove_widget w1` dão "Não aplicado: <ref> não existe"; as demais ações são aplicadas), `CHAT-24 remover a última aba é ignorado e informado` (rascunho com uma aba: "Não aplicado: o dashboard precisa de ao menos uma aba"; com duas abas, remover as duas aplica a primeira e recusa a segunda), `GEN-12 mais de 20 widgets novos ficam nos 20 primeiros e contam os descartados` (23 `create_widget`: 20 ações com os 20 primeiros títulos e `discardedWidgets: 3`), filtro com parâmetro repetido e opções `QUERY` com `CREATE` são recusados, `move_widget` e `resize_widget` saem como `set_layout` sem sobreposição
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
@@ -265,9 +265,9 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/ai/ai-widget.generate.spec.ts`: `GEN-05 generate valida, executa e corrige o Cypher do widget` (roteiro com `DELETE` e depois Cypher válido: resultado `done` com `attempts: 2`, o gateway recebeu só o válido, `onAttempt` recebeu 1 e 2), `CHAT-08 generate parte do widget atual e dos filtros` (a `HumanMessage` da 1ª chamada tem o título, o Cypher atual e `$categoria` do filtro), `failed` depois de 4 tentativas traz o último Cypher, `provider_error` para na 1ª chamada, o log sai com `purpose=assistant`
-- [ ] Testes de `AiWidgetService` e da rota `.../ai/widget` de `ia-cypher` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/ai/ai-widget.generate.spec.ts`: `GEN-05 generate valida, executa e corrige o Cypher do widget` (roteiro com `DELETE` e depois Cypher válido: resultado `done` com `attempts: 2`, o gateway recebeu só o válido, `onAttempt` recebeu 1 e 2), `CHAT-08 generate parte do widget atual e dos filtros` (a `HumanMessage` da 1ª chamada tem o título, o Cypher atual e `$categoria` do filtro), `failed` depois de 4 tentativas traz o último Cypher, `provider_error` para na 1ª chamada, o log sai com `purpose=assistant`
+- [x] Testes de `AiWidgetService` e da rota `.../ai/widget` de `ia-cypher` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
@@ -286,8 +286,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/assistant.service.spec.ts` (service tirado do app de teste, eventos guardados num array): `GEN-03 geração cria abas, widgets e filtros devolvidos pelo LLM` (plano com uma aba nova, três widgets e um filtro: `done` traz `create_tab`, três `create_widget` com Cypher, visualização, mapeamento, título e `result`, e `create_filter`), `GEN-05 cada widget gerado passa pela validação, execução e autocorreção` (o 2º widget recebe `DELETE` e depois um Cypher válido: o gateway nunca recebe o `DELETE` e o widget sai com o válido), `GEN-06 widget que continua falhando entra com erro e o último Cypher e os demais seguem` (4 respostas inválidas para o 2º widget: ele sai com o 4º Cypher, `TABLE` e `error`; o 3º widget é gerado normalmente; `NEO4J_UNAVAILABLE` num widget também vira widget com erro), `GEN-07 resposta da geração informa quantos widgets foram criados e os títulos com erro` (`details.createdWidgets: 3` e `failedWidgets: ["Ranking de lojas"]`), `GEN-09 cancelar para a geração sem nova chamada nem resposta gravada` (abortar durante o 2º widget em `'hang'`: nenhum evento depois, nenhuma chamada nova ao modelo e só a mensagem do usuário em `assistant_messages`), `GEN-13 pedido ao assistente não grava o dashboard` (depois do `done`, `dashboards.version`, abas e widgets no banco são os de antes), `CHAT-05 assistente envia ao LLM só as 20 mensagens mais recentes` (com 25 mensagens gravadas, o plano recebe as 20 últimas antes da nova e a nova no fim), `CHAT-06 nenhuma linha de resultado nem valor de filtro chega ao provedor` (linhas do gateway com `VALOR-DE-LINHA-5b2e`, filtro com `defaultValue` `VALOR-DE-FILTRO-c41d` e opções `['OPCAO-77aa']` no corpo: nenhuma mensagem de `calls`, nem no segundo pedido com a conversa anterior, contém esses textos), `CHAT-08 ação que muda o Cypher passa pela validação, execução e autocorreção` (`update_widget w1` com `prompt`: a geração parte do widget atual e o Cypher novo foi executado; `update_widget` só com `visualization` não chama o modelo e traz `result` do Cypher atual), `CHAT-09 resposta do assistente traz a lista do que mudou` (`details.changes` na ordem das ações e o texto do `reply`), `CHAT-12 resposta sem ações não altera o rascunho` (`done` com `actions: []` e o texto do LLM gravado), `CHAT-22 falha do provedor no meio dos widgets não devolve ações nem grava resposta` (erro 429 no 2º widget: evento `provider_error` `AI_PROVIDER_RATE_LIMIT`, nenhum `done`, nenhuma resposta gravada), `CHAT-29 log de cada pedido tem usuário, dashboard, ações, widgets com erro e duração sem o texto` (linhas `result=ok` e `result=provider_error` com `user=`, `dashboard=`, `actions=`, `widgetErrors=`, `durationMs=`; nenhuma linha contém o texto da mensagem nem o Cypher), `HIST-01 mensagem do usuário e resposta do assistente ficam gravadas no PostgreSQL` (duas linhas, `USER` e `ASSISTANT`, com o texto e `details`)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/assistant/assistant.service.spec.ts` (service tirado do app de teste, eventos guardados num array): `GEN-03 geração cria abas, widgets e filtros devolvidos pelo LLM` (plano com uma aba nova, três widgets e um filtro: `done` traz `create_tab`, três `create_widget` com Cypher, visualização, mapeamento, título e `result`, e `create_filter`), `GEN-05 cada widget gerado passa pela validação, execução e autocorreção` (o 2º widget recebe `DELETE` e depois um Cypher válido: o gateway nunca recebe o `DELETE` e o widget sai com o válido), `GEN-06 widget que continua falhando entra com erro e o último Cypher e os demais seguem` (4 respostas inválidas para o 2º widget: ele sai com o 4º Cypher, `TABLE` e `error`; o 3º widget é gerado normalmente; `NEO4J_UNAVAILABLE` num widget também vira widget com erro), `GEN-07 resposta da geração informa quantos widgets foram criados e os títulos com erro` (`details.createdWidgets: 3` e `failedWidgets: ["Ranking de lojas"]`), `GEN-09 cancelar para a geração sem nova chamada nem resposta gravada` (abortar durante o 2º widget em `'hang'`: nenhum evento depois, nenhuma chamada nova ao modelo e só a mensagem do usuário em `assistant_messages`), `GEN-13 pedido ao assistente não grava o dashboard` (depois do `done`, `dashboards.version`, abas e widgets no banco são os de antes), `CHAT-05 assistente envia ao LLM só as 20 mensagens mais recentes` (com 25 mensagens gravadas, o plano recebe as 20 últimas antes da nova e a nova no fim), `CHAT-06 nenhuma linha de resultado nem valor de filtro chega ao provedor` (linhas do gateway com `VALOR-DE-LINHA-5b2e`, filtro com `defaultValue` `VALOR-DE-FILTRO-c41d` e opções `['OPCAO-77aa']` no corpo: nenhuma mensagem de `calls`, nem no segundo pedido com a conversa anterior, contém esses textos), `CHAT-08 ação que muda o Cypher passa pela validação, execução e autocorreção` (`update_widget w1` com `prompt`: a geração parte do widget atual e o Cypher novo foi executado; `update_widget` só com `visualization` não chama o modelo e traz `result` do Cypher atual), `CHAT-09 resposta do assistente traz a lista do que mudou` (`details.changes` na ordem das ações e o texto do `reply`), `CHAT-12 resposta sem ações não altera o rascunho` (`done` com `actions: []` e o texto do LLM gravado), `CHAT-22 falha do provedor no meio dos widgets não devolve ações nem grava resposta` (erro 429 no 2º widget: evento `provider_error` `AI_PROVIDER_RATE_LIMIT`, nenhum `done`, nenhuma resposta gravada), `CHAT-29 log de cada pedido tem usuário, dashboard, ações, widgets com erro e duração sem o texto` (linhas `result=ok` e `result=provider_error` com `user=`, `dashboard=`, `actions=`, `widgetErrors=`, `durationMs=`; nenhuma linha contém o texto da mensagem nem o Cypher), `HIST-01 mensagem do usuário e resposta do assistente ficam gravadas no PostgreSQL` (duas linhas, `USER` e `ASSISTANT`, com o texto e `details`)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
@@ -306,8 +306,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/assistant.route.spec.ts`: `GEN-08 resposta informa o widget N de M em geração` (plano com dois widgets, o 1º corrigido uma vez: o corpo tem, na ordem, `accepted`, `planned` com `widgetsTotal: 2`, `widget` 1 de 2 tentativa 1, `widget` 1 de 2 tentativa 2, `widget` 2 de 2 tentativa 1 e `done`; `Content-Type` `application/x-ndjson`), `CHAT-16 mensagem longa responde 400 com A mensagem passa de 4.000 caracteres` (em `fieldErrors.message`, sem chamada ao modelo nem linha gravada), `CHAT-17 Visualizador e quem não edita recebem 403 no assistente` (Visualizador com compartilhamento `edit` e Editor com `view` recebem 403; quem não alcança recebe 404; dono e Admin recebem 200), `CHAT-27 conexão sem schema lido responde 409 com Leia o schema da conexão antes de usar a IA` (`SCHEMA_NOT_READ`, sem mensagem gravada), `CHAT-21 Tentar novamente reaproveita a mensagem sem gravar outra` (1º pedido com erro do provedor; 2º com `retryOf` igual ao id do `accepted`: uma só linha `USER` e o `done` gravado depois dela; `retryOf` de mensagem antiga grava uma nova), `GEN-02 dashboard criado por quem pede a geração é dele e entra no fim da sidebar` (Editor cria por `POST /api/dashboards`: `ownerId` é dele, o `GET /api/sidebar` termina nele e o pedido ao assistente nesse dashboard responde 200), sem provedor responde 409 `LLM_NOT_CONFIGURED` com "Nenhum provedor de IA configurado"
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `apps/api/test/assistant/assistant.route.spec.ts`: `GEN-08 resposta informa o widget N de M em geração` (plano com dois widgets, o 1º corrigido uma vez: o corpo tem, na ordem, `accepted`, `planned` com `widgetsTotal: 2`, `widget` 1 de 2 tentativa 1, `widget` 1 de 2 tentativa 2, `widget` 2 de 2 tentativa 1 e `done`; `Content-Type` `application/x-ndjson`), `CHAT-16 mensagem longa responde 400 com A mensagem passa de 4.000 caracteres` (em `fieldErrors.message`, sem chamada ao modelo nem linha gravada), `CHAT-17 Visualizador e quem não edita recebem 403 no assistente` (Visualizador com compartilhamento `edit` e Editor com `view` recebem 403; quem não alcança recebe 404; dono e Admin recebem 200), `CHAT-27 conexão sem schema lido responde 409 com Leia o schema da conexão antes de usar a IA` (`SCHEMA_NOT_READ`, sem mensagem gravada), `CHAT-21 Tentar novamente reaproveita a mensagem sem gravar outra` (1º pedido com erro do provedor; 2º com `retryOf` igual ao id do `accepted`: uma só linha `USER` e o `done` gravado depois dela; `retryOf` de mensagem antiga grava uma nova), `GEN-02 dashboard criado por quem pede a geração é dele e entra no fim da sidebar` (Editor cria por `POST /api/dashboards`: `ownerId` é dele, o `GET /api/sidebar` termina nele e o pedido ao assistente nesse dashboard responde 200), sem provedor responde 409 `LLM_NOT_CONFIGURED` com "Nenhum provedor de IA configurado"
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: integration
 **Gate**: build
@@ -328,9 +328,9 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `assistant-api.test.ts` com MSW e `ReadableStream`: `GEN-08 leitura do NDJSON entrega accepted, widget e done na ordem` (linhas partidas entre pedaços chegam inteiras; a função devolve `done`), 409 `SCHEMA_NOT_READ` vira `ApiError` com `code` e `message`, `useClearAssistant` chama `DELETE` e esvazia o cache, abortar o `signal` rejeita com `AbortError`
-- [ ] Testes de `ai-api.test.ts` de `ia-cypher` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `assistant-api.test.ts` com MSW e `ReadableStream`: `GEN-08 leitura do NDJSON entrega accepted, widget e done na ordem` (linhas partidas entre pedaços chegam inteiras; a função devolve `done`), 409 `SCHEMA_NOT_READ` vira `ApiError` com `code` e `message`, `useClearAssistant` chama `DELETE` e esvazia o cache, abortar o `signal` rejeita com `AbortError`
+- [x] Testes de `ai-api.test.ts` de `ia-cypher` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
@@ -349,8 +349,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apply-actions.test.ts`: `GEN-03 aplicar as ações cria abas, widgets e filtros no rascunho` (aba nova com o id e o nome da ação; widgets com título, Cypher, visualização, mapeamento resolvido e layout; filtro novo; nome do dashboard), `GEN-06 widget com erro entra no rascunho com o último Cypher` (`create_widget` com `error` e `result: null`: o widget tem o Cypher da ação, `TABLE` e `{}`), `CHAT-23 ação sobre widget que saiu do rascunho é ignorada` (`update_widget` e `set_layout` de widget removido não mudam nada e não criam widget), `remove_filter` tira o `crossFilter` dos widgets que apontavam para ele, `update_widget` com `BAR` e mapeamento de coluna ausente vira a sugestão de `resolveAiMapping`, o rascunho original não é mutado
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `apply-actions.test.ts`: `GEN-03 aplicar as ações cria abas, widgets e filtros no rascunho` (aba nova com o id e o nome da ação; widgets com título, Cypher, visualização, mapeamento resolvido e layout; filtro novo; nome do dashboard), `GEN-06 widget com erro entra no rascunho com o último Cypher` (`create_widget` com `error` e `result: null`: o widget tem o Cypher da ação, `TABLE` e `{}`), `CHAT-23 ação sobre widget que saiu do rascunho é ignorada` (`update_widget` e `set_layout` de widget removido não mudam nada e não criam widget), `remove_filter` tira o `crossFilter` dos widgets que apontavam para ele, `update_widget` com `BAR` e mapeamento de coluna ausente vira a sugestão de `resolveAiMapping`, o rascunho original não é mutado
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
@@ -369,8 +369,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `useAssistant.test.tsx`: `GEN-09 Cancelar a geração aborta o pedido e deixa o rascunho como estava` (depois de `widget` 1 de 3, `cancel()`: `request.signal.aborted` no handler é verdadeiro e o rascunho é o mesmo objeto), `GEN-13 resultado da geração fica no rascunho sem gravar o dashboard` (depois do `done` o rascunho tem os widgets e nenhum `PUT /api/dashboards/:id` foi feito), `CHAT-10 hook oferece Desfazer só para a resposta mais recente que alterou o rascunho` (resposta com ações: `undoMessageId` é o id dela; resposta seguinte sem ações: continua o da anterior; resposta seguinte com ações: passa a ser a nova), `CHAT-11 Desfazer devolve o rascunho ao estado anterior à resposta` (`undo()` volta o mesmo objeto de antes e `undoMessageId` some), `CHAT-14 Cancelar durante a resposta aborta e não altera o rascunho` (antes de `planned`), `CHAT-21 falha do provedor mostra a mensagem e Tentar novamente reenvia a mesma mensagem` (`provider_error` `AI_PROVIDER_AUTH`: `failure` com "O provedor de IA recusou a chave configurada" e o id do `accepted`; `retry()` envia o mesmo texto com `retryOf`), `CHAT-22 falha do provedor depois do plano não altera o rascunho` (`planned`, `widget` e depois `provider_error`: o rascunho é o mesmo objeto), `CHAT-26 Descartar mantém a conversa e tira o Desfazer` (trocar o rascunho pelo salvo: `undoMessageId` some e o cache da conversa continua com as mensagens), `CHAT-27 schema não lido mostra a mensagem na conversa` (409 `SCHEMA_NOT_READ`: `failure` com "Leia o schema da conexão antes de usar a IA"), `CHAT-28 sair do dashboard para o pedido` (desmontar e `editing` falso abortam o pedido), `send` chama `ensureEditing` antes do `fetch`
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes em `useAssistant.test.tsx`: `GEN-09 Cancelar a geração aborta o pedido e deixa o rascunho como estava` (depois de `widget` 1 de 3, `cancel()`: `request.signal.aborted` no handler é verdadeiro e o rascunho é o mesmo objeto), `GEN-13 resultado da geração fica no rascunho sem gravar o dashboard` (depois do `done` o rascunho tem os widgets e nenhum `PUT /api/dashboards/:id` foi feito), `CHAT-10 hook oferece Desfazer só para a resposta mais recente que alterou o rascunho` (resposta com ações: `undoMessageId` é o id dela; resposta seguinte sem ações: continua o da anterior; resposta seguinte com ações: passa a ser a nova), `CHAT-11 Desfazer devolve o rascunho ao estado anterior à resposta` (`undo()` volta o mesmo objeto de antes e `undoMessageId` some), `CHAT-14 Cancelar durante a resposta aborta e não altera o rascunho` (antes de `planned`), `CHAT-21 falha do provedor mostra a mensagem e Tentar novamente reenvia a mesma mensagem` (`provider_error` `AI_PROVIDER_AUTH`: `failure` com "O provedor de IA recusou a chave configurada" e o id do `accepted`; `retry()` envia o mesmo texto com `retryOf`), `CHAT-22 falha do provedor depois do plano não altera o rascunho` (`planned`, `widget` e depois `provider_error`: o rascunho é o mesmo objeto), `CHAT-26 Descartar mantém a conversa e tira o Desfazer` (trocar o rascunho pelo salvo: `undoMessageId` some e o cache da conversa continua com as mensagens), `CHAT-27 schema não lido mostra a mensagem na conversa` (409 `SCHEMA_NOT_READ`: `failure` com "Leia o schema da conexão antes de usar a IA"), `CHAT-28 sair do dashboard para o pedido` (desmontar e `editing` falso abortam o pedido), `send` chama `ensureEditing` antes do `fetch`
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
@@ -391,8 +391,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes com gesto em `AssistantMessageList.test.tsx`: `HIST-07 conversa carregando mostra esqueleto`, `HIST-08 conversa que não carrega mostra Não foi possível carregar a conversa e Tentar novamente` (clicar chama `onReload`), `CHAT-20 conversa vazia mostra Descreva o que você quer ver ou mudar neste dashboard`, `CHAT-09 resposta mostra o texto e a lista do que mudou` (cada item de `changes` e de `notApplied` em uma linha), `GEN-07 resposta mostra os widgets criados e os títulos com erro` ("3 widgets criados" e "Widgets com erro: Ranking de lojas"), `GEN-12 resposta mostra quantos widgets foram descartados` ("3 widgets descartados: o limite é 20 por pedido"), `CHAT-10 Desfazer aparece só na resposta indicada` (duas respostas com mudanças e `undoMessageId` da segunda: um botão só, na segunda; clicar chama `onUndo`), `HIST-09 respostas antigas aparecem sem Desfazer` (sem `undoMessageId`: nenhum botão "Desfazer"), `CHAT-21 falha mostra a mensagem do provedor e Tentar novamente na mensagem do usuário` (clicar chama `onRetry`), mensagens na ordem recebida
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `AssistantMessageList.test.tsx`: `HIST-07 conversa carregando mostra esqueleto`, `HIST-08 conversa que não carrega mostra Não foi possível carregar a conversa e Tentar novamente` (clicar chama `onReload`), `CHAT-20 conversa vazia mostra Descreva o que você quer ver ou mudar neste dashboard`, `CHAT-09 resposta mostra o texto e a lista do que mudou` (cada item de `changes` e de `notApplied` em uma linha), `GEN-07 resposta mostra os widgets criados e os títulos com erro` ("3 widgets criados" e "Widgets com erro: Ranking de lojas"), `GEN-12 resposta mostra quantos widgets foram descartados` ("3 widgets descartados: o limite é 20 por pedido"), `CHAT-10 Desfazer aparece só na resposta indicada` (duas respostas com mudanças e `undoMessageId` da segunda: um botão só, na segunda; clicar chama `onUndo`), `HIST-09 respostas antigas aparecem sem Desfazer` (sem `undoMessageId`: nenhum botão "Desfazer"), `CHAT-21 falha mostra a mensagem do provedor e Tentar novamente na mensagem do usuário` (clicar chama `onRetry`), mensagens na ordem recebida
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
@@ -411,8 +411,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes com gesto em `AssistantComposer.test.tsx`: `CHAT-15 Enviar fica desabilitado com a mensagem vazia` (vazio e só espaços; digitar "troque para linha" habilita; Enter com o campo vazio não chama `onSubmit`), `CHAT-16 mensagem com mais de 4.000 caracteres mostra A mensagem passa de 4.000 caracteres` (e "Enviar" desabilitado), `CHAT-13 durante a resposta o campo fica desabilitado e mostra Cancelar` (com `running` e sem `progress`: "Pensando..."; clicar em "Cancelar" chama `onCancel`), `GEN-08 durante a geração mostra Gerando widget N de M e Cancelar` (com `progress` `{ index: 2, total: 5 }`: "Gerando widget 2 de 5"), Shift+Enter quebra a linha sem enviar
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `AssistantComposer.test.tsx`: `CHAT-15 Enviar fica desabilitado com a mensagem vazia` (vazio e só espaços; digitar "troque para linha" habilita; Enter com o campo vazio não chama `onSubmit`), `CHAT-16 mensagem com mais de 4.000 caracteres mostra A mensagem passa de 4.000 caracteres` (e "Enviar" desabilitado), `CHAT-13 durante a resposta o campo fica desabilitado e mostra Cancelar` (com `running` e sem `progress`: "Pensando..."; clicar em "Cancelar" chama `onCancel`), `GEN-08 durante a geração mostra Gerando widget N de M e Cancelar` (com `progress` `{ index: 2, total: 5 }`: "Gerando widget 2 de 5"), Shift+Enter quebra a linha sem enviar
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
@@ -431,8 +431,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes com gesto em `AssistantPanel.test.tsx` (MSW): `HIST-04 Limpar conversa pede confirmação com Apagar toda a conversa deste dashboard?` ("Cancelar" fecha sem requisição), `HIST-05 confirmar a limpeza apaga a conversa do painel` (o `DELETE` sai e o painel mostra o estado vazio), `CHAT-19 conversa rola com a mais recente embaixo e o campo fixo` (a lista está num contêiner com `overflow-y-auto` e `flex-1`, o `textarea` fica fora dele, depois do contêiner; ao chegar uma mensagem nova, `scrollIntoView` é chamado no último item), sem provedor o composer fica desabilitado com "Nenhum provedor de IA configurado"
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `AssistantPanel.test.tsx` (MSW): `HIST-04 Limpar conversa pede confirmação com Apagar toda a conversa deste dashboard?` ("Cancelar" fecha sem requisição), `HIST-05 confirmar a limpeza apaga a conversa do painel` (o `DELETE` sai e o painel mostra o estado vazio), `CHAT-19 conversa rola com a mais recente embaixo e o campo fixo` (a lista está num contêiner com `overflow-y-auto` e `flex-1`, o `textarea` fica fora dele, depois do contêiner; ao chegar uma mensagem nova, `scrollIntoView` é chamado no último item), sem provedor o composer fica desabilitado com "Nenhum provedor de IA configurado"
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
@@ -451,9 +451,9 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes com gesto em `AssistantDashboard.test.tsx` (página do dashboard, MSW): `CHAT-01 Assistente abre e fecha o painel à direita` (clicar abre o `aside` "Assistente", depois da grade na ordem do documento; clicar de novo fecha), `CHAT-02 painel aberto deixa a grade na largura restante` (painel e grade são irmãos num contêiner `flex`; a grade tem `min-w-0` e `flex-1`; o painel não tem `absolute` nem `fixed`; com `mockElementSize` de 816 px no contêiner da grade, a grade usa 816 px), `CHAT-03 painel volta aberto ou fechado como foi deixado neste navegador` (fechar, desmontar e abrir de novo: fechado; abrir, desmontar e abrir: aberto; `localStorage` que lança erro não quebra a página), `CHAT-04 enviar em visualização entra no modo de edição e aplica no rascunho` (fora da edição, enviar "troque para linha": a página entra em edição e o widget mostra a mudança do `done`), `CHAT-18 Assistente aparece só para Admin e Editor que podem editar` (Visualizador e Editor com "pode ver" não veem o botão; dono, Editor com "pode editar" e Admin veem), `CHAT-25 Pedir à IA fica desabilitado em todos os widgets enquanto o assistente responde` (com o stream aberto, o item "Pedir à IA" de cada card está desabilitado; depois do `done`, habilitado), `CHAT-30 trocar de aba mantém o painel aberto e a conversa` (trocar para a 2ª aba: o painel e as mensagens continuam na tela), `HIST-02 reabrir o dashboard mostra a conversa` (com o `GET` devolvendo duas mensagens, abrir a página com o painel aberto mostra as duas na ordem)
-- [ ] Testes de `DashboardPage`, `WidgetCard` e `AskAiWidget` de `dashboards-consultas`, `widgets-graficos`, `ia-cypher` e `interatividade` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `AssistantDashboard.test.tsx` (página do dashboard, MSW): `CHAT-01 Assistente abre e fecha o painel à direita` (clicar abre o `aside` "Assistente", depois da grade na ordem do documento; clicar de novo fecha), `CHAT-02 painel aberto deixa a grade na largura restante` (painel e grade são irmãos num contêiner `flex`; a grade tem `min-w-0` e `flex-1`; o painel não tem `absolute` nem `fixed`; com `mockElementSize` de 816 px no contêiner da grade, a grade usa 816 px), `CHAT-03 painel volta aberto ou fechado como foi deixado neste navegador` (fechar, desmontar e abrir de novo: fechado; abrir, desmontar e abrir: aberto; `localStorage` que lança erro não quebra a página), `CHAT-04 enviar em visualização entra no modo de edição e aplica no rascunho` (fora da edição, enviar "troque para linha": a página entra em edição e o widget mostra a mudança do `done`), `CHAT-18 Assistente aparece só para Admin e Editor que podem editar` (Visualizador e Editor com "pode ver" não veem o botão; dono, Editor com "pode editar" e Admin veem), `CHAT-25 Pedir à IA fica desabilitado em todos os widgets enquanto o assistente responde` (com o stream aberto, o item "Pedir à IA" de cada card está desabilitado; depois do `done`, habilitado), `CHAT-30 trocar de aba mantém o painel aberto e a conversa` (trocar para a 2ª aba: o painel e as mensagens continuam na tela), `HIST-02 reabrir o dashboard mostra a conversa` (com o `GET` devolvendo duas mensagens, abrir a página com o painel aberto mostra as duas na ordem)
+- [x] Testes de `DashboardPage`, `WidgetCard` e `AskAiWidget` de `dashboards-consultas`, `widgets-graficos`, `ia-cypher` e `interatividade` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
@@ -472,9 +472,9 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes com gesto em `DescribeDashboard.test.tsx` (MSW): `GEN-01 Novo dashboard oferece Descrever para a IA com Nome, Conexão e Descrição` (as duas opções aparecem; "Em branco" continua com "Nome" e "Conexão" como antes), `GEN-10 Descrição vazia ou longa mostra a mensagem no campo` ("Informe a descrição" e "A descrição passa de 4.000 caracteres", sem `POST`), `GEN-11 sem provedor Descrever para a IA fica desabilitado com Nenhum provedor de IA configurado`, `GEN-02 Descrever para a IA cria o dashboard e abre o assistente com a descrição como primeira mensagem` (o `POST /api/dashboards` leva nome e conexão; a página abre em edição com o painel aberto; o `POST .../assistant/messages` leva a descrição como `message`; a mensagem aparece na conversa; a sidebar é invalidada; recarregar a página não envia de novo), `GEN-14 falha da geração inicial mantém o dashboard vazio em edição com o erro na conversa` (`provider_error` no stream: a página continua em edição com "Esta aba está vazia", a mensagem do provedor e "Tentar novamente" na conversa)
-- [ ] Testes de `NewDashboardDialog` de `dashboards-consultas` continuam verdes
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] Testes com gesto em `DescribeDashboard.test.tsx` (MSW): `GEN-01 Novo dashboard oferece Descrever para a IA com Nome, Conexão e Descrição` (as duas opções aparecem; "Em branco" continua com "Nome" e "Conexão" como antes), `GEN-10 Descrição vazia ou longa mostra a mensagem no campo` ("Informe a descrição" e "A descrição passa de 4.000 caracteres", sem `POST`), `GEN-11 sem provedor Descrever para a IA fica desabilitado com Nenhum provedor de IA configurado`, `GEN-02 Descrever para a IA cria o dashboard e abre o assistente com a descrição como primeira mensagem` (o `POST /api/dashboards` leva nome e conexão; a página abre em edição com o painel aberto; o `POST .../assistant/messages` leva a descrição como `message`; a mensagem aparece na conversa; a sidebar é invalidada; recarregar a página não envia de novo), `GEN-14 falha da geração inicial mantém o dashboard vazio em edição com o erro na conversa` (`provider_error` no stream: a página continua em edição com "Esta aba está vazia", a mensagem do provedor e "Tentar novamente" na conversa)
+- [x] Testes de `NewDashboardDialog` de `dashboards-consultas` continuam verdes
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: unit
 **Gate**: build
@@ -682,7 +682,7 @@ Proof: run api | ✓ CHAT-29 log de cada pedido tem usuário, dashboard, ações
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** none
+**Dispatched:** lote 1 (T1-T7, sonnet) - returned (ab6f4a6). Lote 2 (T8-T13, sonnet) - returned (473c49b). Lote 3 (T14-T18, sonnet) - returned (9734a23). Verifier (haiku) sobre 9734a23 - returned: FAIL, 6 findings fechados (a0e5a2d..eb2b2ab; AD-139). Round 2: 87 pass / 0 fail em 28c3007; `validate_verification.py` exit 0. Feature encerrada. Executada no worktree NinBI-wt-ia (branch feat/interatividade-ia-dashboard).
 **Walked:** dispensado por AD-023
 
 ---

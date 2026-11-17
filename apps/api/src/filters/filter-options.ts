@@ -21,7 +21,7 @@ export function optionsFromResult(result: QueryResultDto): FilterOptionsDto {
   for (const row of result.rows) {
     const option = toOption(row[0] ?? null)
     if (option === null) continue
-    const key = `${typeof option}:${option}`
+    const key = String(option)
     if (seen.has(key)) continue
     seen.add(key)
     if (options.length === FILTER_OPTIONS_MAX) {

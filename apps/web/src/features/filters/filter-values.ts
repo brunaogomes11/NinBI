@@ -83,11 +83,34 @@ export function widgetsUsingFilter(
     .length
 }
 
+/** Opções sem repetidas por texto (`1` e `'1'` são a mesma opção), na ordem da primeira aparição. */
+export function uniqueOptions<T extends string | number | boolean>(
+  options: readonly T[],
+): T[] {
+  const seen = new Set<string>()
+  return options.filter((option) => {
+    const key = String(option)
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+/** Linhas da lista fixa: sem espaços nas pontas, sem vazias e sem repetidas. */
+export function parseStaticOptions(text: string): string[] {
+  return uniqueOptions(
+    text
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line !== ''),
+  )
+}
+
 export type NumberInputResult =
   | { ok: true; value: number | null }
   | { ok: false; message: string }
 
-/** Aceita `1234,5`, `1.234,5` e `1234.5`; vazio é `null`. */
+/** Aceita `1234`, `1234,5`, `1.234,5` e `1234.5`; recusa `1.234` (milhar ambíguo); vazio é `null`. */
 export function parseNumberInput(text: string): NumberInputResult {
   const trimmed = text.trim()
   if (trimmed === '') return { ok: true, value: null }
@@ -97,6 +120,8 @@ export function parseNumberInput(text: string): NumberInputResult {
     if (!/^-?\d{1,3}(\.\d{3})*,\d+$|^-?\d+,\d+$/.test(trimmed)) return invalid
     normalized = trimmed.replace(/\./g, '').replace(',', '.')
   } else if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+    // `1.234` e `1.000` seguem o padrão de milhar pt-BR: ambíguo, então recusa (AD-138).
+    if (/^-?[1-9]\d{0,2}(\.\d{3})+$/.test(trimmed)) return invalid
     normalized = trimmed
   } else {
     return invalid

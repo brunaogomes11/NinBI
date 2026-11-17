@@ -20,7 +20,7 @@ export const DEFAULT_LLM_CALL_TIMEOUT_MS = 60_000
 
 export interface LlmCallContext {
   userId: string
-  purpose: 'widget' | 'test'
+  purpose: 'widget' | 'test' | 'assistant'
   attempt: number | null
   signal?: AbortSignal
 }

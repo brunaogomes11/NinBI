@@ -50,6 +50,13 @@
       "when": 1794879241222,
       "tag": "0006_fontes_sql",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794908517524,
+      "tag": "0007_assistant_messages",
+      "breakpoints": true
     }
   ]
 }

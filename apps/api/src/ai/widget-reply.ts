@@ -21,7 +21,7 @@ export interface NormalizedReply {
 }
 
 /** Fim do objeto JSON que começa em `start`, respeitando textos entre aspas; -1 se não fecha. */
-function balancedEnd(text: string, start: number): number {
+export function balancedEnd(text: string, start: number): number {
   let depth = 0
   let inString = false
   for (let i = start; i < text.length; i++) {

@@ -21,9 +21,13 @@ export async function createDbBeforeFontesSql() {
   const journal = JSON.parse(readFileSync(journalPath, 'utf8')) as {
     entries: { tag: string }[]
   }
-  journal.entries = journal.entries.filter(
-    (entry) => entry.tag !== FONTES_SQL_TAG,
+  // Tudo a partir da 0006 fica de fora: o migrador do drizzle ignora uma
+  // migração mais antiga que a última já aplicada, então uma migração posterior
+  // aplicada antes faria `applyFontesSql` não aplicar a 0006.
+  const fontesSqlIndex = journal.entries.findIndex(
+    (entry) => entry.tag === FONTES_SQL_TAG,
   )
+  journal.entries = journal.entries.slice(0, fontesSqlIndex)
   writeFileSync(journalPath, JSON.stringify(journal))
 
   const client = new PGlite()

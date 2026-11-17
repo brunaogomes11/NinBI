@@ -50,6 +50,16 @@ describe('csv', () => {
     )
   })
 
+  it('EXP-03 texto que só começa com uma data fica como texto, sem perder o resto', () => {
+    const csv = toCsv(
+      resultOf(
+        ['a', 'b', 'c'],
+        [['2026-01-05 reunião', '2026-13-45', '2026-01-05T10:00:00Z']],
+      ),
+    )
+    expect(body(csv)[1]).toBe('2026-01-05 reunião;2026-13-45;05/01/2026')
+  })
+
   it('EXP-04 texto com ponto e vírgula, aspas ou quebra de linha vai entre aspas', () => {
     const csv = toCsv(
       resultOf(['x'], [['a;b'], ['diz "oi"'], ['linha1\nlinha2']]),

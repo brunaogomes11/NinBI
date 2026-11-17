@@ -1,6 +1,11 @@
-import type { DashboardFilter, SidebarLayoutInput } from '@ninbi/contracts'
+import type {
+  AssistantReplyDetails,
+  DashboardFilter,
+  SidebarLayoutInput,
+} from '@ninbi/contracts'
 import { sql } from 'drizzle-orm'
 import {
+  bigint,
   boolean,
   check,
   index,
@@ -49,6 +54,7 @@ export const shareRecipientTypeEnum = pgEnum('share_recipient_type', [
   'EVERYONE',
 ])
 export const sharePermissionEnum = pgEnum('share_permission', ['view', 'edit'])
+export const assistantRoleEnum = pgEnum('assistant_role', ['USER', 'ASSISTANT'])
 
 const timestamptz = (name: string) =>
   timestamp(name, { withTimezone: true, mode: 'date' })
@@ -307,6 +313,31 @@ export const llmSettings = pgTable(
   (table) => [check('llm_settings_single_row', sql`${table.id} = 1`)],
 )
 
+export const assistantMessages = pgTable(
+  'assistant_messages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    seq: bigint('seq', { mode: 'number' }).generatedAlwaysAsIdentity(),
+    dashboardId: uuid('dashboard_id')
+      .notNull()
+      .references(() => dashboards.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: assistantRoleEnum('role').notNull(),
+    text: text('text').notNull(),
+    details: jsonb('details').$type<AssistantReplyDetails>(),
+    createdAt: timestamptz('created_at').notNull(),
+  },
+  (table) => [
+    index('assistant_messages_dashboard_user_seq_idx').on(
+      table.dashboardId,
+      table.userId,
+      table.seq,
+    ),
+  ],
+)
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type SessionRow = typeof sessions.$inferSelect
@@ -316,3 +347,4 @@ export type WidgetRow = typeof widgets.$inferSelect
 export type LlmSettingsRow = typeof llmSettings.$inferSelect
 export type TeamRow = typeof teams.$inferSelect
 export type DashboardShareRow = typeof dashboardShares.$inferSelect
+export type AssistantMessageRow = typeof assistantMessages.$inferSelect

@@ -197,6 +197,25 @@ describe('FilterEditorDialog', () => {
     expect(loaded.getByText('Livros')).toBeInTheDocument()
   })
 
+  it('FLT-24 lista fixa com linhas repetidas grava cada opção uma vez', async () => {
+    const puts: DashboardSaveInput[] = []
+    const app = open(dashboardWith({ filters: [] }), puts)
+    const dialog = await openNew(app)
+    await app.user.type(dialog.getByLabelText('Rótulo'), 'Categoria')
+    await app.user.type(dialog.getByLabelText('Parâmetro'), 'categoria')
+    await chooseType(app, 'Seleção única')
+    await app.user.type(
+      dialog.getByLabelText('Opções (uma por linha)'),
+      'A{Enter}B{Enter}A',
+    )
+    await app.user.click(dialog.getByRole('button', { name: 'Aplicar' }))
+    await app.user.click(await screen.findByRole('button', { name: 'Salvar' }))
+    await waitFor(() => expect(puts).toHaveLength(1))
+    expect(puts[0]?.filters?.[0]).toMatchObject({
+      options: { source: 'STATIC', values: ['A', 'B'] },
+    })
+  })
+
   it('FLT-17 Aplicar e Salvar enviam o filtro novo no PUT', async () => {
     const puts: DashboardSaveInput[] = []
     const app = open(dashboardWith({ filters: [] }), puts)

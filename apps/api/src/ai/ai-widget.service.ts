@@ -2,12 +2,16 @@ import { AIMessage, type BaseMessage } from '@langchain/core/messages'
 import { Inject, Injectable } from '@nestjs/common'
 import {
   AI_MAX_ATTEMPTS,
+  type AiProviderErrorCode,
   type AiWidgetEvent,
   type AiWidgetRequest,
   type ConnectionSchemaDto,
   can,
+  type FilterPromptInfo,
   MESSAGES,
+  type QueryResultDto,
   type Role,
+  type WidgetVisualization,
 } from '@ninbi/contracts'
 import { AppError } from '../common/app-error'
 import type { LlmSnapshot } from '../llm/chat-model.factory'
@@ -21,6 +25,7 @@ import { QueryService } from '../queries/query.service'
 import { SchemaQueryService } from '../schema/schema-query.service'
 import {
   buildWidgetMessages,
+  type CurrentWidget,
   correctionMessage,
   type QueryErrorInfo,
 } from './widget-prompt'
@@ -36,6 +41,35 @@ export interface PreparedGeneration {
   schema: ConnectionSchemaDto
   body: AiWidgetBody
 }
+
+export interface GenerateInput {
+  userId: string
+  snapshot: LlmSnapshot
+  schema: ConnectionSchemaDto
+  connectionId: string
+  widget: CurrentWidget
+  /** Só para o log da consulta. */
+  widgetId?: string
+  prompt: string
+  filters: FilterPromptInfo[]
+  purpose: 'widget' | 'assistant'
+  signal: AbortSignal
+  onAttempt?: (attempt: number) => void
+}
+
+export type WidgetGenerationOutcome =
+  | {
+      kind: 'done'
+      attempts: number
+      cypher: string
+      visualization: WidgetVisualization
+      mapping: Record<string, unknown> | null
+      title: string
+      result: QueryResultDto
+    }
+  | { kind: 'failed'; attempts: number; cypher: string | null; message: string }
+  | { kind: 'stopped'; message: string }
+  | { kind: 'provider_error'; code: AiProviderErrorCode; message: string }
 
 /** Gera o widget com o LLM e corrige o Cypher até 3 vezes (AIQ-06 a AIQ-13, FIX-01 a FIX-10). */
 @Injectable()
@@ -81,42 +115,40 @@ export class AiWidgetService {
     }
   }
 
-  async run(
-    prepared: PreparedGeneration,
-    emit: (event: AiWidgetEvent) => void,
-    signal: AbortSignal,
-  ): Promise<void> {
-    const { body, snapshot, schema, connectionId, userId } = prepared
+  /**
+   * O laço de até 4 chamadas, sem HTTP: valida, executa e corrige o Cypher (AD-084). Cancelar lança
+   * `LlmCancelledError`; o chamador decide o que fazer.
+   */
+  async generate(input: GenerateInput): Promise<WidgetGenerationOutcome> {
+    const { snapshot, schema, connectionId, userId, signal } = input
     const messages: BaseMessage[] = buildWidgetMessages({
       schema,
-      widget: body.widget,
-      prompt: body.prompt,
-      filters: body.filters,
+      widget: input.widget,
+      prompt: input.prompt,
+      filters: input.filters,
     })
     let lastCypher: string | null = null
     let lastMessage: string = MESSAGES.aiNoCypher
 
     for (let attempt = 1; attempt <= AI_MAX_ATTEMPTS; attempt++) {
-      if (signal.aborted) return
-      emit({ type: 'attempt', attempt, maxAttempts: AI_MAX_ATTEMPTS })
+      if (signal.aborted) throw new LlmCancelledError()
+      input.onAttempt?.(attempt)
 
       let text: string
       try {
         text = await this.llm.call(snapshot, messages, {
           userId,
-          purpose: 'widget',
+          purpose: input.purpose,
           attempt,
           signal,
         })
       } catch (error) {
-        if (error instanceof LlmCancelledError) return
         if (error instanceof LlmProviderError) {
-          emit({
-            type: 'provider_error',
+          return {
+            kind: 'provider_error',
             code: error.code,
             message: error.message,
-          })
-          return
+          }
         }
         throw error
       }
@@ -126,32 +158,30 @@ export class AiWidgetService {
       if (!parsed.ok) {
         failure = { code: 'AI_NO_CYPHER', message: MESSAGES.aiNoCypher }
       } else {
-        const reply = normalizeWidgetReply(parsed.reply, body.widget)
+        const reply = normalizeWidgetReply(parsed.reply, input.widget)
         lastCypher = reply.cypher
         try {
           const result = await this.queries.run({
             userId,
             connectionId,
             cypher: reply.cypher,
-            widgetId: body.widgetId,
+            widgetId: input.widgetId,
             signal,
           })
-          emit({
-            type: 'done',
+          return {
+            kind: 'done',
             attempts: attempt,
             cypher: reply.cypher,
             visualization: reply.visualization,
             mapping: reply.mapping,
             title: reply.title,
             result,
-          })
-          return
+          }
         } catch (error) {
-          if (signal.aborted) return
+          if (signal.aborted) throw new LlmCancelledError()
           if (!(error instanceof AppError)) throw error
           if (error.code === 'NEO4J_UNAVAILABLE') {
-            emit({ type: 'stopped', message: error.message })
-            return
+            return { kind: 'stopped', message: error.message }
           }
           failure = {
             code: error.code,
@@ -164,11 +194,69 @@ export class AiWidgetService {
       messages.push(new AIMessage(text), correctionMessage(failure))
     }
 
-    emit({
-      type: 'failed',
+    return {
+      kind: 'failed',
       attempts: AI_MAX_ATTEMPTS,
       cypher: lastCypher,
       message: lastMessage,
-    })
+    }
+  }
+
+  async run(
+    prepared: PreparedGeneration,
+    emit: (event: AiWidgetEvent) => void,
+    signal: AbortSignal,
+  ): Promise<void> {
+    const { body, snapshot, schema, connectionId, userId } = prepared
+    let outcome: WidgetGenerationOutcome
+    try {
+      outcome = await this.generate({
+        userId,
+        snapshot,
+        schema,
+        connectionId,
+        widget: body.widget,
+        widgetId: body.widgetId,
+        prompt: body.prompt,
+        filters: body.filters ?? [],
+        purpose: 'widget',
+        signal,
+        onAttempt: (attempt) =>
+          emit({ type: 'attempt', attempt, maxAttempts: AI_MAX_ATTEMPTS }),
+      })
+    } catch (error) {
+      if (error instanceof LlmCancelledError) return
+      throw error
+    }
+    switch (outcome.kind) {
+      case 'done':
+        emit({
+          type: 'done',
+          attempts: outcome.attempts,
+          cypher: outcome.cypher,
+          visualization: outcome.visualization,
+          mapping: outcome.mapping,
+          title: outcome.title,
+          result: outcome.result,
+        })
+        return
+      case 'failed':
+        emit({
+          type: 'failed',
+          attempts: outcome.attempts,
+          cypher: outcome.cypher,
+          message: outcome.message,
+        })
+        return
+      case 'stopped':
+        emit({ type: 'stopped', message: outcome.message })
+        return
+      case 'provider_error':
+        emit({
+          type: 'provider_error',
+          code: outcome.code,
+          message: outcome.message,
+        })
+    }
   }
 }

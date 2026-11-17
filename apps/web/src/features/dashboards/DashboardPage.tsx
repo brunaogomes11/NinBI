@@ -6,9 +6,9 @@ import {
   MESSAGES,
 } from '@ninbi/contracts'
 import { useQueryClient } from '@tanstack/react-query'
-import { MoreHorizontal, RefreshCw, Share2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { MoreHorizontal, RefreshCw, Share2, Sparkles } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +38,9 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { useAiStatus } from '@/features/ai/api'
 import { useAiGenerations } from '@/features/ai/useAiGenerations'
+import { AssistantPanel } from '@/features/assistant/AssistantPanel'
+import { useAssistantMessages } from '@/features/assistant/api'
+import { useAssistant } from '@/features/assistant/useAssistant'
 import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
 import { FilterBar } from '@/features/filters/FilterBar'
@@ -93,6 +96,31 @@ function NotFound() {
       </Link>
     </Card>
   )
+}
+
+const ASSISTANT_OPEN_KEY = 'ninbi-assistant-open'
+
+function readAssistantOpen(): boolean {
+  try {
+    return localStorage.getItem(ASSISTANT_OPEN_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function writeAssistantOpen(open: boolean) {
+  try {
+    localStorage.setItem(ASSISTANT_OPEN_KEY, open ? '1' : '0')
+  } catch {
+    // sem armazenamento o painel só não lembra (CHAT-03)
+  }
+}
+
+/** A descrição de "Descrever para a IA" que veio na navegação (GEN-02). */
+function promptFromState(state: unknown): string | null {
+  if (typeof state !== 'object' || state === null) return null
+  const prompt = (state as { assistantPrompt?: unknown }).assistantPrompt
+  return typeof prompt === 'string' && prompt.trim() !== '' ? prompt : null
 }
 
 function isNotFound(error: unknown): boolean {
@@ -204,11 +232,54 @@ function DashboardViewBody({
   const [newWidgetId, setNewWidgetId] = useState<string | null>(null)
   const canUseAi = sessionUser ? can(sessionUser.role, 'ai.use') : false
   const aiStatus = useAiStatus(draft !== null && canUseAi)
+  const canUseAssistant = canUseAi && dashboard.permissions.edit
+  const location = useLocation()
+  const navigate = useNavigate()
+  const initialPrompt = useRef<string | null>(promptFromState(location.state))
+  const [assistantOpen, setAssistantOpen] = useState(
+    () => initialPrompt.current !== null || readAssistantOpen(),
+  )
+  // A conversa carrega antes do primeiro envio, para a mensagem aceita não se perder (GEN-02).
+  const conversation = useAssistantMessages(
+    dashboard.id,
+    canUseAssistant && (assistantOpen || initialPrompt.current !== null),
+  )
+  const assistant = useAssistant({
+    dashboardId: dashboard.id,
+    draft,
+    setDraft: editor.change,
+    ensureEditing: () => {
+      if (!draft) editor.start()
+    },
+    editing: draft !== null,
+  })
+  const conversationReady = conversation.status === 'success'
+  const { send: sendToAssistant } = assistant
+  // O pedido inicial sai uma vez e a navegação perde o estado, então recarregar não reenvia (GEN-02).
+  useEffect(() => {
+    const prompt = initialPrompt.current
+    if (!prompt || !canUseAssistant || !conversationReady) return
+    initialPrompt.current = null
+    writeAssistantOpen(true)
+    navigate(
+      { pathname: location.pathname, search: location.search },
+      { replace: true, state: null },
+    )
+    sendToAssistant(prompt)
+  }, [
+    canUseAssistant,
+    conversationReady,
+    navigate,
+    location.pathname,
+    location.search,
+    sendToAssistant,
+  ])
   const ai = useAiGenerations({
     dashboardId: dashboard.id,
     draft,
     setDraft: editor.change,
     editing: draft !== null,
+    assistantBusy: assistant.running,
     onFailed: (widgetId, failure) => {
       setAiFailure({ widgetId, ...failure })
       setEditingWidgetId(widgetId)
@@ -359,6 +430,20 @@ function DashboardViewBody({
               {MESSAGES.shareTitle}
             </Button>
           )}
+          {canUseAssistant && (
+            <Button
+              type="button"
+              variant="outline"
+              aria-pressed={assistantOpen}
+              onClick={() => {
+                setAssistantOpen(!assistantOpen)
+                writeAssistantOpen(!assistantOpen)
+              }}
+            >
+              <Sparkles aria-hidden="true" />
+              {MESSAGES.assistantToggle}
+            </Button>
+          )}
           <RefreshControl
             value={draft ? draft.refreshIntervalSec : session.intervalSec}
             onChange={(sec) =>
@@ -411,112 +496,135 @@ function DashboardViewBody({
           {editor.saveError}
         </p>
       )}
-      {shownTab && (
-        <>
-          <DashboardTabsBar
-            tabs={tabs}
-            activeTabId={shownTab.id}
-            onSelect={setSelectedTabId}
-            edit={
-              draft
-                ? {
-                    onAdd: () => {
-                      const id = crypto.randomUUID()
-                      editor.change((current) => addTab(current, id))
-                      setSelectedTabId(id)
-                    },
-                    onRename: (tabId, name) =>
-                      editor.change((current) =>
-                        renameTab(current, tabId, name),
-                      ),
-                    onRemove: (tabId) =>
-                      editor.change((current) => removeTab(current, tabId)),
+      <div className="flex items-start gap-4">
+        <div
+          data-slot="dashboard-main"
+          className="flex min-w-0 flex-1 flex-col gap-4"
+        >
+          {shownTab && (
+            <>
+              <DashboardTabsBar
+                tabs={tabs}
+                activeTabId={shownTab.id}
+                onSelect={setSelectedTabId}
+                edit={
+                  draft
+                    ? {
+                        onAdd: () => {
+                          const id = crypto.randomUUID()
+                          editor.change((current) => addTab(current, id))
+                          setSelectedTabId(id)
+                        },
+                        onRename: (tabId, name) =>
+                          editor.change((current) =>
+                            renameTab(current, tabId, name),
+                          ),
+                        onRemove: (tabId) =>
+                          editor.change((current) => removeTab(current, tabId)),
+                      }
+                    : undefined
+                }
+              />
+              <DashboardGrid
+                key={shownTab.id}
+                dashboardId={dashboard.id}
+                version={dashboard.version}
+                widgets={shownTab.widgets}
+                edit={
+                  draft && shownTab
+                    ? {
+                        connectionId: draft.connectionId,
+                        onLayoutChange: (layouts) =>
+                          editor.change((current) =>
+                            setLayout(current, shownTab.id, layouts),
+                          ),
+                        onEditWidget: setEditingWidgetId,
+                        ai: canUseAi
+                          ? {
+                              available: aiStatus.data?.configured === true,
+                              busy: assistant.running,
+                              stateOf: ai.stateOf,
+                              start: (widgetId, prompt) =>
+                                void ai.start(widgetId, prompt),
+                              cancel: ai.cancel,
+                            }
+                          : undefined,
+                        onRemoveWidget: (widgetId) =>
+                          editor.change((current) =>
+                            removeWidget(current, shownTab.id, widgetId),
+                          ),
+                        onAddWidget: () => {
+                          const id = crypto.randomUUID()
+                          editor.change((current) =>
+                            addWidget(current, shownTab.id, id),
+                          )
+                          setEditingWidgetId(id)
+                          setNewWidgetId(id)
+                        },
+                      }
+                    : undefined
+                }
+              />
+              {editingWidget && draft && (
+                <WidgetEditorDialog
+                  key={editingWidget.id}
+                  dashboardId={dashboard.id}
+                  connectionId={draft.connectionId}
+                  widget={editingWidget}
+                  initialCypher={
+                    aiFailure?.widgetId === editingWidget.id
+                      ? (aiFailure.cypher ?? undefined)
+                      : undefined
                   }
-                : undefined
-            }
-          />
-          <DashboardGrid
-            key={shownTab.id}
-            dashboardId={dashboard.id}
-            version={dashboard.version}
-            widgets={shownTab.widgets}
-            edit={
-              draft && shownTab
-                ? {
-                    connectionId: draft.connectionId,
-                    onLayoutChange: (layouts) =>
-                      editor.change((current) =>
-                        setLayout(current, shownTab.id, layouts),
+                  initialError={
+                    aiFailure?.widgetId === editingWidget.id
+                      ? aiFailure.message
+                      : undefined
+                  }
+                  onApply={(changes) =>
+                    editor.change((current) =>
+                      updateWidget(
+                        current,
+                        shownTab.id,
+                        editingWidget.id,
+                        changes,
                       ),
-                    onEditWidget: setEditingWidgetId,
-                    ai: canUseAi
+                    )
+                  }
+                  ai={
+                    canUseAi && newWidgetId === editingWidget.id
                       ? {
                           available: aiStatus.data?.configured === true,
-                          stateOf: ai.stateOf,
-                          start: (widgetId, prompt) =>
-                            void ai.start(widgetId, prompt),
-                          cancel: ai.cancel,
+                          state: ai.stateOf(editingWidget.id),
+                          onStart: (prompt) => {
+                            setAiFailure(null)
+                            void ai.start(editingWidget.id, prompt)
+                          },
+                          onCancel: () => ai.cancel(editingWidget.id),
                         }
-                      : undefined,
-                    onRemoveWidget: (widgetId) =>
-                      editor.change((current) =>
-                        removeWidget(current, shownTab.id, widgetId),
-                      ),
-                    onAddWidget: () => {
-                      const id = crypto.randomUUID()
-                      editor.change((current) =>
-                        addWidget(current, shownTab.id, id),
-                      )
-                      setEditingWidgetId(id)
-                      setNewWidgetId(id)
-                    },
+                      : undefined
                   }
-                : undefined
-            }
-          />
-          {editingWidget && draft && (
-            <WidgetEditorDialog
-              key={editingWidget.id}
-              dashboardId={dashboard.id}
-              connectionId={draft.connectionId}
-              widget={editingWidget}
-              initialCypher={
-                aiFailure?.widgetId === editingWidget.id
-                  ? (aiFailure.cypher ?? undefined)
-                  : undefined
-              }
-              initialError={
-                aiFailure?.widgetId === editingWidget.id
-                  ? aiFailure.message
-                  : undefined
-              }
-              onApply={(changes) =>
-                editor.change((current) =>
-                  updateWidget(current, shownTab.id, editingWidget.id, changes),
-                )
-              }
-              ai={
-                canUseAi && newWidgetId === editingWidget.id
-                  ? {
-                      available: aiStatus.data?.configured === true,
-                      state: ai.stateOf(editingWidget.id),
-                      onStart: (prompt) => {
-                        setAiFailure(null)
-                        void ai.start(editingWidget.id, prompt)
-                      },
-                      onCancel: () => ai.cancel(editingWidget.id),
-                    }
-                  : undefined
-              }
-              onClose={() => {
-                setEditingWidgetId(null)
-                setNewWidgetId(null)
-                setAiFailure(null)
-              }}
-            />
+                  onClose={() => {
+                    setEditingWidgetId(null)
+                    setNewWidgetId(null)
+                    setAiFailure(null)
+                  }}
+                />
+              )}
+            </>
           )}
-        </>
-      )}
+        </div>
+        {canUseAssistant && assistantOpen && (
+          <AssistantPanel
+            dashboardId={dashboard.id}
+            assistant={assistant}
+            onClose={() => {
+              setAssistantOpen(false)
+              writeAssistantOpen(false)
+            }}
+          />
+        )}
+      </div>
       <AlertDialog
         open={editor.discardOpen}
         onOpenChange={editor.setDiscardOpen}

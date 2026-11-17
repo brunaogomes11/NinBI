@@ -746,6 +746,22 @@
 - **Date**: 2026-11-16
 - **Status**: active
 
+### AD-138 (active)
+- **Decision**: O campo numérico de um filtro recusa, com `MESSAGES.filterNumberInvalid` ("Digite um número"), o texto sem vírgula no padrão de milhar pt-BR (`1.234`, `1.000`, `12.345`, `1.234.567`). Aceita `1234`, `-3`, `1234,5`, `1.234,5` e `1234.5`; `0.001` e `1.5` seguem como decimais.
+- **Reason**: Verificação de `interatividade` (F4): `1.234` virava 1,234 e `1.000` virava 1 sem aviso, um erro silencioso para quem digita no padrão brasileiro. Recusar evita adivinhar a intenção. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Quem queria `1.234` como decimal (ponto) precisa digitar `1,234`.
+- **Scope**: interatividade.
+- **Date**: 2026-11-17
+- **Status**: active
+
+### AD-139 (active)
+- **Decision**: Em CHAT-10, "a resposta mais recente do assistente [que] alterou o rascunho" é lida como a resposta mais recente QUE alterou o rascunho. O "Desfazer" fica nessa resposta até o rascunho mudar, mesmo que uma resposta posterior sem ações venha depois; a guarda `draft === after` esconde o botão quando o rascunho foi editado à mão ou descartado, e só uma resposta tem o botão por vez.
+- **Reason**: Verificação de `ia-dashboard`: o texto do AC admitia a leitura "a última resposta, se alterou". Uma resposta sem ações (por exemplo, uma pergunta) não deve tirar de quem pediu a chance de desfazer a mudança anterior, e a guarda de identidade já impede desfazer sobre edições manuais. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Depois de uma resposta sem ações, o "Desfazer" aparece numa resposta que não é a última da conversa.
+- **Scope**: ia-dashboard.
+- **Date**: 2026-11-17
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:

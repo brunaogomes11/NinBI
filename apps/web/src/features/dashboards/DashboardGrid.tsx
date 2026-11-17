@@ -42,6 +42,7 @@ export interface GridEdit extends WidgetEditSource {
 /** A IA dos widgets da grade: um estado e um pedido por widget. */
 export interface GridAi {
   available: boolean
+  busy?: boolean
   stateOf: (widgetId: string) => AiGenerationState
   start: (widgetId: string, prompt: string) => void
   cancel: (widgetId: string) => void
@@ -116,6 +117,7 @@ export function DashboardGrid({
                     onRemove: () => edit.onRemoveWidget(widget.id),
                     ai: edit.ai && {
                       available: edit.ai.available,
+                      busy: edit.ai.busy,
                       state: edit.ai.stateOf(widget.id),
                       onStart: (prompt) => edit.ai?.start(widget.id, prompt),
                       onCancel: () => edit.ai?.cancel(widget.id),

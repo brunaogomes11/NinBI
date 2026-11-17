@@ -19,6 +19,7 @@ describe('schema do banco', () => {
       .map((row) => row.table_name)
       .filter((name) => !name.startsWith('__'))
     expect(names).toEqual([
+      'assistant_messages',
       'connection_schemas',
       'connections',
       'dashboard_shares',
