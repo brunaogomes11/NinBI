@@ -290,5 +290,5 @@ Proof: run api | ✓ ASQ-06 consulta SQL gerada é validada, executada e corrigi
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** fases 1 e 2 returned; check_proofs verde em 1d86f9f (19 pass); Verifier (haiku) enviado
+**Dispatched:** fases 1 e 2 returned; check_proofs verde em 1d86f9f; Verifier (haiku) returned FAIL; correção dos achados (sonnet) em f02691f
 **Walked:** none
