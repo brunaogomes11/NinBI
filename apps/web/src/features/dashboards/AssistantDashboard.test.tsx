@@ -443,4 +443,57 @@ describe('Assistente na página do dashboard', () => {
     expect(within(panel).getByText('troque para linha')).toBeInTheDocument()
     expect(within(panel).getByText('Troquei.')).toBeInTheDocument()
   })
+
+  it('ASQ-12 a página passa a linguagem da conexão ao assistente', async () => {
+    localStorage.setItem(OPEN_KEY, '1')
+    const create = (id: string, cypher: string): AssistantAction => ({
+      type: 'create_widget',
+      tabId: 't-1',
+      widgetId: id,
+      title: id,
+      cypher,
+      visualization: 'TABLE',
+      mapping: null,
+      layout: { x: 0, y: 4, w: 4, h: 4 },
+      result: makeQueryResult({ columns: ['n'], rows: [[`semente ${id}`]] }),
+      error: null,
+    })
+    // Em SQL o `--` comenta o `$categoria` do primeiro widget, então o resultado da resposta
+    // vira a prévia dele; o segundo usa o filtro e roda a consulta (FLT-20).
+    const actions = [
+      create('w-comentado', 'SELECT 1 AS n -- $categoria'),
+      create('w-usado', 'SELECT 1 AS n WHERE categoria = $categoria'),
+    ]
+    const { user } = open({
+      dashboard: makeDashboard({
+        connectionType: 'POSTGRES',
+        filters: [
+          {
+            id: '6b0c2f3e-6a52-4a63-9a40-9d1d6f5d1a11',
+            label: 'Categoria',
+            parameter: 'categoria',
+            type: 'TEXT',
+            options: null,
+            defaultValue: null,
+          },
+        ],
+      }),
+      post: http.post(MESSAGES_URL, () =>
+        ndjson([
+          { type: 'accepted', userMessage: userMessage('m-1', 'crie widgets') },
+          {
+            type: 'done',
+            reply: userMessage('m-2', 'Criei.', 'ASSISTANT'),
+            actions,
+          },
+        ]),
+      ),
+    })
+    await screen.findByText('Vendas por loja')
+
+    await user.type(await screen.findByLabelText('Mensagem'), 'crie widgets')
+    await user.click(screen.getByRole('button', { name: 'Enviar' }))
+    expect(await screen.findByText('semente w-comentado')).toBeInTheDocument()
+    expect(screen.queryByText('semente w-usado')).toBeNull()
+  })
 })

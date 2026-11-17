@@ -205,8 +205,8 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Teste `ASQ-12 a página passa a linguagem da conexão ao assistente` em apps/web/src
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `ASQ-12 a página passa a linguagem da conexão ao assistente` em apps/web/src
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

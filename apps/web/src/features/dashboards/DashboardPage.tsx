@@ -310,6 +310,7 @@ function DashboardViewBody({
       if (!draft) editor.start()
     },
     editing: draft !== null,
+    language,
   })
   const conversationReady = conversation.status === 'success'
   const { send: sendToAssistant } = assistant
