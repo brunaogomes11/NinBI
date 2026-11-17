@@ -203,8 +203,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/assistant/assistant-prompt.spec.ts`: `CHAT-05 pedido traz schema, estrutura do rascunho, 20 mensagens recentes e a mensagem nova` (a mensagem de sistema tem `(:Pedido)` do schema e os 12 tipos de ação; a última `HumanMessage` tem `t1 "Vendas"`, `w1 "Total por mês"`, o Cypher, `BAR`, o mapeamento, posição e tamanho, `f1 "Categoria" $categoria SINGLE_SELECT` e a mensagem nova; a conversa entra como `HumanMessage` e `AIMessage` na ordem, com as mudanças da resposta), `CHAT-06 rascunho serializado não leva nada além da estrutura` (rascunho vindo de `assistantDraftSchema.parse` de um objeto com `defaultValue` `VALOR-DE-FILTRO-c41d` e `result` com `VALOR-DE-LINHA-5b2e`: nenhuma mensagem contém esses textos), refs seguem a ordem das abas, dos widgets e dos filtros
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/assistant/assistant-prompt.spec.ts`: `CHAT-05 pedido traz schema, estrutura do rascunho, 20 mensagens recentes e a mensagem nova` (a mensagem de sistema tem `(:Pedido)` do schema e os 12 tipos de ação; a última `HumanMessage` tem `t1 "Vendas"`, `w1 "Total por mês"`, o Cypher, `BAR`, o mapeamento, posição e tamanho, `f1 "Categoria" $categoria SINGLE_SELECT` e a mensagem nova; a conversa entra como `HumanMessage` e `AIMessage` na ordem, com as mudanças da resposta), `CHAT-06 rascunho serializado não leva nada além da estrutura` (rascunho vindo de `assistantDraftSchema.parse` de um objeto com `defaultValue` `VALOR-DE-FILTRO-c41d` e `result` com `VALOR-DE-LINHA-5b2e`: nenhuma mensagem contém esses textos), refs seguem a ordem das abas, dos widgets e dos filtros
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
