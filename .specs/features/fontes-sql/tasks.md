@@ -258,14 +258,14 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-05 consulta que não começa por SELECT ou WITH é recusada` em apps/api/test
-- [ ] Teste `SQX-06 palavra bloqueada fora de strings e comentários é recusada com a cláusula` em apps/api/test
-- [ ] Teste `SQX-07 palavras bloqueadas valem sem diferenciar maiúsculas` em apps/api/test
-- [ ] Teste `SQX-08 palavra bloqueada em string, comentário, identificador ou nome maior é aceita` em apps/api/test
-- [ ] Teste `SQX-09 mais de uma instrução separada por ponto e vírgula é recusada` em apps/api/test
-- [ ] Teste `SQX-12 consulta SQL com mais de 20.000 caracteres é recusada` em apps/api/test
-- [ ] Os testes de `read-only-cypher` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SQX-05 consulta que não começa por SELECT ou WITH é recusada` em apps/api/test
+- [x] Teste `SQX-06 palavra bloqueada fora de strings e comentários é recusada com a cláusula` em apps/api/test
+- [x] Teste `SQX-07 palavras bloqueadas valem sem diferenciar maiúsculas` em apps/api/test
+- [x] Teste `SQX-08 palavra bloqueada em string, comentário, identificador ou nome maior é aceita` em apps/api/test
+- [x] Teste `SQX-09 mais de uma instrução separada por ponto e vírgula é recusada` em apps/api/test
+- [x] Teste `SQX-12 consulta SQL com mais de 20.000 caracteres é recusada` em apps/api/test
+- [x] Os testes de `read-only-cypher` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
@@ -1292,5 +1292,5 @@ Proof: run web | ✓ SMG-08 filtro mostra Consulta SQL ou Consulta Cypher pelo t
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** MySQL e SQL Server sem container; só o PostgreSQL do compose tem teste real, e o usuário testa os outros dois à mão contra um banco remoto (user: "não precisa, só o postgres e eu vou pegar um banco remoto pra testar"). T21 removida.
-**Dispatched:** lote 1 (T1 a T6, sonnet) em 41b2fc3
+**Dispatched:** lote 1 (T1 a T6, sonnet) returned em 41b2fc3; lote 2 (T7 a T12, opus) em 7771e17
 **Walked:** none
