@@ -577,8 +577,8 @@ T24
 
 **Done when**:
 
-- [ ] Testes com gesto em `CrossFilterRows.test.tsx`: `XFL-02 clicar em linha de lista, linha de tabela e marcador define o filtro` (lista: clicar na linha "Livros" define "Categoria" "Livros"; tabela ordenada por "total" decrescente na página 2: clicar numa linha define o valor da linha clicada, não o da posição original; mapa 400 × 300: clicar no marcador "Centro" com `crossFilter` na coluna `loja` define "Centro"), `XFL-04 linha e marcador selecionados ficam destacados` (a linha e o marcador clicados têm `data-selected="true"`, os demais `data-dimmed="true"`)
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes com gesto em `CrossFilterRows.test.tsx`: `XFL-02 clicar em linha de lista, linha de tabela e marcador define o filtro` (lista: clicar na linha "Livros" define "Categoria" "Livros"; tabela ordenada por "total" decrescente na página 2: clicar numa linha define o valor da linha clicada, não o da posição original; mapa 400 × 300: clicar no marcador "Centro" com `crossFilter` na coluna `loja` define "Centro"), `XFL-04 linha e marcador selecionados ficam destacados` (a linha e o marcador clicados têm `data-selected="true"`, os demais `data-dimmed="true"`)
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
