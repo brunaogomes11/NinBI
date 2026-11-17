@@ -1292,5 +1292,5 @@ Proof: run web | ✓ SMG-08 filtro mostra Consulta SQL ou Consulta Cypher pelo t
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** MySQL e SQL Server sem container; só o PostgreSQL do compose tem teste real, e o usuário testa os outros dois à mão contra um banco remoto (user: "não precisa, só o postgres e eu vou pegar um banco remoto pra testar"). T21 removida.
-**Dispatched:** lotes 1 a 5 returned; check_proofs verde em 9053c87; Verifier (haiku) em 4cd612a
+**Dispatched:** lotes 1 a 5 returned; Verifier (haiku) returned FAIL em d925f55; correção dos achados (opus) em d925f55
 **Walked:** none
