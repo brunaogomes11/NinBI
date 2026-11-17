@@ -722,6 +722,14 @@
 - **Date**: 2026-11-16
 - **Status**: active
 
+### AD-135 (active)
+- **Decision**: O campo numérico de um filtro recusa, com `MESSAGES.filterNumberInvalid` ("Digite um número"), o texto sem vírgula no padrão de milhar pt-BR (`1.234`, `1.000`, `12.345`, `1.234.567`). Aceita `1234`, `-3`, `1234,5`, `1.234,5` e `1234.5`; `0.001` e `1.5` seguem como decimais.
+- **Reason**: Verificação de `interatividade` (F4): `1.234` virava 1,234 e `1.000` virava 1 sem aviso, um erro silencioso para quem digita no padrão brasileiro. Recusar evita adivinhar a intenção. Delegado pelo usuário: "Pode fazer todas features desse jeito, sem nem me perguntar."
+- **Trade-off**: Quem queria `1.234` como decimal (ponto) precisa digitar `1,234`.
+- **Scope**: interatividade.
+- **Date**: 2026-11-17
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: MVP do NinBI, oito features em `.specs/features/`, nesta ordem de dependência:

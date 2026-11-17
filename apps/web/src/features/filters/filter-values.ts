@@ -110,7 +110,7 @@ export type NumberInputResult =
   | { ok: true; value: number | null }
   | { ok: false; message: string }
 
-/** Aceita `1234,5`, `1.234,5` e `1234.5`; vazio é `null`. */
+/** Aceita `1234`, `1234,5`, `1.234,5` e `1234.5`; recusa `1.234` (milhar ambíguo); vazio é `null`. */
 export function parseNumberInput(text: string): NumberInputResult {
   const trimmed = text.trim()
   if (trimmed === '') return { ok: true, value: null }
@@ -120,6 +120,8 @@ export function parseNumberInput(text: string): NumberInputResult {
     if (!/^-?\d{1,3}(\.\d{3})*,\d+$|^-?\d+,\d+$/.test(trimmed)) return invalid
     normalized = trimmed.replace(/\./g, '').replace(',', '.')
   } else if (/^-?\d+(\.\d+)?$/.test(trimmed)) {
+    // `1.234` e `1.000` seguem o padrão de milhar pt-BR: ambíguo, então recusa (AD-135).
+    if (/^-?[1-9]\d{0,2}(\.\d{3})+$/.test(trimmed)) return invalid
     normalized = trimmed
   } else {
     return invalid
