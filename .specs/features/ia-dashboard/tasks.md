@@ -328,9 +328,9 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `assistant-api.test.ts` com MSW e `ReadableStream`: `GEN-08 leitura do NDJSON entrega accepted, widget e done na ordem` (linhas partidas entre pedaços chegam inteiras; a função devolve `done`), 409 `SCHEMA_NOT_READ` vira `ApiError` com `code` e `message`, `useClearAssistant` chama `DELETE` e esvazia o cache, abortar o `signal` rejeita com `AbortError`
-- [ ] Testes de `ai-api.test.ts` de `ia-cypher` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Testes em `assistant-api.test.ts` com MSW e `ReadableStream`: `GEN-08 leitura do NDJSON entrega accepted, widget e done na ordem` (linhas partidas entre pedaços chegam inteiras; a função devolve `done`), 409 `SCHEMA_NOT_READ` vira `ApiError` com `code` e `message`, `useClearAssistant` chama `DELETE` e esvazia o cache, abortar o `signal` rejeita com `AbortError`
+- [x] Testes de `ai-api.test.ts` de `ia-cypher` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
