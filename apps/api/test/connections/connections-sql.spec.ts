@@ -2,7 +2,10 @@ import type { Role } from '@ninbi/contracts'
 import { eq } from 'drizzle-orm'
 import request from 'supertest'
 import { afterEach, describe, expect, it } from 'vitest'
-import { CONNECTION_VERIFY_TIMEOUT_MS } from '../../src/connections/connections.service'
+import {
+  CONNECTION_VERIFY_TIMEOUT_MS,
+  DEFAULT_CONNECTION_VERIFY_TIMEOUT_MS,
+} from '../../src/connections/connections.service'
 import { CryptoService } from '../../src/crypto/crypto.service'
 import { connections } from '../../src/database/schema'
 import { SourceGatewayError } from '../../src/sources/source'
@@ -120,6 +123,8 @@ describe('conexão SQL', () => {
   })
 
   it('SRC-08 banco SQL que não responde em 10 s devolve a mensagem de prazo', async () => {
+    // O prazo real é 10 s; o teste o encurta só para não esperar.
+    expect(DEFAULT_CONNECTION_VERIFY_TIMEOUT_MS).toBe(10_000)
     const t = await setup({
       overrides: [{ provide: CONNECTION_VERIFY_TIMEOUT_MS, useValue: 100 }],
     })

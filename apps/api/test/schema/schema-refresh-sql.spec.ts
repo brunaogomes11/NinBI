@@ -8,6 +8,7 @@ import {
   schemaExampleOptOuts,
 } from '../../src/database/schema'
 import {
+  DEFAULT_SCHEMA_READ_TIMEOUT_MS,
   SCHEMA_READ_TIMEOUT_MS,
   SchemaRefreshService,
 } from '../../src/schema/schema-refresh.service'
@@ -116,6 +117,8 @@ function schemaLogs() {
 
 describe('leitura do schema SQL', () => {
   it('SCS-10 leitura grava no lugar do schema anterior e falha ou 120 s o mantém', async () => {
+    // O prazo real é 120 s; o teste o encurta só para não esperar.
+    expect(DEFAULT_SCHEMA_READ_TIMEOUT_MS).toBe(120_000)
     const t = await setup(500)
     await t.readOnce()
     const first = await t.stored()
