@@ -118,11 +118,11 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Teste `ASQ-05 criar widget em conexão SQL pede a consulta no dialeto` em apps/api/test/assistant
-- [ ] Teste `ASQ-09 conexão SQL sem schema lido responde 409` em apps/api/test/assistant
-- [ ] Teste `ASQ-10 o tipo da conexão do rascunho decide schema e dialeto` em apps/api/test/assistant
-- [ ] Os testes de `assistant.service.spec.ts` e `assistant.route.spec.ts` de Neo4j seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `ASQ-05 criar widget em conexão SQL pede a consulta no dialeto` em apps/api/test/assistant
+- [x] Teste `ASQ-09 conexão SQL sem schema lido responde 409` em apps/api/test/assistant
+- [x] Teste `ASQ-10 o tipo da conexão do rascunho decide schema e dialeto` em apps/api/test/assistant
+- [x] Os testes de `assistant.service.spec.ts` e `assistant.route.spec.ts` de Neo4j seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

@@ -2,7 +2,6 @@ import { Inject, Injectable } from '@nestjs/common'
 import {
   type ConnectionSchemaDto,
   type ExampleSetting,
-  isRelationalSchema,
   MESSAGES,
   type RelationalSchemaDto,
   type SchemaDto,
@@ -44,19 +43,6 @@ function isRelationalDocument(
     'kind' in document &&
     document.kind === 'RELATIONAL'
   )
-}
-
-/**
- * O schema como grafo, para quem só sabe falar Cypher: o relacional vira um
- * grafo vazio, que é o que `get` devolvia para uma conexão SQL antes da T26.
- */
-// SPEC_DEVIATION: o assistente (`ia-dashboard`) não conhece o schema
-// relacional e fica fora desta feature; ele usa esta função para seguir com o
-// comportamento de antes.
-export function toGraphSchemaDto(schema: SchemaDto): ConnectionSchemaDto {
-  if (!isRelationalSchema(schema)) return schema
-  const { kind: _kind, tables: _tables, foreignKeys: _fks, ...rest } = schema
-  return { ...rest, labels: [], relationshipTypes: [] }
 }
 
 @Injectable()

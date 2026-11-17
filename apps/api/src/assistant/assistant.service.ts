@@ -8,17 +8,20 @@ import {
   type AssistantEvent,
   type AssistantMessageDto,
   type assistantRequestSchema,
-  type ConnectionSchemaDto,
   can,
   type DashboardFilter,
   filtersForPrompt,
   MESSAGES,
   type QueryResultDto,
   type Role,
+  type SchemaDto,
 } from '@ninbi/contracts'
+import { eq } from 'drizzle-orm'
 import type { z } from 'zod'
 import { AiWidgetService, type GenerateInput } from '../ai/ai-widget.service'
 import { AppError } from '../common/app-error'
+import { type AppDatabase, DB } from '../database/database.module'
+import { connections } from '../database/schema'
 import type { LlmSnapshot } from '../llm/chat-model.factory'
 import {
   LlmCancelledError,
@@ -27,14 +30,17 @@ import {
 } from '../llm/llm-client'
 import { LlmSettingsService } from '../llm/llm-settings.service'
 import { QueryService } from '../queries/query.service'
-import {
-  SchemaQueryService,
-  toGraphSchemaDto,
-} from '../schema/schema-query.service'
+import { SchemaQueryService } from '../schema/schema-query.service'
+import type { PromptDialect } from '../sources/source'
+import { SourceRegistry } from '../sources/source-registry'
 import { AssistantHistoryService } from './assistant-history.service'
 import { buildAssistantMessages, serializeDraft } from './assistant-prompt'
 import { parseAssistantReply } from './assistant-reply'
-import { type PendingAction, resolveActions } from './resolve-actions'
+import {
+  type PendingAction,
+  type QueryValidator,
+  resolveActions,
+} from './resolve-actions'
 
 export type AssistantBody = z.output<typeof assistantRequestSchema>
 
@@ -44,7 +50,12 @@ export interface PreparedAssistantRequest {
   /** Cópia da configuração no início: o pedido inteiro usa esta (LLM-15). */
   snapshot: LlmSnapshot
   connectionId: string
-  schema: ConnectionSchemaDto
+  /** Schema da conexão do rascunho: de grafo ou relacional (ASQ-01, ASQ-02). */
+  schema: SchemaDto
+  /** Idioma da consulta, o da fonte do tipo da conexão do rascunho (ASQ-05, ASQ-10). */
+  dialect: PromptDialect
+  /** Validador somente leitura da mesma fonte, para as opções de filtro (ASQ-08). */
+  validate: QueryValidator
   body: AssistantBody
 }
 
@@ -75,6 +86,8 @@ export class AssistantService {
     @Inject(AiWidgetService) private readonly widgets: AiWidgetService,
     @Inject(AssistantHistoryService)
     private readonly history: AssistantHistoryService,
+    @Inject(DB) private readonly db: AppDatabase,
+    @Inject(SourceRegistry) private readonly sources: SourceRegistry,
   ) {}
 
   /** Tudo que pode falhar antes de o primeiro byte da resposta sair (CHAT-27). */
@@ -97,18 +110,24 @@ export class AssistantService {
     ) {
       throw new AppError(403, 'FORBIDDEN', MESSAGES.forbiddenRoute)
     }
-    // SPEC_DEVIATION (fontes-sql T26): o assistente só fala Cypher e fica fora
-    // da feature; uma conexão SQL chega a ele como grafo vazio, como antes.
-    const schema = toGraphSchemaDto(await this.schemas.get(connectionId))
+    // O tipo da conexão do rascunho decide schema, dialeto e validação (ASQ-10).
+    const schema = await this.schemas.get(connectionId)
     if (schema.readAt === null) {
       throw new AppError(409, 'SCHEMA_NOT_READ', MESSAGES.aiSchemaNotRead)
     }
+    const [connection] = await this.db
+      .select({ type: connections.type })
+      .from(connections)
+      .where(eq(connections.id, connectionId))
+    const source = this.sources.for(connection?.type ?? 'NEO4J')
     return {
       userId: input.userId,
       dashboardId: input.dashboardId,
       snapshot,
       connectionId,
       schema,
+      dialect: source.dialect,
+      validate: (query) => source.validate(query),
       body: input.body,
     }
   }
@@ -150,8 +169,16 @@ export class AssistantService {
     emit: (event: AssistantEvent) => void,
     signal: AbortSignal,
   ): Promise<{ result: LogResult; actions: number; widgetErrors: number }> {
-    const { userId, dashboardId, snapshot, schema, connectionId, body } =
-      prepared
+    const {
+      userId,
+      dashboardId,
+      snapshot,
+      schema,
+      dialect,
+      validate,
+      connectionId,
+      body,
+    } = prepared
     const { draft } = body
     const providerError = (error: {
       code: AiProviderErrorCode
@@ -181,6 +208,7 @@ export class AssistantService {
       .slice(-ASSISTANT_HISTORY_LIMIT)
     const messages = buildAssistantMessages({
       schema,
+      dialect,
       draft,
       history: earlier,
       message: body.message,
@@ -202,9 +230,10 @@ export class AssistantService {
     const parsed = parseAssistantReply(planText)
     const plan = resolveActions(
       draft,
-      serializeDraft(draft).refs,
+      serializeDraft(draft, dialect).refs,
       parsed.actions,
       randomUUID,
+      validate,
     )
     const total = plan.actions.filter(needsGeneration).length
     emit({ type: 'planned', widgetsTotal: total })
@@ -244,6 +273,7 @@ export class AssistantService {
           userId,
           snapshot,
           schema,
+          dialect,
           connectionId,
           filters,
           signal,
@@ -336,7 +366,8 @@ export class AssistantService {
       draft: AssistantDraft
       userId: string
       snapshot: LlmSnapshot
-      schema: ConnectionSchemaDto
+      schema: SchemaDto
+      dialect: PromptDialect
       connectionId: string
       filters: GenerateInput['filters']
       signal: AbortSignal
@@ -362,6 +393,7 @@ export class AssistantService {
       userId: ctx.userId,
       snapshot: ctx.snapshot,
       schema: ctx.schema,
+      dialect: ctx.dialect,
       connectionId: ctx.connectionId,
       widgetId: action.widgetId,
       widget: {
