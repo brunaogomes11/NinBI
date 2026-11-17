@@ -77,9 +77,24 @@ describe('tabelas de conexões e schema', () => {
     await db.execute(sql`
       INSERT INTO connections (name, uri, database, username, password_encrypted)
       VALUES ('Vendas', 'neo4j+s://vendas:7687', 'vendas', 'neo4j', 'v1:a:b:c')`)
+    // O schema lido e a escolha de exemplo da conexão também ficam iguais.
+    await db.execute(sql`
+      INSERT INTO connection_schemas (connection_id, read_at, document)
+      SELECT id, '2026-01-01T12:00:00Z',
+        '{"labels":[{"name":"Cliente","properties":[{"name":"email","type":"STRING","example":"a@b.com"}]}],"relationshipTypes":[]}'::jsonb
+      FROM connections`)
+    await db.execute(sql`
+      INSERT INTO schema_example_opt_outs (connection_id, element_kind, element_name, property_name)
+      SELECT id, 'LABEL', 'Cliente', 'email' FROM connections`)
+    const schemasBefore = await db.select().from(connectionSchemas)
+    const optOutsBefore = await db.select().from(schemaExampleOptOuts)
+    expect(schemasBefore).toHaveLength(1)
+    expect(optOutsBefore).toHaveLength(1)
 
     await applyFontesSql()
 
+    expect(await db.select().from(connectionSchemas)).toEqual(schemasBefore)
+    expect(await db.select().from(schemaExampleOptOuts)).toEqual(optOutsBefore)
     const [row] = await db.select().from(connections)
     expect(row).toMatchObject({
       name: 'Vendas',
