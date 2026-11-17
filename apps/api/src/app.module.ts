@@ -11,12 +11,12 @@ import { FiltersModule } from './filters/filters.module'
 import { HealthModule } from './health/health.module'
 import { LlmModule } from './llm/llm.module'
 import { MapConfigModule } from './map-config/map-config.module'
-import { Neo4jModule } from './neo4j/neo4j.module'
 import { QueriesModule } from './queries/queries.module'
 import { SchemaModule } from './schema/schema.module'
 import { SetupModule } from './setup/setup.module'
 import { SharingModule } from './sharing/sharing.module'
 import { SidebarModule } from './sidebar/sidebar.module'
+import { SourcesModule } from './sources/sources.module'
 import { TeamsModule } from './teams/teams.module'
 import { UsersModule } from './users/users.module'
 import { WebModule } from './web/web.module'
@@ -35,11 +35,11 @@ import { WebModule } from './web/web.module'
     HealthModule,
     LlmModule,
     MapConfigModule,
-    Neo4jModule,
     QueriesModule,
     SchemaModule,
     SetupModule,
     SharingModule,
+    SourcesModule,
     SidebarModule,
     TeamsModule,
     UsersModule,

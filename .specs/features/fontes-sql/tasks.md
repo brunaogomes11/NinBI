@@ -421,8 +421,8 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SRC-22 registro sem fonte para um tipo falha com Driver não encontrado` em apps/api/test
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SRC-22 registro sem fonte para um tipo falha com Driver não encontrado` em apps/api/test
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick
