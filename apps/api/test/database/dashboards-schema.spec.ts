@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import {
   connections,
@@ -9,6 +9,7 @@ import {
   widgets,
 } from '../../src/database/schema'
 import { createTestDb } from '../db'
+import { createDbBeforeFontesSql } from './legacy-db'
 
 async function seed() {
   const { db, client } = await createTestDb()
@@ -133,6 +134,51 @@ describe('tabelas de dashboards', () => {
     ).rejects.toThrow()
     const remaining = await db.select().from(connections)
     expect(remaining.map((row) => row.id)).toEqual([connection.id])
+    await client.close()
+  })
+})
+
+describe('migração fontes-sql sobre dashboards', () => {
+  it('SMG-02 migração mantém o texto das consultas', async () => {
+    const { db, client, applyFontesSql } = await createDbBeforeFontesSql()
+    const filters = [
+      {
+        id: 'f1',
+        type: 'LIST',
+        cypher: 'MATCH (c:Cliente) RETURN DISTINCT c.pais AS value',
+      },
+    ]
+    const widgetCypher =
+      'MATCH (c:Cliente) WHERE c.pais = $pais RETURN count(c)'
+    await db.execute(sql`
+      INSERT INTO users (id, name, email, password_hash, role)
+      VALUES ('00000000-0000-4000-8000-000000000001', 'Ana', 'ana@x.com', 'x', 'EDITOR')`)
+    await db.execute(sql`
+      INSERT INTO connections (id, name, uri, username, password_encrypted)
+      VALUES ('00000000-0000-4000-8000-000000000002', 'Vendas', 'neo4j://h', 'neo4j', 'v1:a:b:c')`)
+    await db.execute(sql`
+      INSERT INTO dashboards (id, name, owner_id, connection_id, filters)
+      VALUES ('00000000-0000-4000-8000-000000000003', 'Painel',
+        '00000000-0000-4000-8000-000000000001',
+        '00000000-0000-4000-8000-000000000002',
+        ${JSON.stringify(filters)}::jsonb)`)
+    await db.execute(sql`
+      INSERT INTO dashboard_tabs (id, dashboard_id, name, position)
+      VALUES ('00000000-0000-4000-8000-000000000004',
+        '00000000-0000-4000-8000-000000000003', 'Aba 1', 0)`)
+    await db.execute(sql`
+      INSERT INTO widgets (id, dashboard_id, tab_id, title, cypher, x, y, w, h)
+      VALUES ('00000000-0000-4000-8000-000000000005',
+        '00000000-0000-4000-8000-000000000003',
+        '00000000-0000-4000-8000-000000000004', 'Clientes', ${widgetCypher},
+        0, 0, 4, 4)`)
+
+    await applyFontesSql()
+
+    const [widget] = await db.select().from(widgets)
+    const [dashboard] = await db.select().from(dashboards)
+    expect(widget?.cypher).toBe(widgetCypher)
+    expect(dashboard?.filters).toEqual(filters)
     await client.close()
   })
 })

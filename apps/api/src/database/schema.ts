@@ -25,9 +25,16 @@ export const schemaStatusEnum = pgEnum('schema_status', [
   'READY',
   'FAILED',
 ])
+export const connectionTypeEnum = pgEnum('connection_type', [
+  'NEO4J',
+  'POSTGRES',
+  'MYSQL',
+  'SQLSERVER',
+])
 export const schemaElementKindEnum = pgEnum('schema_element_kind', [
   'LABEL',
   'RELATIONSHIP',
+  'TABLE',
 ])
 export const llmProviderEnum = pgEnum('llm_provider', [
   'OPENAI',
@@ -101,7 +108,11 @@ export const connections = pgTable(
   {
     id: uuid('id').primaryKey().defaultRandom(),
     name: varchar('name', { length: 80 }).notNull(),
-    uri: text('uri').notNull(),
+    type: connectionTypeEnum('type').notNull().default('NEO4J'),
+    uri: text('uri'),
+    host: text('host'),
+    port: integer('port'),
+    ssl: boolean('ssl').notNull().default(false),
     database: varchar('database', { length: 120 }),
     username: varchar('username', { length: 120 }).notNull(),
     passwordEncrypted: text('password_encrypted').notNull(),

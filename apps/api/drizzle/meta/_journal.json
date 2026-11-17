@@ -43,6 +43,13 @@
       "when": 1794871273595,
       "tag": "0005_dashboard_filters",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794879241222,
+      "tag": "0006_fontes_sql",
+      "breakpoints": true
     }
   ]
 }

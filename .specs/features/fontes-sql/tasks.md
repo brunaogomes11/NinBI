@@ -237,9 +237,9 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SMG-01 migração marca as conexões existentes como Neo4j` em `apps/api/test/database/connections-schema.spec.ts` (insere uma linha no formato antigo antes da 0006, aplica a 0006 em PGlite e lê `type = NEO4J`, `host`, `port` nulos, `ssl = false`, `uri` e senha iguais)
-- [ ] Teste `SMG-02 migração mantém o texto das consultas` em `apps/api/test/database/dashboards-schema.spec.ts` (o `cypher` de um widget e o de um filtro seguem iguais)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SMG-01 migração marca as conexões existentes como Neo4j` em `apps/api/test/database/connections-schema.spec.ts` (insere uma linha no formato antigo antes da 0006, aplica a 0006 em PGlite e lê `type = NEO4J`, `host`, `port` nulos, `ssl = false`, `uri` e senha iguais)
+- [x] Teste `SMG-02 migração mantém o texto das consultas` em `apps/api/test/database/dashboards-schema.spec.ts` (o `cypher` de um widget e o de um filtro seguem iguais)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick

@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { describe, expect, it } from 'vitest'
 import {
   connectionSchemas,
@@ -6,6 +6,7 @@ import {
   schemaExampleOptOuts,
 } from '../../src/database/schema'
 import { createTestDb } from '../db'
+import { createDbBeforeFontesSql } from './legacy-db'
 
 const base = {
   uri: 'neo4j://h',
@@ -68,6 +69,57 @@ describe('tabelas de conexões e schema', () => {
     expect(row?.schemaStatus).toBe('NEVER')
     expect(row?.database).toBeNull()
     expect(row?.schemaReadStartedAt).toBeNull()
+    await client.close()
+  })
+
+  it('SMG-01 migração marca as conexões existentes como Neo4j', async () => {
+    const { db, client, applyFontesSql } = await createDbBeforeFontesSql()
+    await db.execute(sql`
+      INSERT INTO connections (name, uri, database, username, password_encrypted)
+      VALUES ('Vendas', 'neo4j+s://vendas:7687', 'vendas', 'neo4j', 'v1:a:b:c')`)
+
+    await applyFontesSql()
+
+    const [row] = await db.select().from(connections)
+    expect(row).toMatchObject({
+      name: 'Vendas',
+      type: 'NEO4J',
+      host: null,
+      port: null,
+      ssl: false,
+      uri: 'neo4j+s://vendas:7687',
+      database: 'vendas',
+      username: 'neo4j',
+      passwordEncrypted: 'v1:a:b:c',
+    })
+    await client.close()
+  })
+
+  it('SMG-01 conexão SQL guarda host, porta e SSL sem URI e TABLE vira tipo de escolha', async () => {
+    const { db, client } = await createTestDb()
+    const [row] = await db
+      .insert(connections)
+      .values({
+        name: 'Sortify',
+        type: 'POSTGRES',
+        host: 'db.exemplo',
+        port: 5432,
+        ssl: true,
+        database: 'sortify',
+        username: 'leitor',
+        passwordEncrypted: 'v1:a:b:c',
+      })
+      .returning()
+    if (!row) throw new Error('conexão não criada')
+    expect(row.uri).toBeNull()
+    await db.insert(schemaExampleOptOuts).values({
+      connectionId: row.id,
+      elementKind: 'TABLE',
+      elementName: 'clientes',
+      propertyName: 'email',
+    })
+    const [optOut] = await db.select().from(schemaExampleOptOuts)
+    expect(optOut?.elementKind).toBe('TABLE')
     await client.close()
   })
 })
