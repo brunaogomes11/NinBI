@@ -5,6 +5,7 @@ import {
   type DashboardFilter,
   extractParameterNames,
   MESSAGES,
+  type QueryLanguage,
   type QueryResultDto,
   type WidgetVisualization as Visualization,
   WIDGET_VISUALIZATIONS,
@@ -205,6 +206,7 @@ function initialMapping(widget: WidgetDto, v: Visualization): MappingDraft {
 export function WidgetEditorDialog({
   dashboardId,
   connectionId,
+  language = 'CYPHER',
   widget,
   initialCypher,
   initialError,
@@ -214,6 +216,8 @@ export function WidgetEditorDialog({
 }: {
   dashboardId: string
   connectionId: string
+  /** Linguagem da conexão do rascunho: define o editor e os parâmetros da consulta. */
+  language?: QueryLanguage
   widget: WidgetDto
   /** Último Cypher gerado pela IA que falhou (FIX-06): abre no editor no lugar do salvo. */
   initialCypher?: string
@@ -253,7 +257,10 @@ export function WidgetEditorDialog({
     mutationFn: () => {
       setAiError(null)
       // Os valores atuais dos filtros que o Cypher usa (FLT-19).
-      const params = relevantParams(extractParameterNames(cypher), allParams)
+      const params = relevantParams(
+        extractParameterNames(cypher, language),
+        allParams,
+      )
       return runQuery(dashboardId, {
         cypher,
         connectionId,
@@ -361,7 +368,11 @@ export function WidgetEditorDialog({
                 unavailable={!ai.available}
               />
             )}
-            <CypherEditor value={cypher} onChange={setCypher} />
+            <CypherEditor
+              value={cypher}
+              onChange={setCypher}
+              language={language}
+            />
             <div>
               <Button
                 type="button"

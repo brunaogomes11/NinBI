@@ -186,7 +186,7 @@ describe('FilterEditorDialog', () => {
       await screen.findByRole('option', { name: 'Consulta Cypher' }),
     )
     await app.user.type(
-      dialog.getByLabelText('Cypher'),
+      dialog.getByLabelText('Consulta Cypher'),
       'MATCH (c:Categoria) RETURN c.nome',
     )
     await app.user.click(

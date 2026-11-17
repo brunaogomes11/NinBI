@@ -1,5 +1,6 @@
 import {
   extractParameterNames,
+  type QueryLanguage,
   type QueryParamValue,
   type QueryResultDto,
   type WidgetDto,
@@ -12,6 +13,8 @@ import { relevantParams } from '@/features/filters/filter-values'
 /** Em edição o widget roda o Cypher do rascunho, na conexão do rascunho. */
 export interface WidgetEditSource {
   connectionId: string
+  /** Linguagem da conexão do rascunho; sem ela vale Cypher. */
+  language?: QueryLanguage
 }
 
 export type FilterParams = Record<string, QueryParamValue>
@@ -30,7 +33,7 @@ export function widgetParams(
   allParams: FilterParams,
 ): FilterParams {
   const names = edit
-    ? extractParameterNames(widget.cypher ?? '')
+    ? extractParameterNames(widget.cypher ?? '', edit.language)
     : widget.parameters
   return relevantParams(names, allParams)
 }

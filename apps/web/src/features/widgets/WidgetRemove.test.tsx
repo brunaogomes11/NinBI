@@ -125,8 +125,8 @@ describe('WidgetCard em edição', () => {
     expect(within(dialog).getByLabelText('Título')).toHaveValue(
       'Vendas por loja',
     )
-    expect(within(dialog).getByRole('textbox', { name: 'Cypher' })).toHaveValue(
-      'MATCH (l:Loja) RETURN l.nome AS loja',
-    )
+    expect(
+      within(dialog).getByRole('textbox', { name: 'Consulta Cypher' }),
+    ).toHaveValue('MATCH (l:Loja) RETURN l.nome AS loja')
   })
 })

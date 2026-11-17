@@ -32,15 +32,21 @@ export function queryLanguage(type: ConnectionType): QueryLanguage {
   return connectionLanguage(type)
 }
 
-/** Rótulo do campo de consulta: "Consulta SQL" ou "Consulta Cypher". */
-export function queryLabel(type: ConnectionType): string {
-  return queryLanguage(type) === 'SQL' ? 'Consulta SQL' : 'Consulta Cypher'
+/** Rótulo do campo de consulta da linguagem: "Consulta SQL" ou "Consulta Cypher". */
+export function languageLabel(language: QueryLanguage): string {
+  return language === 'SQL' ? 'Consulta SQL' : 'Consulta Cypher'
 }
 
-export function useConnections() {
+/** Rótulo do campo de consulta do tipo de conexão. */
+export function queryLabel(type: ConnectionType): string {
+  return languageLabel(queryLanguage(type))
+}
+
+export function useConnections(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: CONNECTIONS_QUERY_KEY,
     queryFn: () => apiFetch<ConnectionDto[]>('/api/connections'),
+    enabled: options.enabled ?? true,
   })
 }
 

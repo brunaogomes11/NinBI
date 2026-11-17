@@ -58,7 +58,7 @@ describe('WidgetEditorDialog', () => {
     expect(dialog.getByRole('button', { name: 'Executar' })).toBeInTheDocument()
     expect(dialog.getByRole('region', { name: 'Prévia' })).toBeInTheDocument()
     await user.type(
-      dialog.getByRole('textbox', { name: 'Cypher' }),
+      dialog.getByRole('textbox', { name: 'Consulta Cypher' }),
       'MATCH (n) RETURN n',
     )
 
@@ -81,7 +81,10 @@ describe('WidgetEditorDialog', () => {
       bodies,
     )
     const cypher = 'MATCH (n) RETURN labels(n) AS label, count(*) AS total'
-    await user.type(dialog.getByRole('textbox', { name: 'Cypher' }), cypher)
+    await user.type(
+      dialog.getByRole('textbox', { name: 'Consulta Cypher' }),
+      cypher,
+    )
 
     await user.click(dialog.getByRole('button', { name: 'Executar' }))
 
@@ -103,7 +106,7 @@ describe('WidgetEditorDialog', () => {
         { status: 400 },
       ),
     )
-    const editor = dialog.getByRole('textbox', { name: 'Cypher' })
+    const editor = dialog.getByRole('textbox', { name: 'Consulta Cypher' })
     await user.type(editor, 'CREATE (n)')
 
     await user.click(dialog.getByRole('button', { name: 'Executar' }))
@@ -117,7 +120,10 @@ describe('WidgetEditorDialog', () => {
 
     expect(dialog.getByRole('button', { name: 'Executar' })).toBeDisabled()
 
-    await user.type(dialog.getByRole('textbox', { name: 'Cypher' }), 'RETURN 1')
+    await user.type(
+      dialog.getByRole('textbox', { name: 'Consulta Cypher' }),
+      'RETURN 1',
+    )
     expect(dialog.getByRole('button', { name: 'Executar' })).toBeEnabled()
   })
 
@@ -127,7 +133,10 @@ describe('WidgetEditorDialog', () => {
     const title = dialog.getByLabelText('Título')
     await user.clear(title)
     await user.type(title, 'Pedidos')
-    await user.type(dialog.getByRole('textbox', { name: 'Cypher' }), 'RETURN 1')
+    await user.type(
+      dialog.getByRole('textbox', { name: 'Consulta Cypher' }),
+      'RETURN 1',
+    )
 
     await user.click(dialog.getByRole('button', { name: 'Aplicar' }))
 
@@ -144,7 +153,10 @@ describe('WidgetEditorDialog', () => {
     const bodies: unknown[] = []
     const { user, dialog } = await openEditor(ok, bodies)
     await user.type(dialog.getByLabelText('Título'), ' mudou')
-    await user.type(dialog.getByRole('textbox', { name: 'Cypher' }), 'RETURN 1')
+    await user.type(
+      dialog.getByRole('textbox', { name: 'Consulta Cypher' }),
+      'RETURN 1',
+    )
 
     await user.click(dialog.getByRole('button', { name: 'Cancelar' }))
 
@@ -175,7 +187,10 @@ describe('WidgetEditorDialog', () => {
       await delay('infinite')
       return HttpResponse.json(makeQueryResult())
     })
-    await user.type(dialog.getByRole('textbox', { name: 'Cypher' }), 'RETURN 1')
+    await user.type(
+      dialog.getByRole('textbox', { name: 'Consulta Cypher' }),
+      'RETURN 1',
+    )
 
     await user.click(dialog.getByRole('button', { name: 'Executar' }))
 

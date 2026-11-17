@@ -119,7 +119,7 @@ async function pick(
 
 async function runQuery(app: App, dialog: ReturnType<typeof within>) {
   await app.user.type(
-    dialog.getByRole('textbox', { name: 'Cypher' }),
+    dialog.getByRole('textbox', { name: 'Consulta Cypher' }),
     'MATCH (n) RETURN n',
   )
   await app.user.click(dialog.getByRole('button', { name: 'Executar' }))
@@ -266,7 +266,7 @@ describe('VisualizationPanel', () => {
       ).toBeInTheDocument(),
     )
     const dialog = await savedWidgetEditor(app, 'Barras')
-    const cypher = dialog.getByRole('textbox', { name: 'Cypher' })
+    const cypher = dialog.getByRole('textbox', { name: 'Consulta Cypher' })
     await app.user.clear(cypher)
     await app.user.type(cypher, 'MATCH (l:Loja) RETURN l.nome AS loja')
 

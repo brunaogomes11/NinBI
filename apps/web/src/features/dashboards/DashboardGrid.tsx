@@ -113,6 +113,7 @@ export function DashboardGrid({
                 edit={
                   edit && {
                     connectionId: edit.connectionId,
+                    language: edit.language,
                     onEdit: () => edit.onEditWidget(widget.id),
                     onRemove: () => edit.onRemoveWidget(widget.id),
                     ai: edit.ai && {

@@ -42,7 +42,7 @@ import { AssistantPanel } from '@/features/assistant/AssistantPanel'
 import { useAssistantMessages } from '@/features/assistant/api'
 import { useAssistant } from '@/features/assistant/useAssistant'
 import { useSession } from '@/features/auth/useSession'
-import { useConnections } from '@/features/connections/api'
+import { queryLanguage, useConnections } from '@/features/connections/api'
 import { FilterBar } from '@/features/filters/FilterBar'
 import { FilterEditorDialog } from '@/features/filters/FilterEditorDialog'
 import {
@@ -213,7 +213,19 @@ function DashboardViewBody({
   const { draft } = editor
   const tabs = draft ? draft.tabs : dashboard.tabs
   const shownTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0]
-  const edit = draft ? { connectionId: draft.connectionId } : undefined
+  // Só consulta a lista de conexões quando o rascunho trocou de conexão; senão vale o tipo do dashboard.
+  const switched = !!draft && draft.connectionId !== dashboard.connectionId
+  const connections = useConnections({ enabled: switched })
+  const draftType =
+    (switched
+      ? connections.data?.find(
+          (connection) => connection.id === draft?.connectionId,
+        )?.type
+      : undefined) ?? dashboard.connectionType
+  const language = queryLanguage(draftType)
+  const edit = draft
+    ? { connectionId: draft.connectionId, language }
+    : undefined
   const [filterDialog, setFilterDialog] = useState<{
     filter: DashboardFilter | null
   } | null>(null)
@@ -388,7 +400,10 @@ function DashboardViewBody({
             removingFilter,
             draft.tabs.flatMap((tab) =>
               tab.widgets.map((widget) => ({
-                parameters: extractParameterNames(widget.cypher ?? ''),
+                parameters: extractParameterNames(
+                  widget.cypher ?? '',
+                  language,
+                ),
               })),
             ),
           )}
@@ -534,6 +549,7 @@ function DashboardViewBody({
                   draft && shownTab
                     ? {
                         connectionId: draft.connectionId,
+                        language,
                         onLayoutChange: (layouts) =>
                           editor.change((current) =>
                             setLayout(current, shownTab.id, layouts),
@@ -570,6 +586,7 @@ function DashboardViewBody({
                   key={editingWidget.id}
                   dashboardId={dashboard.id}
                   connectionId={draft.connectionId}
+                  language={language}
                   widget={editingWidget}
                   initialCypher={
                     aiFailure?.widgetId === editingWidget.id

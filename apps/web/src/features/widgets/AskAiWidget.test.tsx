@@ -174,7 +174,7 @@ describe('Pedir à IA no card do widget', () => {
       await screen.findByRole('menuitem', { name: 'Editar widget' }),
     )
 
-    const editor = await screen.findByLabelText('Cypher')
+    const editor = await screen.findByLabelText('Consulta Cypher')
     expect(editor).toHaveValue(GENERATED_CYPHER)
     await user.type(editor, ' LIMIT 5')
     expect(editor).toHaveValue(`${GENERATED_CYPHER} LIMIT 5`)
@@ -275,7 +275,7 @@ describe('Pedir à IA no card do widget', () => {
     await ask(user)
 
     const dialog = await screen.findByRole('dialog', { name: 'Editar widget' })
-    expect(within(dialog).getByLabelText('Cypher')).toHaveValue(
+    expect(within(dialog).getByLabelText('Consulta Cypher')).toHaveValue(
       'MATCH (n) RETURN n',
     )
     expect(within(dialog).getByText(message)).toBeInTheDocument()

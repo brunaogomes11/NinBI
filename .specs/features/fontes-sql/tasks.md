@@ -873,11 +873,11 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-01 editor de conexão SQL mostra Consulta SQL com destaque de SQL` em apps/web
-- [ ] Teste `SQX-02 editor de conexão Neo4j mostra Consulta Cypher` em apps/web
-- [ ] Teste `SQX-16 parâmetros do widget SQL vêm do tokenizador SQL` em apps/web
-- [ ] Os testes de `WidgetEditorDialog.test.tsx` seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `SQX-01 editor de conexão SQL mostra Consulta SQL com destaque de SQL` em apps/web
+- [x] Teste `SQX-02 editor de conexão Neo4j mostra Consulta Cypher` em apps/web
+- [x] Teste `SQX-16 parâmetros do widget SQL vêm do tokenizador SQL` em apps/web
+- [x] Os testes de `WidgetEditorDialog.test.tsx` seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

@@ -97,7 +97,7 @@ describe('Novo widget com a IA', () => {
     await screen.findByLabelText(FIELD)
     const dialog = screen.getByRole('dialog', { name: 'Editar widget' })
     const field = within(dialog).getByLabelText(FIELD)
-    const cypher = within(dialog).getByLabelText('Cypher')
+    const cypher = within(dialog).getByLabelText('Consulta Cypher')
     expect(
       field.compareDocumentPosition(cypher) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
@@ -107,7 +107,9 @@ describe('Novo widget com a IA', () => {
     const withoutAi = open(false)
     await statusLoaded(withoutAi)
     const dialogWithout = await newWidget(withoutAi.user)
-    expect(within(dialogWithout).getByLabelText('Cypher')).toBeInTheDocument()
+    expect(
+      within(dialogWithout).getByLabelText('Consulta Cypher'),
+    ).toBeInTheDocument()
     expect(within(dialogWithout).getByLabelText(FIELD)).toBeDisabled()
     expect(
       within(dialogWithout).getByText(MESSAGES.llmNotConfigured),
@@ -165,7 +167,7 @@ describe('Novo widget com a IA', () => {
 
     const dialog = await screen.findByRole('dialog', { name: 'Editar widget' })
     await waitFor(() =>
-      expect(within(dialog).getByLabelText('Cypher')).toHaveValue(
+      expect(within(dialog).getByLabelText('Consulta Cypher')).toHaveValue(
         'MATCH (n) DELETE n',
       ),
     )
