@@ -958,8 +958,8 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SAI-07 resultado da IA abre no editor do tipo da conexão` em apps/web
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `SAI-07 resultado da IA abre no editor do tipo da conexão` em apps/web
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

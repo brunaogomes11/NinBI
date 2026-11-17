@@ -337,6 +337,7 @@ function DashboardViewBody({
     draft,
     setDraft: editor.change,
     editing: draft !== null,
+    language,
     assistantBusy: assistant.running,
     onFailed: (widgetId, failure) => {
       setAiFailure({ widgetId, ...failure })

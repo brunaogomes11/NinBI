@@ -4,6 +4,7 @@ import {
   filterParameterNames,
   filtersForPrompt,
   MESSAGES,
+  type QueryLanguage,
   type QueryResultDto,
   type WidgetDto,
 } from '@ninbi/contracts'
@@ -31,6 +32,8 @@ export interface UseAiGenerationsOptions {
   draft: DashboardDraft | null
   setDraft: (change: (draft: DashboardDraft) => DashboardDraft) => void
   editing: boolean
+  /** Linguagem da conexão do rascunho; sem ela vale Cypher. */
+  language?: QueryLanguage
   /** O assistente está respondendo: o pedido por widget espera (CHAT-25). */
   assistantBusy?: boolean
   /** A 4ª tentativa falhou: o editor abre com o último Cypher e a mensagem (FIX-06). */
@@ -74,7 +77,7 @@ export function useAiGenerations(options: UseAiGenerationsOptions) {
 
   const applyDone = useCallback(
     (widgetId: string, event: Extract<AiWidgetEvent, { type: 'done' }>) => {
-      const { dashboardId, draft, setDraft } = latest.current
+      const { dashboardId, draft, setDraft, language } = latest.current
       const found = findWidget(draft, widgetId)
       if (!draft || !found) return // widget removido durante a geração (AIQ-29)
       const resolved = resolveAiMapping(
@@ -92,8 +95,8 @@ export function useAiGenerations(options: UseAiGenerationsOptions) {
       )
       // Com parâmetro de filtro o resultado da IA não vale para os valores atuais: o widget executa (FLT-20).
       const filterNames = new Set(draft.filters.flatMap(filterParameterNames))
-      const usesFilter = extractParameterNames(event.cypher).some((name) =>
-        filterNames.has(name),
+      const usesFilter = extractParameterNames(event.cypher, language).some(
+        (name) => filterNames.has(name),
       )
       if (!usesFilter) {
         queryClient.setQueryData<QueryResultDto>(

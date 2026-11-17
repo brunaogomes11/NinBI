@@ -19,7 +19,11 @@ import {
   setupStatusHandler,
 } from '@/test/renderApp'
 import { server } from '@/test/server'
-import { type AiFailure, useAiGenerations } from './useAiGenerations'
+import {
+  type AiFailure,
+  type UseAiGenerationsOptions,
+  useAiGenerations,
+} from './useAiGenerations'
 
 const URL_PATH = '/api/dashboards/d-1/ai/widget'
 const encoder = new TextEncoder()
@@ -68,7 +72,10 @@ const CATEGORIA = {
   defaultValue: 'Livros',
 }
 
-function setup(dashboard = makeDashboard()) {
+function setup(
+  dashboard = makeDashboard(),
+  language?: UseAiGenerationsOptions['language'],
+) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
@@ -86,6 +93,7 @@ function setup(dashboard = makeDashboard()) {
         draft,
         setDraft: (change) => setDraft(change),
         editing,
+        language,
         onFailed: (id, failure) => failures.push([id, failure]),
       })
       return { draft, setDraft, ai }
@@ -413,5 +421,96 @@ describe('Pedir à IA com filtros na página', () => {
         ),
       ).toBe(true),
     )
+  })
+})
+
+describe('Resultado da IA por tipo de conexão', () => {
+  let restoreSize: () => void
+  beforeEach(() => {
+    restoreSize = mockElementSize(600, 300)
+  })
+  afterEach(() => restoreSize())
+
+  const SQL =
+    'SELECT categoria, count(*) AS total FROM produto GROUP BY categoria -- $categoria'
+
+  it('SAI-07 resultado da IA abre no editor do tipo da conexão', async () => {
+    // O `$categoria` no comentário só é parâmetro para o Cypher: em SQL o resultado da IA vale.
+    server.use(http.post(URL_PATH, () => ndjson([doneEvent({ cypher: SQL })])))
+    const { result, queryClient } = setup(
+      makeDashboard({ filters: [CATEGORIA], connectionType: 'POSTGRES' }),
+      'SQL',
+    )
+    await act(() => result.current.ai.start('w-1', 'itens'))
+    expect(
+      queryClient.getQueryData<{ rows: unknown[] }>([
+        'query',
+        'd-1',
+        'c-1',
+        SQL,
+      ])?.rows,
+    ).toEqual([
+      ['A', 3],
+      ['B', 5],
+    ])
+
+    const cypher = setup(makeDashboard({ filters: [CATEGORIA] }), 'CYPHER')
+    await act(() => cypher.result.current.ai.start('w-1', 'itens'))
+    expect(
+      cypher.queryClient.getQueryData(['query', 'd-1', 'c-1', SQL]),
+    ).toBeUndefined()
+  })
+
+  it('SAI-07 consulta SQL gerada abre no editor Consulta SQL', async () => {
+    server.use(http.post(URL_PATH, () => ndjson([doneEvent({ cypher: SQL })])))
+    const { user } = renderApp('/dashboards/d-1?editar=1', {
+      handlers: [
+        http.get('/api/ai/status', () =>
+          HttpResponse.json({ configured: true }),
+        ),
+        setupStatusHandler(false),
+        sessionHandler(makeUser({ role: 'ADMIN' })),
+        sidebarHandler([{ type: 'dashboard', id: 'd-1', name: 'Vendas' }]),
+        connectionsHandler([
+          makeConnection({ id: 'c-1', name: 'Vendas', type: 'POSTGRES' }),
+        ]),
+        http.get('/api/dashboards/d-1', () =>
+          HttpResponse.json(makeDashboard({ connectionType: 'POSTGRES' })),
+        ),
+        http.post('/api/dashboards/:id/query', () =>
+          HttpResponse.json(makeQueryResult()),
+        ),
+      ],
+    })
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Ações do widget Vendas por loja',
+      }),
+    )
+    await user.click(
+      await screen.findByRole('menuitem', { name: /Pedir à IA/ }),
+    )
+    await user.type(
+      await screen.findByLabelText('Descreva o que você quer ver'),
+      'itens por categoria',
+    )
+    await user.click(screen.getByRole('button', { name: 'Enviar' }))
+    await waitFor(() =>
+      expect(
+        screen.queryByLabelText('Descreva o que você quer ver'),
+      ).toBeNull(),
+    )
+
+    await user.click(
+      await screen.findByRole('button', {
+        name: 'Ações do widget Itens por categoria',
+      }),
+    )
+    await user.click(
+      await screen.findByRole('menuitem', { name: 'Editar widget' }),
+    )
+    expect(
+      await screen.findByRole('textbox', { name: 'Consulta SQL' }),
+    ).toHaveValue(SQL)
   })
 })
