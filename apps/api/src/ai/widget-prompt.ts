@@ -13,6 +13,8 @@ import {
   WIDGET_VISUALIZATIONS,
   type WidgetVisualization,
 } from '@ninbi/contracts'
+import { SQL_DIALECTS } from '../sources/dialects'
+import type { PromptDialect } from '../sources/source'
 
 export interface CurrentWidget {
   title: string
@@ -25,7 +27,8 @@ export interface CurrentWidget {
 export interface QueryErrorInfo {
   code: string
   message: string
-  neo4jCode?: string
+  /** Código do erro do banco (Neo4j ou SQL), quando houver. */
+  dbCode?: string
 }
 
 /** Formato do `mapping` de cada visualização (os nomes de campo vêm de `widgetMappingSchemas`). */
@@ -42,10 +45,25 @@ const MAPPING_SHAPES: Record<WidgetVisualization, string> = {
   MAP: '{"lat":"col","lon":"col","label":"col"|null}',
 }
 
-const SYNTAX_OR_SEMANTIC = new Set([
+const CYPHER_SYNTAX_OR_SEMANTIC: ReadonlySet<string> = new Set([
   'Neo.ClientError.Statement.SyntaxError',
   'Neo.ClientError.Statement.SemanticError',
 ])
+
+/** Códigos de erro de sintaxe ou semântica de cada dialeto (FIX-03). */
+function syntaxCodes(dialect: PromptDialect): ReadonlySet<string> {
+  if (dialect === 'Cypher') return CYPHER_SYNTAX_OR_SEMANTIC
+  const sql = Object.values(SQL_DIALECTS).find((d) => d.label === dialect)
+  return sql?.syntaxErrorCodes ?? new Set()
+}
+
+/** Nome do banco na mensagem de erro de execução. */
+const DATABASE_NAMES: Record<PromptDialect, string> = {
+  Cypher: 'Neo4j',
+  PostgreSQL: 'PostgreSQL',
+  MySQL: 'MySQL',
+  'T-SQL': 'SQL Server',
+}
 
 function property(p: SchemaPropertyDto): string {
   const example =
@@ -143,20 +161,24 @@ export function buildWidgetMessages(input: {
   ]
 }
 
-function errorText(error: QueryErrorInfo): string {
+function errorText(error: QueryErrorInfo, dialect: PromptDialect): string {
   if (error.code !== 'QUERY_FAILED') return error.message
-  if (error.neo4jCode && SYNTAX_OR_SEMANTIC.has(error.neo4jCode)) {
+  if (error.dbCode && syntaxCodes(dialect).has(error.dbCode)) {
     return error.message
   }
-  // A mensagem de execução pode carregar valores do banco: só o código segue (FIX-04, AIQ-06).
-  return error.neo4jCode
-    ? `Erro de execução no Neo4j: ${error.neo4jCode}`
-    : 'Erro de execução no Neo4j'
+  // A mensagem de execução pode carregar valores do banco: só o código segue (FIX-04, AIQ-06, SQX-13).
+  const database = DATABASE_NAMES[dialect]
+  return error.dbCode
+    ? `Erro de execução no ${database}: ${error.dbCode}`
+    : `Erro de execução no ${database}`
 }
 
 /** Pede a correção depois de uma tentativa que falhou (FIX-01, FIX-03, FIX-04). */
-export function correctionMessage(error: QueryErrorInfo): HumanMessage {
+export function correctionMessage(
+  error: QueryErrorInfo,
+  dialect: PromptDialect = 'Cypher',
+): HumanMessage {
   return new HumanMessage(
-    `A consulta falhou com o erro: ${errorText(error)}. Corrija e responda de novo só com o objeto JSON.`,
+    `A consulta falhou com o erro: ${errorText(error, dialect)}. Corrija e responda de novo só com o objeto JSON.`,
   )
 }

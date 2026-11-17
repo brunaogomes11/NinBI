@@ -199,7 +199,7 @@ export class QueryService {
       }
       const failed = this.fail('QUERY_FAILED', error.message, mask)
       // Só o código segue para quem decide a correção; o filtro de erros não o serializa (FIX-04).
-      failed.neo4jCode = error.code
+      failed.dbCode = error.code
       return { result: 'failed', error: failed }
     }
     throw error

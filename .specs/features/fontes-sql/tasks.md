@@ -613,9 +613,9 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SQX-13 dbCode segue ao prompt e erro de execução SQL vai só com o código` em apps/api/test
-- [ ] Os testes de `ai-widget` e de `queries-service-ai` seguem verdes (só a propriedade renomeada muda nas expectativas)
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Teste `SQX-13 dbCode segue ao prompt e erro de execução SQL vai só com o código` em apps/api/test
+- [x] Os testes de `ai-widget` e de `queries-service-ai` seguem verdes (só a propriedade renomeada muda nas expectativas)
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: unit
 **Gate**: quick

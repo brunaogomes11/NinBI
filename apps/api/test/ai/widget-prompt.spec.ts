@@ -148,12 +148,12 @@ describe('widget-prompt', () => {
       {
         code: 'QUERY_FAILED',
         message: 'Invalid input 7: expected ( em linha 1',
-        neo4jCode: 'Neo.ClientError.Statement.SyntaxError',
+        dbCode: 'Neo.ClientError.Statement.SyntaxError',
       },
       {
         code: 'QUERY_FAILED',
         message: 'Variable `q` not defined',
-        neo4jCode: 'Neo.ClientError.Statement.SemanticError',
+        dbCode: 'Neo.ClientError.Statement.SemanticError',
       },
     ]
     for (const error of cases) {
@@ -168,7 +168,7 @@ describe('widget-prompt', () => {
       correctionMessage({
         code: 'QUERY_FAILED',
         message: '/ by zero em 42',
-        neo4jCode: 'Neo.ClientError.Statement.ArithmeticError',
+        dbCode: 'Neo.ClientError.Statement.ArithmeticError',
       }).content,
     )
     expect(withCode).toContain('Neo.ClientError.Statement.ArithmeticError')

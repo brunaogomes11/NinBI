@@ -64,7 +64,7 @@ describe('QueryService para a IA', () => {
       })
       .catch((e: unknown) => e)) as AppError
     expect(error.code).toBe('QUERY_FAILED')
-    expect(error.neo4jCode).toBe('Neo.ClientError.Statement.ArithmeticError')
+    expect(error.dbCode).toBe('Neo.ClientError.Statement.ArithmeticError')
 
     const owner = await signInAs(t.app, t.db, 'EDITOR', 'dono@x.com')
     const dashboard = await createDashboard(t.db, {

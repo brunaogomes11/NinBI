@@ -186,7 +186,7 @@ export class AiWidgetService {
           failure = {
             code: error.code,
             message: error.message,
-            neo4jCode: error.neo4jCode,
+            dbCode: error.dbCode,
           }
         }
       }
