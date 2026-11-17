@@ -184,9 +184,9 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] Teste `ASQ-13 filtros do assistente acham os widgets que usam o parâmetro em SQL` em apps/web/src
-- [ ] Os testes de `useAssistant.test.tsx` seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `ASQ-13 filtros do assistente acham os widgets que usam o parâmetro em SQL` em apps/web/src
+- [x] Os testes de `useAssistant.test.tsx` seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

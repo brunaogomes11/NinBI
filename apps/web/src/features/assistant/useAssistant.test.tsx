@@ -1,7 +1,9 @@
 import {
   type AssistantAction,
   type AssistantMessageDto,
+  type DashboardFilter,
   MESSAGES,
+  type QueryLanguage,
 } from '@ninbi/contracts'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { act, renderHook, waitFor } from '@testing-library/react'
@@ -84,7 +86,11 @@ const doneWith = (replyId: string, actions: AssistantAction[]) => ({
 })
 
 function setup(
-  options: { draft?: DashboardDraft | null; editing?: boolean } = {},
+  options: {
+    draft?: DashboardDraft | null
+    editing?: boolean
+    language?: QueryLanguage
+  } = {},
 ) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -108,6 +114,7 @@ function setup(
           setDraft((current) => current ?? fromDto(makeDashboard()))
         },
         editing,
+        language: options.language,
       })
       return { draft, setDraft, assistant }
     },
@@ -190,6 +197,62 @@ describe('useAssistant', () => {
     expect(
       queryClient.getQueryData(['query', 'd-1', 'c-1', widget?.cypher]),
     ).toEqual(makeQueryResult())
+  })
+
+  it('ASQ-13 filtros do assistente acham os widgets que usam o parâmetro em SQL', async () => {
+    // em SQL o comentário `--` esconde o `$categoria`: o widget não usa o filtro e a prévia nasce
+    // com o resultado da resposta; o widget que usa `$loja` de verdade fica sem prévia (FLT-20)
+    const comment = 'SELECT 1 AS total -- $categoria'
+    const used = 'SELECT 1 AS total WHERE loja = $loja'
+    const widget = (id: string, query: string): AssistantAction => ({
+      type: 'create_widget',
+      tabId: 't-novo',
+      widgetId: id,
+      title: id,
+      cypher: query,
+      visualization: 'TABLE',
+      mapping: null,
+      layout: { x: 0, y: 0, w: 4, h: 4 },
+      result: makeQueryResult(),
+      error: null,
+    })
+    const filter = (parameter: string) =>
+      ({
+        id: `f-${parameter}`,
+        label: parameter,
+        parameter,
+        type: 'TEXT',
+        options: null,
+        defaultValue: null,
+      }) as unknown as DashboardFilter
+    server.use(
+      http.post(URL_PATH, () =>
+        ndjson([
+          { type: 'accepted', userMessage: userMessage() },
+          doneWith('r-1', [
+            createTab('t-novo'),
+            widget('w-comentario', comment),
+            widget('w-usado', used),
+          ]),
+        ]),
+      ),
+    )
+    const { result, queryClient } = setup({
+      language: 'SQL',
+      draft: fromDto(
+        makeDashboard({ filters: [filter('categoria'), filter('loja')] }),
+      ),
+    })
+
+    await act(async () => result.current.assistant.send('crie widgets'))
+    await waitFor(() => expect(result.current.draft?.tabs).toHaveLength(2))
+
+    expect(queryClient.getQueryData(['query', 'd-1', 'c-1', comment])).toEqual(
+      makeQueryResult(),
+    )
+    expect(
+      queryClient.getQueryData(['query', 'd-1', 'c-1', used]),
+    ).toBeUndefined()
   })
 
   it('CHAT-10 hook oferece Desfazer só para a resposta mais recente que alterou o rascunho', async () => {

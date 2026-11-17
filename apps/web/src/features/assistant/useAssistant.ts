@@ -6,6 +6,7 @@ import {
   extractParameterNames,
   filterParameterNames,
   MESSAGES,
+  type QueryLanguage,
   type QueryResultDto,
 } from '@ninbi/contracts'
 import { useQueryClient } from '@tanstack/react-query'
@@ -38,6 +39,8 @@ export interface UseAssistantOptions {
   /** Entra no modo de edição se ainda não está (CHAT-04). */
   ensureEditing: () => void
   editing: boolean
+  /** Linguagem da conexão do rascunho; sem ela, Cypher. */
+  language?: QueryLanguage
 }
 
 interface UndoPoint {
@@ -106,6 +109,7 @@ export function useAssistant(options: UseAssistantOptions) {
       dashboardId: string,
       after: DashboardDraft,
       actions: AssistantAction[],
+      language: QueryLanguage,
     ) => {
       const filterNames = new Set(after.filters.flatMap(filterParameterNames))
       const results = new Map<string, QueryResultDto>()
@@ -124,7 +128,11 @@ export function useAssistant(options: UseAssistantOptions) {
           const cypher = widget.cypher ?? ''
           if (!result || cypher.trim() === '') continue
           // Com parâmetro de filtro o resultado do assistente não vale para os valores atuais (FLT-20).
-          if (extractParameterNames(cypher).some((n) => filterNames.has(n))) {
+          if (
+            extractParameterNames(cypher, language).some((n) =>
+              filterNames.has(n),
+            )
+          ) {
             continue
           }
           queryClient.setQueryData<QueryResultDto>(
@@ -139,16 +147,21 @@ export function useAssistant(options: UseAssistantOptions) {
 
   const handleDone = useCallback(
     (event: Extract<AssistantEvent, { type: 'done' }>) => {
-      const { dashboardId, draft, setDraft } = latest.current
+      const {
+        dashboardId,
+        draft,
+        setDraft,
+        language = 'CYPHER',
+      } = latest.current
       queryClient.setQueryData<AssistantMessageDto[] | undefined>(
         assistantQueryKey(dashboardId),
         (messages) => appendOnce(messages, event.reply),
       )
       if (!draft || event.actions.length === 0) return
       const before = draft
-      const after = applyAssistantActions(before, event.actions)
+      const after = applyAssistantActions(before, event.actions, language)
       setDraft(() => after)
-      seedPreviews(dashboardId, after, event.actions)
+      seedPreviews(dashboardId, after, event.actions, language)
       setUndoPoint({ messageId: event.reply.id, before, after })
     },
     [queryClient, seedPreviews],
