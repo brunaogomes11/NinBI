@@ -13,6 +13,7 @@ import { useConnectionSchema, useRefreshSchema } from './api'
 import { ExampleToggle } from './ExampleToggle'
 import { SchemaElementList, type SchemaSelection } from './SchemaElementList'
 import { SchemaPropertiesTable } from './SchemaPropertiesTable'
+import { TableSchemaView } from './TableSchemaView'
 
 /** O item escolhido, se ainda existe no schema; senão o primeiro label (ou o primeiro tipo). */
 function resolveSelection(
@@ -92,7 +93,10 @@ export function SchemaPage() {
   const reading = data?.status === 'READING'
   const hasRead = !!data?.readAt
   const graph = data && !isRelationalSchema(data) ? data : undefined
-  const empty = !!graph && hasRead && graph.labels.length === 0
+  const relational = data && isRelationalSchema(data) ? data : undefined
+  const empty =
+    hasRead &&
+    (graph ? graph.labels.length === 0 : relational?.tables.length === 0)
 
   return (
     <div className="flex min-h-0 flex-col gap-4">
@@ -159,6 +163,9 @@ export function SchemaPage() {
       )}
       {graph && !empty && (
         <SchemaDetail connectionId={connectionId} schema={graph} />
+      )}
+      {relational && !empty && (
+        <TableSchemaView connectionId={connectionId} schema={relational} />
       )}
     </div>
   )

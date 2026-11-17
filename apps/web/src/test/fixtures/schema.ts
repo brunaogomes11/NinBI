@@ -1,4 +1,8 @@
-import type { ConnectionSchemaDto } from '@ninbi/contracts'
+import type {
+  ConnectionSchemaDto,
+  RelationalSchemaDto,
+  SchemaDto,
+} from '@ninbi/contracts'
 import { HttpResponse, http, type RequestHandler } from 'msw'
 
 /** Texto de 5.000 caracteres (entre aspas) para os testes de truncamento. */
@@ -109,9 +113,76 @@ export function makeSchema(
 
 /** `GET /api/connections/:id/schema` com o schema dado (ou uma função que o devolve a cada chamada). */
 export function schemaHandler(
-  schema: ConnectionSchemaDto | (() => ConnectionSchemaDto) = makeSchema(),
+  schema: SchemaDto | (() => SchemaDto) = makeSchema(),
 ): RequestHandler {
   return http.get('/api/connections/:id/schema', () =>
     HttpResponse.json(typeof schema === 'function' ? schema() : schema),
   )
+}
+
+/**
+ * Schema SQL em miniatura: tabelas `public.cliente` e `public.pedido`, a view `public.pedidos_abertos`
+ * e a chave estrangeira `pedido.cliente_id` -> `cliente.id`; exemplos já em literal SQL.
+ */
+export function makeRelationalSchema(
+  overrides: Partial<RelationalSchemaDto> = {},
+): RelationalSchemaDto {
+  return {
+    kind: 'RELATIONAL',
+    connectionId: 'c-1',
+    connectionName: 'Vendas',
+    status: 'READY',
+    readAt: '2026-11-16T17:30:00Z',
+    startedAt: null,
+    error: null,
+    tables: [
+      {
+        name: 'public.cliente',
+        isView: false,
+        columns: [
+          { name: 'id', type: 'integer', example: '1', sendExample: true },
+          {
+            name: 'nome',
+            type: 'text',
+            example: "'Ana'",
+            sendExample: true,
+          },
+        ],
+      },
+      {
+        name: 'public.pedido',
+        isView: false,
+        columns: [
+          { name: 'id', type: 'integer', example: '10', sendExample: true },
+          {
+            name: 'cliente_id',
+            type: 'integer',
+            example: '1',
+            sendExample: true,
+          },
+          {
+            name: 'criado_em',
+            type: 'date',
+            example: "'2024-02-05'",
+            sendExample: true,
+          },
+          { name: 'obs', type: 'text', example: null, sendExample: true },
+        ],
+      },
+      {
+        name: 'public.pedidos_abertos',
+        isView: true,
+        columns: [
+          { name: 'id', type: 'integer', example: '10', sendExample: true },
+        ],
+      },
+    ],
+    foreignKeys: [
+      {
+        from: { table: 'public.pedido', columns: ['cliente_id'] },
+        to: { table: 'public.cliente', columns: ['id'] },
+      },
+    ],
+    ...overrides,
+  }
 }

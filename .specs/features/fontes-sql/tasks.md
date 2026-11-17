@@ -848,13 +848,13 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SCS-12 schema SQL mostra Tabelas com views marcadas e Relações` em apps/web
-- [ ] Teste `SCS-13 tabela selecionada mostra colunas e chaves estrangeiras` em apps/web
-- [ ] Teste `SCS-14 exemplo aparece como literal SQL` em apps/web
-- [ ] Teste `SCS-15 banco sem tabelas mostra Este banco não tem dados` em apps/web
-- [ ] Teste `SCS-16 Admin desliga Enviar exemplo à IA de uma coluna` em apps/web
-- [ ] Os testes de `SchemaPage.test.tsx` de Neo4j seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `SCS-12 schema SQL mostra Tabelas com views marcadas e Relações` em apps/web
+- [x] Teste `SCS-13 tabela selecionada mostra colunas e chaves estrangeiras` em apps/web
+- [x] Teste `SCS-14 exemplo aparece como literal SQL` em apps/web
+- [x] Teste `SCS-15 banco sem tabelas mostra Este banco não tem dados` em apps/web
+- [x] Teste `SCS-16 Admin desliga Enviar exemplo à IA de uma coluna` em apps/web
+- [x] Os testes de `SchemaPage.test.tsx` de Neo4j seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick

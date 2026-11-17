@@ -1,15 +1,14 @@
-import { can, type SchemaPropertyDto } from '@ninbi/contracts'
+import { can, type ExampleSetting } from '@ninbi/contracts'
 import { toast } from 'sonner'
 import { Switch } from '@/components/ui/switch'
 import { useSession } from '@/features/auth/useSession'
 import { useSetExampleSetting } from './api'
-import type { SchemaSelection } from './SchemaElementList'
 
 interface ExampleToggleProps {
   connectionId: string
-  kind: SchemaSelection['kind']
+  kind: ExampleSetting['kind']
   element: string
-  property: SchemaPropertyDto
+  property: { name: string; sendExample: boolean }
 }
 
 /** Liga ou desliga o envio do exemplo da propriedade à IA; só quem gerencia conexões pode mudar. */
