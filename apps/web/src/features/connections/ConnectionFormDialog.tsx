@@ -1,13 +1,16 @@
-import { zodResolver } from '@hookform/resolvers/zod'
 import {
-  type ConnectionCreateInput,
+  CONNECTION_TYPES,
+  type ConnectionCreate,
   type ConnectionDto,
+  type ConnectionType,
+  type ConnectionUpdate,
   connectionCreateSchema,
   connectionUpdateSchema,
 } from '@ninbi/contracts'
 import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { type FieldErrors, type Resolver, useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -25,27 +28,98 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { ApiError } from '@/lib/api'
-import { useCreateConnection, useUpdateConnection } from './api'
+import {
+  connectionTypeLabel,
+  defaultPortFor,
+  useCreateConnection,
+  useUpdateConnection,
+} from './api'
 
-const FIELDS = [
-  { name: 'name', label: 'Nome', type: 'text' },
-  { name: 'uri', label: 'URI', type: 'text' },
-  { name: 'database', label: 'Banco', type: 'text' },
-  { name: 'username', label: 'Usuário', type: 'text' },
-] as const
+interface FormValues {
+  type: ConnectionType
+  name: string
+  uri: string
+  host: string
+  port: string
+  database: string
+  username: string
+  password: string
+  ssl: boolean
+}
 
-function defaultsFor(connection?: ConnectionDto): ConnectionCreateInput {
+function defaultsFor(connection?: ConnectionDto): FormValues {
   return {
+    type: connection?.type ?? 'NEO4J',
     name: connection?.name ?? '',
     uri: connection?.uri ?? '',
+    host: connection?.host ?? '',
+    port: connection?.port ? String(connection.port) : '',
     database: connection?.database ?? '',
     username: connection?.username ?? '',
     password: '',
+    ssl: connection?.ssl ?? false,
   }
 }
 
-/** Cria (sem `connection`) ou edita (com `connection`) uma conexão; a API testa no Neo4j antes de gravar. */
+/** O corpo que o contrato valida: Neo4j com URI; SQL com host, porta numérica e SSL. */
+function toPayload(values: FormValues) {
+  const { type, name, database, username, password } = values
+  if (type === 'NEO4J') {
+    return { type, name, uri: values.uri, database, username, password }
+  }
+  return {
+    type,
+    name,
+    host: values.host,
+    port: Number(values.port),
+    database,
+    username,
+    ssl: values.ssl,
+    password,
+  }
+}
+
+/** Valida com o schema do contrato e leva a mensagem de cada campo ao formulário. */
+function resolverFor(editing: boolean): Resolver<FormValues> {
+  const schema = editing ? connectionUpdateSchema : connectionCreateSchema
+  return async (values) => {
+    const parsed = schema.safeParse(toPayload(values))
+    if (parsed.success) return { values: parsed.data as never, errors: {} }
+    const errors: Record<string, { type: string; message: string }> = {}
+    for (const issue of parsed.error.issues) {
+      const field = String(issue.path[0] ?? 'root')
+      if (!errors[field]) {
+        errors[field] = { type: 'validation', message: issue.message }
+      }
+    }
+    return { values: {}, errors: errors as FieldErrors<FormValues> }
+  }
+}
+
+const TEXT_FIELDS = {
+  name: 'Nome',
+  uri: 'URI',
+  host: 'Host',
+  port: 'Porta',
+  database: 'Banco',
+  username: 'Usuário',
+} as const
+type TextField = keyof typeof TEXT_FIELDS
+
+const FIELDS_BY_KIND: Record<'NEO4J' | 'SQL', TextField[]> = {
+  NEO4J: ['name', 'uri', 'database', 'username'],
+  SQL: ['name', 'host', 'port', 'database', 'username'],
+}
+
+/** Cria (sem `connection`) ou edita (com `connection`) uma conexão; a API testa no banco antes de gravar. */
 export function ConnectionFormDialog({
   open,
   onOpenChange,
@@ -56,12 +130,11 @@ export function ConnectionFormDialog({
   connection?: ConnectionDto
 }) {
   const editing = connection !== undefined
-  const form = useForm<ConnectionCreateInput>({
-    resolver: zodResolver(
-      editing ? connectionUpdateSchema : connectionCreateSchema,
-    ) as never,
+  const form = useForm<FormValues>({
+    resolver: resolverFor(editing),
     defaultValues: defaultsFor(connection),
   })
+  const isSql = form.watch('type') !== 'NEO4J'
   const create = useCreateConnection()
   const update = useUpdateConnection(connection?.id ?? '')
   const pending = create.isPending || update.isPending
@@ -72,15 +145,15 @@ export function ConnectionFormDialog({
     if (open) form.reset(defaultsFor(connection))
   }, [open, connection?.id, form])
 
-  function submit(values: ConnectionCreateInput) {
-    // O resolvedor já aplicou o schema: o banco vazio chega como null.
-    const { password, ...rest } = values
+  function submit(resolved: FormValues) {
+    // O resolvedor já aplicou o contrato: o banco vazio do Neo4j chega como null.
+    const values = resolved as unknown as ConnectionCreate
     const callbacks = {
       onSuccess: () => onOpenChange(false),
       onError: (error: Error) => {
         if (error instanceof ApiError && error.fieldErrors) {
           for (const [field, message] of Object.entries(error.fieldErrors)) {
-            form.setError(field as keyof ConnectionCreateInput, { message })
+            form.setError(field as keyof FormValues, { message })
           }
           return
         }
@@ -89,14 +162,20 @@ export function ConnectionFormDialog({
     }
     if (editing) {
       // Senha vazia não é enviada: a API mantém a guardada.
-      const body = { ...rest, database: rest.database ?? null }
-      update.mutate(password ? { ...body, password } : body, callbacks)
-    } else {
-      create.mutate(
-        { ...rest, database: rest.database ?? null, password },
+      const { password, ...rest } = values
+      update.mutate(
+        (password ? { ...rest, password } : rest) as ConnectionUpdate,
         callbacks,
       )
+    } else {
+      create.mutate(values, callbacks)
     }
+  }
+
+  function chooseType(next: ConnectionType) {
+    form.setValue('type', next)
+    const port = defaultPortFor(next)
+    if (port) form.setValue('port', String(port))
   }
 
   return (
@@ -113,22 +192,50 @@ export function ConnectionFormDialog({
             onSubmit={form.handleSubmit(submit)}
             className="flex flex-col gap-4"
           >
-            {FIELDS.map((item) => (
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipo</FormLabel>
+                  <Select
+                    value={field.value}
+                    onValueChange={(next) => chooseType(next as ConnectionType)}
+                    disabled={editing}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {CONNECTION_TYPES.map((item) => (
+                        <SelectItem key={item} value={item}>
+                          {connectionTypeLabel(item)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {FIELDS_BY_KIND[isSql ? 'SQL' : 'NEO4J'].map((name) => (
               <FormField
-                key={item.name}
+                key={name}
                 control={form.control}
-                name={item.name}
+                name={name}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{item.label}</FormLabel>
+                    <FormLabel>{TEXT_FIELDS[name]}</FormLabel>
                     <FormControl>
-                      <Input
-                        {...field}
-                        value={field.value ?? ''}
-                        type={item.type}
-                        autoComplete="off"
-                      />
+                      <Input {...field} type="text" autoComplete="off" />
                     </FormControl>
+                    {isSql && name === 'username' && (
+                      <FormDescription>
+                        Use um usuário com permissão só de leitura
+                      </FormDescription>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -156,6 +263,25 @@ export function ConnectionFormDialog({
                 </FormItem>
               )}
             />
+            {isSql && (
+              <FormField
+                control={form.control}
+                name="ssl"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center gap-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={(checked) =>
+                          field.onChange(checked === true)
+                        }
+                      />
+                    </FormControl>
+                    <FormLabel className="font-normal">Usar SSL</FormLabel>
+                  </FormItem>
+                )}
+              />
+            )}
             {form.formState.errors.root && (
               <p role="alert" className="text-destructive text-sm">
                 {form.formState.errors.root.message}

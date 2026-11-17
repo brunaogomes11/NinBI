@@ -799,17 +799,17 @@ T38 → T39
 
 **Done when**:
 
-- [ ] Teste `SRC-01 Nova conexão oferece Neo4j, PostgreSQL, MySQL e SQL Server` em apps/web
-- [ ] Teste `SRC-02 tipo SQL mostra host, porta, banco, usuário, senha e Usar SSL` em apps/web
-- [ ] Teste `SRC-03 escolher o tipo preenche a porta padrão` em apps/web
-- [ ] Teste `SRC-04 Neo4j mantém o formulário com URI` em apps/web
-- [ ] Teste `SRC-09 host inválido mostra a mensagem no campo` em apps/web
-- [ ] Teste `SRC-10 porta inválida mostra a mensagem no campo` em apps/web
-- [ ] Teste `SRC-11 banco vazio mostra Informe o banco` em apps/web
-- [ ] Teste `SRC-14 formulário SQL recomenda usuário só de leitura` em apps/web
-- [ ] Teste `SRC-16 edição mostra o tipo desabilitado` em apps/web
-- [ ] Os testes de `ConnectionFormDialog.test.tsx` de Neo4j seguem verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/web test`
+- [x] Teste `SRC-01 Nova conexão oferece Neo4j, PostgreSQL, MySQL e SQL Server` em apps/web
+- [x] Teste `SRC-02 tipo SQL mostra host, porta, banco, usuário, senha e Usar SSL` em apps/web
+- [x] Teste `SRC-03 escolher o tipo preenche a porta padrão` em apps/web
+- [x] Teste `SRC-04 Neo4j mantém o formulário com URI` em apps/web
+- [x] Teste `SRC-09 host inválido mostra a mensagem no campo` em apps/web
+- [x] Teste `SRC-10 porta inválida mostra a mensagem no campo` em apps/web
+- [x] Teste `SRC-11 banco vazio mostra Informe o banco` em apps/web
+- [x] Teste `SRC-14 formulário SQL recomenda usuário só de leitura` em apps/web
+- [x] Teste `SRC-16 edição mostra o tipo desabilitado` em apps/web
+- [x] Os testes de `ConnectionFormDialog.test.tsx` de Neo4j seguem verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/web test`
 
 **Tests**: unit
 **Gate**: quick
