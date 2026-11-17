@@ -265,9 +265,9 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `apps/api/test/ai/ai-widget.generate.spec.ts`: `GEN-05 generate valida, executa e corrige o Cypher do widget` (roteiro com `DELETE` e depois Cypher válido: resultado `done` com `attempts: 2`, o gateway recebeu só o válido, `onAttempt` recebeu 1 e 2), `CHAT-08 generate parte do widget atual e dos filtros` (a `HumanMessage` da 1ª chamada tem o título, o Cypher atual e `$categoria` do filtro), `failed` depois de 4 tentativas traz o último Cypher, `provider_error` para na 1ª chamada, o log sai com `purpose=assistant`
-- [ ] Testes de `AiWidgetService` e da rota `.../ai/widget` de `ia-cypher` continuam verdes
-- [ ] Gate check passes: `pnpm --filter @ninbi/api test`
+- [x] Testes em `apps/api/test/ai/ai-widget.generate.spec.ts`: `GEN-05 generate valida, executa e corrige o Cypher do widget` (roteiro com `DELETE` e depois Cypher válido: resultado `done` com `attempts: 2`, o gateway recebeu só o válido, `onAttempt` recebeu 1 e 2), `CHAT-08 generate parte do widget atual e dos filtros` (a `HumanMessage` da 1ª chamada tem o título, o Cypher atual e `$categoria` do filtro), `failed` depois de 4 tentativas traz o último Cypher, `provider_error` para na 1ª chamada, o log sai com `purpose=assistant`
+- [x] Testes de `AiWidgetService` e da rota `.../ai/widget` de `ia-cypher` continuam verdes
+- [x] Gate check passes: `pnpm --filter @ninbi/api test`
 
 **Tests**: integration
 **Gate**: quick
@@ -682,7 +682,7 @@ Proof: run api | ✓ CHAT-29 log de cada pedido tem usuário, dashboard, ações
 The feature's live state, written as it happens - a compaction gives no warning.
 
 **Settled mid-build:** none
-**Dispatched:** lote 1 (T1-T7, sonnet) sobre o commit de fechamento da interatividade - em andamento.
+**Dispatched:** lote 1 (T1-T7, sonnet) - returned (ab6f4a6). Lote 2 (T8-T13, sonnet) - em andamento.
 **Walked:** dispensado por AD-023
 
 ---
