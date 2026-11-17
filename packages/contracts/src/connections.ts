@@ -138,9 +138,9 @@ const username = z
 
 const neo4jFields = { name, uri, database, username }
 
+/** O valor bruto, sem `trim`: espaço em qualquer ponto é recusado (SRC-09). */
 const host = z
   .string()
-  .trim()
   .min(1, MESSAGES.connectionHostInvalid)
   .refine(
     (value) => !/\s/.test(value) && !value.includes('://'),

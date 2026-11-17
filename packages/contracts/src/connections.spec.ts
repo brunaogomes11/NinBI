@@ -153,13 +153,15 @@ describe('connection contracts: fontes SQL', () => {
   })
 
   it('SRC-09 host vazio, com espaços ou com :// é recusado', () => {
-    for (const host of ['', '   ', 'meu host', 'tcp://h', 'h ']) {
-      const expected = host.trim() === 'h' ? null : { host: 'Host inválido' }
+    for (const host of ['', '   ', 'meu host', 'tcp://h', 'h ', ' h', '\th']) {
       expect(
         errorsOf(connectionCreateSchema, { ...validSql, host }),
         host,
-      ).toEqual(expected)
+      ).toEqual({ host: 'Host inválido' })
     }
+    expect(
+      errorsOf(connectionCreateSchema, { ...validSql, host: 'h' }),
+    ).toBeNull()
     expect(errorsOf(connectionCreateSchema, validSql)).toBeNull()
     expect(
       errorsOf(connectionUpdateSchema, { ...validSql, host: 'a b' }),
