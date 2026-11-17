@@ -225,8 +225,8 @@ T4 → T5 → T6 → T7 → T8
 
 **Done when**:
 
-- [ ] `pnpm build && pnpm typecheck && pnpm lint && pnpm test` passa na raiz
-- [ ] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
+- [x] `pnpm build && pnpm typecheck && pnpm lint && pnpm test` passa na raiz
+- [x] Gate check passes: `pnpm build && pnpm typecheck && pnpm lint && pnpm test`
 
 **Tests**: none
 **Gate**: build
