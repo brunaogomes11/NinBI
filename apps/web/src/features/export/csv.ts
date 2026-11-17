@@ -1,7 +1,7 @@
 import type { QueryResultDto, ResultValue } from '@ninbi/contracts'
+import { formatDate } from '@/lib/format'
 
 const BOM = '﻿'
-const DATE_PREFIX = /^(\d{4})-(\d{2})-(\d{2})/
 
 /** Texto de uma célula; `isText` marca o que pode ser lido como fórmula. */
 function cellText(value: ResultValue): { text: string; isText: boolean } {
@@ -15,8 +15,9 @@ function cellText(value: ResultValue): { text: string; isText: boolean } {
   if (typeof value === 'object') {
     return { text: value.value, isText: value.kind === 'json' }
   }
-  const date = DATE_PREFIX.exec(value)
-  if (date) return { text: `${date[3]}/${date[2]}/${date[1]}`, isText: false }
+  // Só o valor inteiro que é data vira dd/MM/aaaa; texto com prefixo de data fica como veio.
+  const date = formatDate(value)
+  if (date !== value) return { text: date, isText: false }
   return { text: value, isText: true }
 }
 
