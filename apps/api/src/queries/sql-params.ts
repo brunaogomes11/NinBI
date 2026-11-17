@@ -98,7 +98,10 @@ export function bindSqlParams(
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i] as SqlToken
     if (token.type !== 'param') continue
-    const value = params[token.value]
+    // Só o próprio objeto: `$constructor` sem valor não pega o do protótipo.
+    const value = Object.hasOwn(params, token.value)
+      ? params[token.value]
+      : undefined
     const test = nullTest(tokens, i)
     if (test !== null) {
       const isNull = value === null || value === undefined

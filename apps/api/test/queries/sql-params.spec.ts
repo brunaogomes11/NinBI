@@ -49,6 +49,13 @@ describe('bindSqlParams', () => {
       text: 'SELECT ?',
       values: [null],
     })
+    // Nome que existe no protótipo de Object também vai como null.
+    expect(
+      bindSqlParams('SELECT $constructor, $toString', {}, 'dollar'),
+    ).toEqual({ text: 'SELECT $1, $2', values: [null, null] })
+    expect(
+      bindSqlParams('SELECT 1 WHERE $constructor IS NULL', {}, 'at'),
+    ).toEqual({ text: 'SELECT 1 WHERE (1 = 1)', values: [] })
   })
 
   it('SQX-18 $nome IS NULL e IS NOT NULL viram condição constante', () => {
