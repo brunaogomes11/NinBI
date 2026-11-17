@@ -120,8 +120,8 @@ T16 → T17 → T18
 
 **Done when**:
 
-- [ ] Testes em `packages/contracts/src/assistant.spec.ts`: `GEN-10 descrição vazia ou com mais de 4.000 caracteres é recusada` (vazia e só espaços dão "Informe a descrição"; 4.001 caracteres dão "A descrição passa de 4.000 caracteres"; 4.000 passa), `CHAT-16 mensagem com mais de 4.000 caracteres dá A mensagem passa de 4.000 caracteres` (no caminho `message` de `assistantRequestSchema`; 4.000 passa), `CHAT-06 contexto do rascunho descarta valores e opções dos filtros e resultados` (filtro com `defaultValue` e `options`, widget com `result` e `config.crossFilter`: o objeto validado não tem essas chaves; `mapping` e `layout` ficam), `MESSAGES.assistantWidgetsCreated(1)` é "1 widget criado" e `(3)` é "3 widgets criados", `MESSAGES.assistantGeneratingWidget(2, 5)` é "Gerando widget 2 de 5"
-- [ ] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
+- [x] Testes em `packages/contracts/src/assistant.spec.ts`: `GEN-10 descrição vazia ou com mais de 4.000 caracteres é recusada` (vazia e só espaços dão "Informe a descrição"; 4.001 caracteres dão "A descrição passa de 4.000 caracteres"; 4.000 passa), `CHAT-16 mensagem com mais de 4.000 caracteres dá A mensagem passa de 4.000 caracteres` (no caminho `message` de `assistantRequestSchema`; 4.000 passa), `CHAT-06 contexto do rascunho descarta valores e opções dos filtros e resultados` (filtro com `defaultValue` e `options`, widget com `result` e `config.crossFilter`: o objeto validado não tem essas chaves; `mapping` e `layout` ficam), `MESSAGES.assistantWidgetsCreated(1)` é "1 widget criado" e `(3)` é "3 widgets criados", `MESSAGES.assistantGeneratingWidget(2, 5)` é "Gerando widget 2 de 5"
+- [x] Gate check passes: `pnpm --filter @ninbi/contracts build && pnpm --filter @ninbi/contracts test`
 
 **Tests**: unit
 **Gate**: quick
