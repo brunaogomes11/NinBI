@@ -20,6 +20,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { AskAiPanel } from '@/features/ai/AskAiPanel'
 import type { AiGenerationState } from '@/features/ai/useAiGenerations'
+import { WidgetExportMenu } from '@/features/export/WidgetExportMenu'
 import { formatClock } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import {
@@ -238,16 +239,28 @@ function CardAi({
 export function WidgetCard(props: WidgetCardProps) {
   const [askOpen, setAskOpen] = useState(false)
   const closeAsk = useCallback(() => setAskOpen(false), [])
+  const cardRef = useRef<HTMLDivElement>(null)
   return (
-    <div className="relative flex h-full min-h-0 flex-col gap-3 rounded-card bg-card p-4">
+    <div
+      ref={cardRef}
+      className="relative flex h-full min-h-0 flex-col gap-3 rounded-card bg-card p-4"
+    >
       <h3
         className={cn(
-          'truncate font-semibold',
-          props.edit && `${DRAG_HANDLE_CLASS} cursor-move pr-8`,
+          'truncate pr-8 font-semibold',
+          props.edit && `${DRAG_HANDLE_CLASS} cursor-move`,
         )}
       >
         {props.widget.title}
       </h3>
+      {!props.edit && (
+        <WidgetExportMenu
+          dashboardId={props.dashboardId}
+          version={props.version}
+          widget={props.widget}
+          cardRef={cardRef}
+        />
+      )}
       {props.edit && (
         <div className="absolute top-2 right-2">
           <WidgetMenu
