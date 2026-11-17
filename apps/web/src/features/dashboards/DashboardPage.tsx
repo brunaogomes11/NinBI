@@ -1,4 +1,10 @@
-import { can, type DashboardDto, MESSAGES } from '@ninbi/contracts'
+import {
+  can,
+  type DashboardDto,
+  type DashboardFilter,
+  extractParameterNames,
+  MESSAGES,
+} from '@ninbi/contracts'
 import { useQueryClient } from '@tanstack/react-query'
 import { MoreHorizontal, RefreshCw, Share2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -35,11 +41,14 @@ import { useAiGenerations } from '@/features/ai/useAiGenerations'
 import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
 import { FilterBar } from '@/features/filters/FilterBar'
+import { FilterEditorDialog } from '@/features/filters/FilterEditorDialog'
 import {
   FilterSessionProvider,
   useFilterParams,
   useFilterSession,
 } from '@/features/filters/filter-session'
+import { widgetsUsingFilter } from '@/features/filters/filter-values'
+import { RemoveFilterDialog } from '@/features/filters/RemoveFilterDialog'
 import {
   RefreshControl,
   useLastUpdate,
@@ -58,9 +67,11 @@ import { DashboardGrid } from './DashboardGrid'
 import { DashboardTabsBar } from './DashboardTabsBar'
 import { DeleteDashboardDialog } from './DeleteDashboardDialog'
 import {
+  addFilter,
   addTab,
   addWidget,
   type DashboardDraft,
+  removeFilter,
   removeTab,
   removeWidget,
   renameTab,
@@ -68,6 +79,7 @@ import {
   setLayout,
   setName,
   setRefreshInterval,
+  updateFilter,
   updateWidget,
 } from './draft'
 import { useDashboardEditor } from './useDashboardEditor'
@@ -174,6 +186,12 @@ function DashboardViewBody({
   const tabs = draft ? draft.tabs : dashboard.tabs
   const shownTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0]
   const edit = draft ? { connectionId: draft.connectionId } : undefined
+  const [filterDialog, setFilterDialog] = useState<{
+    filter: DashboardFilter | null
+  } | null>(null)
+  const [removingFilter, setRemovingFilter] = useState<DashboardFilter | null>(
+    null,
+  )
   const [editingWidgetId, setEditingWidgetId] = useState<string | null>(null)
   const editingWidget = shownTab?.widgets.find(
     (widget) => widget.id === editingWidgetId,
@@ -269,13 +287,47 @@ function DashboardViewBody({
           draft && dashboard.permissions.edit
             ? {
                 connectionId: draft.connectionId,
-                onNew: () => {},
-                onEdit: () => {},
-                onRemove: () => {},
+                onNew: () => setFilterDialog({ filter: null }),
+                onEdit: (filter) => setFilterDialog({ filter }),
+                onRemove: setRemovingFilter,
               }
             : undefined
         }
       />
+      {draft && filterDialog && (
+        <FilterEditorDialog
+          dashboardId={dashboard.id}
+          connectionId={draft.connectionId}
+          filter={filterDialog.filter}
+          otherFilters={draft.filters}
+          onApply={(filter) =>
+            editor.change((current) =>
+              filterDialog.filter
+                ? updateFilter(current, filterDialog.filter.id, filter)
+                : addFilter(current, filter),
+            )
+          }
+          onClose={() => setFilterDialog(null)}
+        />
+      )}
+      {draft && removingFilter && (
+        <RemoveFilterDialog
+          filter={removingFilter}
+          widgetCount={widgetsUsingFilter(
+            removingFilter,
+            draft.tabs.flatMap((tab) =>
+              tab.widgets.map((widget) => ({
+                parameters: extractParameterNames(widget.cypher ?? ''),
+              })),
+            ),
+          )}
+          onConfirm={() => {
+            editor.change((current) => removeFilter(current, removingFilter.id))
+            setRemovingFilter(null)
+          }}
+          onClose={() => setRemovingFilter(null)}
+        />
+      )}
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 flex-col">
           <h1 className="min-w-0 truncate font-semibold text-xl">
