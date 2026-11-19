@@ -57,7 +57,7 @@ describe('tokens do tema', () => {
         ).toBeGreaterThanOrEqual(4.5)
       }
     }
-    for (const brand of ['--brand-cyan', '--brand-purple']) {
+    for (const brand of ['--brand-cyan', '--brand-teal']) {
       expect(
         contrastRatio(light['--primary-foreground'], light[brand]),
         `primary-foreground sobre ${brand}`,
@@ -65,11 +65,11 @@ describe('tokens do tema', () => {
     }
   })
 
-  it('SHELL-15 destaque usa o gradiente roxo para ciano sobre fundo quase preto', () => {
+  it('SHELL-15 destaque usa o gradiente teal para ciano sobre fundo quase preto', () => {
     for (const theme of [light, dark]) {
       const gradient = theme['--gradient-brand']
-      expect(gradient.indexOf('var(--brand-purple)')).toBeGreaterThan(-1)
-      expect(gradient.indexOf('var(--brand-purple)')).toBeLessThan(
+      expect(gradient.indexOf('var(--brand-teal)')).toBeGreaterThan(-1)
+      expect(gradient.indexOf('var(--brand-teal)')).toBeLessThan(
         gradient.indexOf('var(--brand-cyan)'),
       )
     }

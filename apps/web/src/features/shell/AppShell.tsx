@@ -6,7 +6,7 @@ import { TopBar, TopBarActionProvider } from './TopBar'
 export function AppShell() {
   return (
     <TopBarActionProvider>
-      <div className="flex h-screen overflow-hidden bg-background text-foreground">
+      <div className="ocean-shell flex h-screen overflow-hidden bg-background text-foreground">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <TopBar />

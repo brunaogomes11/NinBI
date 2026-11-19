@@ -62,6 +62,17 @@ export function DashboardGrid({
   edit?: GridEdit
 }) {
   const { ref, width } = useContainerWidth()
+  const compact = !edit && width > 0 && width < 560
+  const layout = widgets.map(toLayoutItem)
+  if (compact) {
+    let nextRow = 0
+    for (const item of layout.sort((a, b) => a.y - b.y || a.x - b.x)) {
+      item.x = 0
+      item.y = nextRow
+      item.w = GRID_COLUMNS
+      nextRow += item.h
+    }
+  }
 
   return (
     <div ref={ref} className="flex w-full flex-col gap-3">
@@ -80,7 +91,7 @@ export function DashboardGrid({
       ) : (
         <ReactGridLayout
           width={width}
-          layout={widgets.map(toLayoutItem)}
+          layout={layout}
           gridConfig={{
             cols: GRID_COLUMNS,
             rowHeight: ROW_HEIGHT,

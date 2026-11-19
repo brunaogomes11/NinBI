@@ -463,8 +463,8 @@ function DashboardViewBody({
           onClose={() => setRemovingFilter(null)}
         />
       )}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 flex-col">
+      <div className="ocean-heading flex flex-wrap items-end justify-between gap-3">
+        <div className="min-w-0 max-w-full">
           <h1 className="min-w-0 truncate font-semibold text-xl">
             {draft ? draft.name : dashboard.name}
           </h1>
@@ -474,7 +474,7 @@ function DashboardViewBody({
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="dashboard-actions flex flex-wrap items-center gap-2">
           {draft && (
             <Button
               type="button"

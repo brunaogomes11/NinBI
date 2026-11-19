@@ -306,7 +306,7 @@ describe('WidgetVisualization', () => {
     const stops = [...(gradient?.getElementsByTagName('stop') ?? [])].map(
       (stop) => stop.getAttribute('stop-color'),
     )
-    expect(stops).toEqual(['var(--brand-purple)', 'var(--brand-cyan)'])
+    expect(stops).toEqual(['var(--brand-teal)', 'var(--brand-cyan)'])
     expect(screen.getByText('20%')).toHaveClass('text-accent-text')
   })
 

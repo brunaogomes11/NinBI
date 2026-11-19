@@ -55,7 +55,7 @@ export function LoginPage() {
   })
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
+    <main className="ocean-auth">
       <Card className="w-full max-w-md">
         <CardHeader className="items-center gap-4">
           <BrandMark />

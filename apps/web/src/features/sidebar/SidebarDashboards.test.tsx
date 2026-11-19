@@ -57,7 +57,7 @@ describe('SidebarDashboards', () => {
     await within(nav()).findByRole('link', { name: 'Beta' })
     const labels = Array.from(
       nav().querySelectorAll(
-        'a[href^="/dashboards/"], button[aria-expanded]:not([aria-haspopup])',
+        'a[href^="/dashboards/"], button[draggable][aria-expanded]',
       ),
     ).map((element) => element.textContent)
     expect(labels).toEqual(['Beta', 'Comercial', 'Alfa', 'Gama'])
@@ -76,7 +76,9 @@ describe('SidebarDashboards', () => {
 
     open(sidebarHandler(ITEMS))
     expect(
-      await screen.findByRole('heading', { name: MESSAGES.dashboardPick }),
+      await within(screen.getByRole('main')).findByRole('link', {
+        name: 'Abrir dashboard Beta',
+      }),
     ).toBeInTheDocument()
     expect(screen.queryByText(MESSAGES.dashboardsEmpty)).not.toBeInTheDocument()
   })

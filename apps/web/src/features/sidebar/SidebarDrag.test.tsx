@@ -49,7 +49,7 @@ const nav = () => screen.getByRole('navigation', { name: 'Barra lateral' })
 function order(): string[] {
   return Array.from(
     nav().querySelectorAll(
-      'a[href^="/dashboards/"], button[aria-expanded]:not([aria-haspopup])',
+      'a[href^="/dashboards/"], button[draggable][aria-expanded]',
     ),
   ).map((element) => element.textContent ?? '')
 }

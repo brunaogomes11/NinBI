@@ -4,95 +4,95 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --brand-purple: #8b5cf6;
+  --brand-teal: #71b9c5;
   --brand-cyan: #2ee6f0;
-  --brand-blue: #4c9eff;
-  --brand-magenta: #d946ef;
+  --brand-blue: #7cb4cb;
+  --brand-sand: #dfb986;
   --gradient-brand: linear-gradient(
     90deg,
-    var(--brand-purple),
+    var(--brand-teal),
     var(--brand-cyan)
   );
   --accent-text: #08717e;
-  --background: #f4f6fa;
-  --foreground: #10131a;
+  --background: #eef5f4;
+  --foreground: #102f38;
   --sidebar: #ffffff;
   --card: #ffffff;
-  --card-foreground: #10131a;
-  --card-elevated: #f0f2f7;
+  --card-foreground: #102f38;
+  --card-elevated: #e4efee;
   --popover: #ffffff;
-  --popover-foreground: #10131a;
-  --border: #e1e5ee;
-  --input: #e1e5ee;
+  --popover-foreground: #102f38;
+  --border: #bacfcf;
+  --input: #bacfcf;
   --ring: #08717e;
-  --muted: #f0f2f7;
-  --muted-foreground: #596075;
-  --secondary: #f0f2f7;
-  --secondary-foreground: #10131a;
-  --accent: #e8ecf4;
-  --accent-foreground: #10131a;
+  --muted: #e4efee;
+  --muted-foreground: #49656b;
+  --secondary: #e4efee;
+  --secondary-foreground: #102f38;
+  --accent: #d4e9e8;
+  --accent-foreground: #102f38;
   --primary: #2ee6f0;
-  --primary-foreground: #0b0d12;
+  --primary-foreground: #041820;
   --destructive: #d12e4c;
   --chart-1: #2ee6f0;
-  --chart-2: #8b5cf6;
-  --chart-3: #d946ef;
-  --chart-4: #6f7cf7;
-  --chart-5: #4c9eff;
+  --chart-2: #e0b384;
+  --chart-3: #9bbec5;
+  --chart-4: #628eaa;
+  --chart-5: #7cb4cb;
   --radius: 12px;
-  --radius-card: 20px;
-  --radius-control: 12px;
+  --radius-card: 14px;
+  --radius-control: 9px;
 }
 
 .dark {
-  --brand-purple: #8b5cf6;
+  --brand-teal: #71b9c5;
   --brand-cyan: #2ee6f0;
-  --brand-blue: #4c9eff;
-  --brand-magenta: #d946ef;
+  --brand-blue: #7cb4cb;
+  --brand-sand: #dfb986;
   --gradient-brand: linear-gradient(
     90deg,
-    var(--brand-purple),
+    var(--brand-teal),
     var(--brand-cyan)
   );
   --accent-text: #2ee6f0;
-  --background: #0b0d12;
-  --foreground: #f3f5f9;
-  --sidebar: #0f1218;
-  --card: #141821;
-  --card-foreground: #f3f5f9;
-  --card-elevated: #1a1f2a;
-  --popover: #141821;
-  --popover-foreground: #f3f5f9;
-  --border: #242a36;
-  --input: #242a36;
+  --background: #041820;
+  --foreground: #f3f6ef;
+  --sidebar: #092733;
+  --card: #0c2935;
+  --card-foreground: #f3f6ef;
+  --card-elevated: #143744;
+  --popover: #0c2935;
+  --popover-foreground: #f3f6ef;
+  --border: #31515e;
+  --input: #31515e;
   --ring: #2ee6f0;
-  --muted: #1a1f2a;
-  --muted-foreground: #8b92a5;
-  --secondary: #1a1f2a;
-  --secondary-foreground: #f3f5f9;
-  --accent: #1f2531;
-  --accent-foreground: #f3f5f9;
+  --muted: #143744;
+  --muted-foreground: #abc3c8;
+  --secondary: #143744;
+  --secondary-foreground: #f3f6ef;
+  --accent: #1a414e;
+  --accent-foreground: #f3f6ef;
   --primary: #2ee6f0;
-  --primary-foreground: #0b0d12;
+  --primary-foreground: #041820;
   --destructive: #f0506e;
   --chart-1: #2ee6f0;
-  --chart-2: #8b5cf6;
-  --chart-3: #d946ef;
-  --chart-4: #6f7cf7;
-  --chart-5: #4c9eff;
+  --chart-2: #e0b384;
+  --chart-3: #9bbec5;
+  --chart-4: #628eaa;
+  --chart-5: #7cb4cb;
   --radius: 12px;
-  --radius-card: 20px;
-  --radius-control: 12px;
+  --radius-card: 14px;
+  --radius-control: 9px;
 }
 
 @theme inline {
   --font-sans:
     "Plus Jakarta Sans Variable", ui-sans-serif, system-ui, sans-serif;
 
-  --color-brand-purple: var(--brand-purple);
+  --color-brand-teal: var(--brand-teal);
   --color-brand-cyan: var(--brand-cyan);
   --color-brand-blue: var(--brand-blue);
-  --color-brand-magenta: var(--brand-magenta);
+  --color-brand-sand: var(--brand-sand);
   --color-accent-text: var(--accent-text);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -195,4 +195,271 @@
 .ninbi-map-marker {
   background: transparent;
   border: 0;
+}
+
+/* A gravura faz parte das superfícies. Os dados e os controles ficam sobre áreas lisas. */
+.brand-wordmark,
+.ocean-shell :where(main) h1,
+.ocean-auth h1,
+.ocean-section-title {
+  font-family: Georgia, Cambria, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+}
+.brand-wordmark {
+  font-size: 2rem;
+  line-height: 1;
+}
+.ocean-shell {
+  height: 100dvh;
+}
+.ocean-shell main {
+  background:
+    radial-gradient(
+      ellipse at top right,
+      color-mix(in srgb, var(--chart-1) 7%, transparent),
+      transparent 60%
+    ),
+    var(--background);
+}
+.ocean-shell header {
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--sidebar);
+}
+.ocean-shell :where(main) h1,
+.ocean-auth h1 {
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  line-height: 1.12;
+}
+.ocean-section-title {
+  font-size: 1.65rem;
+  line-height: 1.2;
+}
+.ocean-heading {
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(11rem, 23vw, 21rem);
+  padding: clamp(1.25rem, 3vw, 2.75rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background:
+    linear-gradient(0deg, #031b27e0, transparent 55%),
+    url("/brand/ocean.webp") center / cover;
+  color: #f6f6ec;
+}
+.ocean-heading h1 {
+  font-size: clamp(2.25rem, 4vw, 4rem);
+}
+.ocean-heading h1::after {
+  content: "";
+  display: block;
+  width: 3.2rem;
+  height: 2px;
+  margin-top: 0.6rem;
+  background: #6cd2d5;
+}
+.ocean-heading .text-muted-foreground {
+  color: #cfe1e2;
+}
+.dashboard-actions {
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--card);
+  color: var(--foreground);
+}
+.dashboard-actions .text-muted-foreground {
+  color: var(--muted-foreground);
+}
+.ocean-nav {
+  background:
+    linear-gradient(to bottom, var(--sidebar) 0%, transparent 95%) bottom / 100%
+    5rem no-repeat,
+    url("/brand/waves.webp") left bottom / auto 5rem no-repeat,
+    var(--sidebar);
+  padding-bottom: 3.5rem;
+}
+.ocean-nav > div:first-child {
+  padding-block: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.ocean-nav img {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+.mobile-menu {
+  display: none;
+}
+[data-slot="card"],
+.ocean-widget {
+  background-image: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--chart-1) 4%, transparent),
+    transparent 60%
+  );
+  box-shadow: 0 4px 14px #00101712;
+}
+.ocean-widget {
+  border: 1px solid var(--border);
+}
+.ocean-metrics .ocean-metric {
+  --metric-tone: #0f526a;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(110deg, #092c38, var(--metric-tone));
+  color: #f5f7ef;
+  border-color: #43636e;
+}
+.ocean-metrics .ocean-metric:nth-child(2) {
+  --metric-tone: #146970;
+}
+.ocean-metrics .ocean-metric:nth-child(3) {
+  --metric-tone: #766550;
+}
+.ocean-metric::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url("/brand/waves.webp") right bottom / auto 42% no-repeat;
+  mask-image:
+    linear-gradient(to bottom, transparent 58%, #0009 88%),
+    linear-gradient(100deg, transparent 25%, black);
+  mask-composite: intersect;
+}
+.ocean-metric svg {
+  color: #8cdddd;
+}
+.ocean-metric:nth-child(3) svg {
+  color: #ebc99f;
+}
+.ocean-empty {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-control);
+}
+.ocean-auth {
+  display: grid;
+  min-height: 100dvh;
+  align-items: center;
+  padding: clamp(1rem, 7vw, 8rem);
+  background:
+    linear-gradient(90deg, #021722b8, transparent 68%),
+    url("/brand/ocean.webp") 66% center / cover,
+    #05232f;
+}
+.ocean-auth > [data-slot="card"] {
+  width: min(100%, 26rem);
+  padding: 2.4rem 0.6rem;
+  border-radius: var(--radius-card);
+  box-shadow: 0 18px 72px #00101860;
+}
+.ocean-auth [data-slot="card-header"] {
+  justify-items: start;
+}
+.ocean-auth .brand-wordmark {
+  font-size: 1.7rem;
+}
+.ocean-auth h1 {
+  margin-top: 0.65rem;
+}
+.ocean-auth input {
+  background: var(--background);
+}
+@media (max-width: 767px) {
+  .ocean-shell {
+    flex-direction: column;
+  }
+  .ocean-shell > div {
+    min-height: 0;
+  }
+  .ocean-nav {
+    width: 100%;
+    max-height: 64dvh;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--sidebar);
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .ocean-nav > div:first-child {
+    padding-block: 0;
+    border: 0;
+  }
+  .ocean-nav[data-expanded="false"] > :not(:first-child) {
+    display: none;
+  }
+  .mobile-menu {
+    display: inline-flex;
+  }
+  .ocean-shell main,
+  .ocean-shell header {
+    padding-inline: 1rem;
+  }
+  .ocean-shell header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-block: 0.6rem;
+  }
+  .ocean-heading {
+    background-position: 65% center;
+  }
+  .dashboard-actions {
+    width: 100%;
+  }
+  .ocean-auth {
+    align-content: end;
+    justify-items: center;
+    padding-top: 12rem;
+    background-size:
+      auto,
+      auto max(45vh, 19rem),
+      auto;
+    background-position:
+      center,
+      70% top,
+      center;
+    background-repeat: no-repeat;
+  }
+}
+@media (max-width: 639px) {
+  .ocean-metrics {
+    gap: 0.45rem;
+  }
+  .ocean-metrics .ocean-metric {
+    padding: 0.8rem 0.6rem;
+    gap: 0.4rem;
+  }
+  .ocean-metric span {
+    font-size: 0.75rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  .ocean-metric strong {
+    margin-top: auto;
+    font-size: 1.6rem;
+  }
+}
+.ocean-widget[data-visualization="KPI"] {
+  isolation: isolate;
+  background-color: color-mix(in srgb, var(--card) 93%, var(--chart-1));
+}
+.ocean-widget[data-visualization="KPI"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: url("/brand/waves.webp") right bottom / auto 50% no-repeat;
+  mask-image:
+    linear-gradient(to bottom, transparent 50%, #0005),
+    linear-gradient(to right, transparent, black);
+  mask-composite: intersect;
 }

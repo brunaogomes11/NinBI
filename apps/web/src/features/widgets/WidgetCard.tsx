@@ -247,7 +247,8 @@ export function WidgetCard(props: WidgetCardProps) {
   return (
     <div
       ref={cardRef}
-      className="relative flex h-full min-h-0 flex-col gap-3 rounded-card bg-card p-4"
+      data-visualization={props.widget.visualization}
+      className="ocean-widget relative flex h-full min-h-0 flex-col gap-3 rounded-card bg-card p-4"
     >
       <h3
         className={cn(
