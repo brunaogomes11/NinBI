@@ -90,6 +90,7 @@ export function DashboardGrid({
         </p>
       ) : (
         <ReactGridLayout
+          className="dashboard-widget-grid"
           width={width}
           layout={layout}
           gridConfig={{

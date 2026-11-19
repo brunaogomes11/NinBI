@@ -1,9 +1,17 @@
-import { type AssistantMessageDto, MESSAGES } from '@ninbi/contracts'
+import {
+  type AssistantMessageDto,
+  type DashboardSaveInput,
+  MESSAGES,
+} from '@ninbi/contracts'
 import { screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { connectionsHandler, makeConnection } from '@/test/fixtures/connections'
-import { makeDashboard } from '@/test/fixtures/dashboards'
+import {
+  makeDashboard,
+  makeQueryResult,
+  makeWidget,
+} from '@/test/fixtures/dashboards'
 import {
   makeUser,
   renderApp,
@@ -46,6 +54,12 @@ function open(options: {
     requests: [],
     stored: [],
   }
+  let saved = makeDashboard({
+    id: NEW_ID,
+    name: 'Painel novo',
+    connectionId: CONNECTION_ID,
+    tabs: [{ id: 't-1', name: 'Aba 1', widgets: [] }],
+  })
   const view = renderApp('/', {
     handlers: [
       setupStatusHandler(false),
@@ -71,14 +85,26 @@ function open(options: {
           { status: 201 },
         )
       }),
-      http.get(`/api/dashboards/${NEW_ID}`, () =>
-        HttpResponse.json(
-          makeDashboard({
-            id: NEW_ID,
-            name: 'Painel novo',
-            tabs: [{ id: 't-1', name: 'Aba 1', widgets: [] }],
-          }),
-        ),
+      http.get(`/api/dashboards/${NEW_ID}`, () => HttpResponse.json(saved)),
+      http.put(`/api/dashboards/${NEW_ID}`, async ({ request }) => {
+        const payload = (await request.json()) as DashboardSaveInput
+        saved = {
+          ...saved,
+          name: payload.name,
+          connectionId: payload.connectionId,
+          version: saved.version + 1,
+          tabs: payload.tabs.map((tab) => ({
+            ...tab,
+            widgets: tab.widgets.map((widget) => makeWidget(widget)),
+          })),
+        }
+        return HttpResponse.json(saved)
+      }),
+      http.post('/api/dashboards/:id/query', () =>
+        HttpResponse.json(makeQueryResult()),
+      ),
+      http.post('/api/dashboards/:id/widgets/:widgetId/run', () =>
+        HttpResponse.json(makeQueryResult()),
       ),
       http.get(MESSAGES_URL, () => HttpResponse.json(state.stored)),
       http.post(MESSAGES_URL, async ({ request }) => {
@@ -103,7 +129,21 @@ function open(options: {
                 },
                 createdAt: '2026-11-17T10:00:05Z',
               },
-              actions: [],
+              actions: [
+                { type: 'create_tab', tabId: 't-receita', name: 'Receita' },
+                {
+                  type: 'create_widget',
+                  tabId: 't-receita',
+                  widgetId: 'w-receita',
+                  title: 'Total por loja',
+                  cypher: 'RETURN 1 AS total',
+                  visualization: 'TABLE',
+                  mapping: null,
+                  layout: { x: 0, y: 0, w: 4, h: 4 },
+                  error: null,
+                  result: null,
+                },
+              ],
             },
           ])
         )
@@ -198,7 +238,7 @@ describe('Descrever para a IA', () => {
   })
 
   it('GEN-02 Descrever para a IA cria o dashboard e abre o assistente com a descrição como primeira mensagem', async () => {
-    const { user, router, state } = open({})
+    const { user, router, state, unmount } = open({})
     const dialog = await openDialog(user)
     await waitFor(() => expect(state.sidebarGets).toBe(1))
     await startDescribe(user, dialog)
@@ -226,6 +266,18 @@ describe('Descrever para a IA', () => {
     // o estado da navegação some: recarregar não envia de novo
     await waitFor(() => expect(router.state.location.state).toBeNull())
     expect(router.state.location.search).toBe('?editar=1')
+    expect(state.requests).toHaveLength(1)
+    expect(
+      await within(panel).findByText('Dashboard salvo.'),
+    ).toBeInTheDocument()
+    unmount()
+    const reopened = renderApp(`/dashboards/${NEW_ID}`)
+    await reopened.user.click(
+      await screen.findByRole('tab', { name: 'Receita' }),
+    )
+    expect(
+      await screen.findByRole('heading', { name: 'Total por loja' }),
+    ).toBeInTheDocument()
     expect(state.requests).toHaveLength(1)
   })
 

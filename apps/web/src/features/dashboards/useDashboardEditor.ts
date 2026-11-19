@@ -7,7 +7,7 @@ import { type DashboardDraft, fromDto, isDirty, toSavePayload } from './draft'
 
 const EDIT_PARAM = 'editar'
 
-function saveErrorMessage(error: Error): string {
+function saveErrorMessage(error: unknown): string {
   // 409 (versão) e DASHBOARD_EDIT_FORBIDDEN (permissão perdida) trazem texto próprio da API.
   return error instanceof ApiError &&
     (error.status === 409 || error.code === 'DASHBOARD_EDIT_FORBIDDEN')
@@ -64,7 +64,33 @@ export function useDashboardEditor(
     return () => window.removeEventListener('beforeunload', warn)
   }, [dirty])
 
+  function reportSaveError(error: unknown) {
+    if (error instanceof ApiError && error.code === 'DASHBOARD_NOT_FOUND') {
+      onNotFound()
+      return
+    }
+    setSaveError(saveErrorMessage(error))
+  }
+
+  async function persist(snapshot: DashboardDraft) {
+    setSaveError(null)
+    try {
+      const saved = fromDto(await save.mutateAsync(toSavePayload(snapshot)))
+      setDraft((current) => {
+        if (!current || current === snapshot) return current ? saved : null
+        // Uma edição feita durante o PUT continua pendente sobre a versão recém-salva.
+        return { ...current, version: saved.version }
+      })
+      return saved
+    } catch (error) {
+      reportSaveError(error)
+      return null
+    }
+  }
+
   return {
+    persist,
+    saved: save.isSuccess && !dirty,
     draft,
     dirty,
     start: () => setDraft(fromDto(dashboard)),
@@ -77,16 +103,7 @@ export function useDashboardEditor(
       setSaveError(null)
       save.mutate(toSavePayload(draft), {
         onSuccess: exit,
-        onError: (error) => {
-          if (
-            error instanceof ApiError &&
-            error.code === 'DASHBOARD_NOT_FOUND'
-          ) {
-            onNotFound()
-            return
-          }
-          setSaveError(saveErrorMessage(error))
-        },
+        onError: reportSaveError,
       })
     },
     discardOpen,

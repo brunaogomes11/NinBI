@@ -17,6 +17,7 @@
   --background: #eef5f4;
   --foreground: #102f38;
   --sidebar: #ffffff;
+  --scroll-thumb: #467982;
   --card: #ffffff;
   --card-foreground: #102f38;
   --card-elevated: #e4efee;
@@ -58,6 +59,7 @@
   --background: #041820;
   --foreground: #f3f6ef;
   --sidebar: #092733;
+  --scroll-thumb: #59959e;
   --card: #0c2935;
   --card-foreground: #f3f6ef;
   --card-elevated: #143744;
@@ -292,6 +294,10 @@
   display: none;
 }
 [data-slot="card"],
+.react-grid-layout.dashboard-widget-grid,
+.dashboard-widget-grid > .react-grid-item {
+  transition: none;
+}
 .ocean-widget {
   background-image: linear-gradient(
     130deg,
@@ -462,4 +468,62 @@
     linear-gradient(to bottom, transparent 50%, #0005),
     linear-gradient(to right, transparent, black);
   mask-composite: intersect;
+}
+
+.assistant-window {
+  --window-gap: clamp(0.5rem, 2vw, 1.5rem);
+  right: max(var(--window-gap), env(safe-area-inset-right));
+  bottom: max(var(--window-gap), env(safe-area-inset-bottom));
+  width: min(
+    26rem,
+    calc(
+      100% -
+      2 *
+      var(--window-gap) -
+      env(safe-area-inset-left) -
+      env(safe-area-inset-right)
+    )
+  );
+  height: min(
+    40rem,
+    calc(
+      100dvh -
+      2 *
+      var(--window-gap) -
+      env(safe-area-inset-top) -
+      env(safe-area-inset-bottom)
+    )
+  );
+  border-color: color-mix(in srgb, var(--accent-text) 40%, var(--border));
+  box-shadow:
+    0 12px 48px #00162055,
+    0 3px 10px #00162033;
+}
+.assistant-window textarea {
+  max-height: min(20dvh, 9rem);
+  overflow-y: auto;
+}
+@media (forced-colors: none) {
+  :root,
+  * {
+    scrollbar-color: var(--scroll-thumb) var(--background);
+    scrollbar-width: thin;
+  }
+  @supports not (scrollbar-color: auto) {
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track,
+    ::-webkit-scrollbar-corner {
+      background: var(--background);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--scroll-thumb);
+      border-radius: 1rem;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-text);
+    }
+  }
 }

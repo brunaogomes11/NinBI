@@ -106,6 +106,7 @@ function setup(
     ({ editing }: { editing: boolean }) => {
       const [draft, setDraft] = useState<DashboardDraft | null>(initial)
       const assistant = useAssistant({
+        persist: async (snapshot) => snapshot,
         dashboardId: 'd-1',
         draft,
         setDraft: (change) => setDraft((current) => current && change(current)),
@@ -155,8 +156,7 @@ describe('useAssistant', () => {
     expect(result.current.draft).toBe(initial)
   })
 
-  it('GEN-13 resultado da geração fica no rascunho sem gravar o dashboard', async () => {
-    let saves = 0
+  it('GEN-13 resultado da geração atualiza o rascunho e prepara a prévia', async () => {
     server.use(
       http.post(URL_PATH, () =>
         ndjson([
@@ -180,10 +180,6 @@ describe('useAssistant', () => {
           ]),
         ]),
       ),
-      http.put('/api/dashboards/d-1', () => {
-        saves += 1
-        return HttpResponse.json({})
-      }),
     )
     const { result, queryClient } = setup()
 
@@ -192,7 +188,6 @@ describe('useAssistant', () => {
 
     const widget = result.current.draft?.tabs[1].widgets[0]
     expect(widget).toMatchObject({ id: 'w-novo', title: 'Total por loja' })
-    expect(saves).toBe(0)
     // a prévia do widget nasce com o resultado que veio na resposta (AD-086)
     expect(
       queryClient.getQueryData(['query', 'd-1', 'c-1', widget?.cypher]),

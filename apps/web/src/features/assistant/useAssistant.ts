@@ -36,6 +36,7 @@ export interface UseAssistantOptions {
   /** `null` fora do modo de edição. */
   draft: DashboardDraft | null
   setDraft: (change: (draft: DashboardDraft) => DashboardDraft) => void
+  persist: (snapshot: DashboardDraft) => Promise<DashboardDraft | null>
   /** Entra no modo de edição se ainda não está (CHAT-04). */
   ensureEditing: () => void
   editing: boolean
@@ -146,7 +147,7 @@ export function useAssistant(options: UseAssistantOptions) {
   )
 
   const handleDone = useCallback(
-    (event: Extract<AssistantEvent, { type: 'done' }>) => {
+    async (event: Extract<AssistantEvent, { type: 'done' }>) => {
       const {
         dashboardId,
         draft,
@@ -160,9 +161,18 @@ export function useAssistant(options: UseAssistantOptions) {
       if (!draft || event.actions.length === 0) return
       const before = draft
       const after = applyAssistantActions(before, event.actions, language)
+      if (after === before) return
       setDraft(() => after)
       seedPreviews(dashboardId, after, event.actions, language)
-      setUndoPoint({ messageId: event.reply.id, before, after })
+      const saved = await latest.current.persist(after)
+      setUndoPoint({
+        messageId: event.reply.id,
+        before:
+          saved && saved.version !== before.version
+            ? { ...before, version: saved.version }
+            : before,
+        after: saved ?? after,
+      })
     },
     [queryClient, seedPreviews],
   )
@@ -208,7 +218,7 @@ export function useAssistant(options: UseAssistantOptions) {
           },
         )
         if (abort.signal.aborted) return
-        if (last.type === 'done') handleDone(last)
+        if (last.type === 'done') await handleDone(last)
         else if (last.type === 'provider_error' || last.type === 'error') {
           fail(last.message)
         } else fail(MESSAGES.internalError)
@@ -254,6 +264,7 @@ export function useAssistant(options: UseAssistantOptions) {
   const undo = useCallback(() => {
     if (!undoPoint) return
     latest.current.setDraft(() => undoPoint.before)
+    void latest.current.persist(undoPoint.before)
     setUndoPoint(null)
   }, [undoPoint])
 

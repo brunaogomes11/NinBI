@@ -1,6 +1,7 @@
 import { MESSAGES } from '@ninbi/contracts'
-import { Trash2, X } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { Sparkles, Trash2, X } from 'lucide-react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,14 +22,18 @@ export interface AssistantPanelProps {
   dashboardId: string
   /** Estado e ações de `useAssistant`, que vive na página (o pedido sobrevive a trocar de aba). */
   assistant: ReturnType<typeof useAssistant>
+  saveFeedback?: ReactNode
+  saving?: boolean
   onClose: () => void
 }
 
-/** Painel lateral do assistente: conversa, campo de mensagem e limpeza (CHAT-19, HIST-04, HIST-05). */
+/** Janela flutuante do assistente: conversa, campo de mensagem e limpeza (CHAT-19, HIST-04, HIST-05). */
 export function AssistantPanel({
   dashboardId,
   assistant,
   onClose,
+  saveFeedback,
+  saving = false,
 }: AssistantPanelProps) {
   const messages = useAssistantMessages(dashboardId)
   const aiStatus = useAiStatus()
@@ -54,13 +59,16 @@ export function AssistantPanel({
     assistant.send(text)
   }
 
-  return (
+  return createPortal(
     <aside
       aria-label={MESSAGES.assistantToggle}
-      className="sticky top-4 flex h-[calc(100vh-9rem)] w-96 shrink-0 flex-col overflow-hidden rounded-card border bg-card"
+      className="assistant-window fixed z-40 flex flex-col overflow-hidden rounded-card border bg-card text-card-foreground"
     >
-      <div className="flex items-center justify-between gap-2 border-b px-3 py-2">
-        <h2 className="font-semibold text-base">{MESSAGES.assistantToggle}</h2>
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b bg-card-elevated px-3 py-2">
+        <h2 className="flex items-center gap-2 font-semibold text-base">
+          <Sparkles aria-hidden="true" className="size-4 text-accent-text" />
+          {MESSAGES.assistantToggle}
+        </h2>
         <div className="flex items-center gap-1">
           <Button
             type="button"
@@ -83,26 +91,36 @@ export function AssistantPanel({
           </Button>
         </div>
       </div>
-      <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto">
+      <div
+        ref={scroller}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+      >
         <AssistantMessageList
           status={messages.status}
           messages={messages.data ?? []}
           onReload={() => void messages.refetch()}
-          undoMessageId={assistant.undoMessageId}
+          undoMessageId={
+            saving || assistant.running ? null : assistant.undoMessageId
+          }
           onUndo={assistant.undo}
           failure={assistant.failure}
           onRetry={assistant.retry}
         />
       </div>
+      {saveFeedback}
       <AssistantComposer
         value={draftText}
         onChange={setDraftText}
         onSubmit={submit}
         onCancel={assistant.cancel}
-        running={assistant.running}
+        running={assistant.running && !saving}
         progress={assistant.progress}
         disabledReason={
-          aiStatus.data?.configured === false ? MESSAGES.llmNotConfigured : null
+          saving
+            ? 'Salvando dashboard…'
+            : aiStatus.data?.configured === false
+              ? MESSAGES.llmNotConfigured
+              : null
         }
       />
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
@@ -120,6 +138,7 @@ export function AssistantPanel({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </aside>
+    </aside>,
+    document.body,
   )
 }

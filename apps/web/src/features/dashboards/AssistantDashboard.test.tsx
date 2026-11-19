@@ -87,6 +87,10 @@ function open(options: Options = {}) {
       http.post('/api/dashboards/:id/widgets/:widgetId/run', () =>
         HttpResponse.json(makeQueryResult()),
       ),
+      http.put(
+        '/api/dashboards/d-1',
+        () => new HttpResponse(null, { status: 500 }),
+      ),
       http.get(MESSAGES_URL, () => HttpResponse.json(options.stored ?? [])),
       ...(options.post ? [options.post] : []),
     ],
@@ -117,7 +121,7 @@ describe('Assistente na página do dashboard', () => {
     expect(assistantButton()).toHaveAttribute('aria-pressed', 'false')
   })
 
-  it('CHAT-02 painel aberto deixa a grade na largura restante', async () => {
+  it('CHAT-02 janela flutuante mantém a largura da grade', async () => {
     restoreSize = mockElementSize(816, 600)
     const dashboard = makeDashboard({
       tabs: [
@@ -147,8 +151,8 @@ describe('Assistente na página do dashboard', () => {
     expect(main).toHaveClass('min-w-0')
     expect(main).toHaveClass('flex-1')
     expect(main.parentElement).toHaveClass('flex')
-    expect(main.parentElement).toBe(panel.parentElement)
-    expect(panel.className).not.toMatch(/\b(absolute|fixed)\b/)
+    expect(panel.parentElement).toBe(document.body)
+    expect(panel).toHaveClass('fixed')
     // metade das 12 colunas em 816 px: (816 - 16) / 2 = 400 px
     const card = screen
       .getByText('Meio')
@@ -418,7 +422,7 @@ describe('Assistente na página do dashboard', () => {
     expect(screen.queryByRole('button', { name: 'Desfazer' })).toBeNull()
   })
 
-  it('CHAT-26 Descartar mantém a conversa e tira o Desfazer', async () => {
+  it('CHAT-26 falha ao salvar mantém o rascunho e Descartar preserva a conversa', async () => {
     localStorage.setItem(OPEN_KEY, '1')
     const { user } = open({ post: replyPost() })
     await screen.findByText('Vendas por loja')
@@ -432,6 +436,9 @@ describe('Assistente na página do dashboard', () => {
       await screen.findByRole('button', { name: 'Desfazer' }),
     ).toBeInTheDocument()
 
+    expect(
+      await screen.findByRole('button', { name: 'Tentar salvar' }),
+    ).toBeEnabled()
     await user.click(screen.getByRole('button', { name: 'Descartar' }))
     const dialog = await screen.findByRole('alertdialog')
     await user.click(within(dialog).getByRole('button', { name: 'Descartar' }))

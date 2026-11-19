@@ -306,6 +306,7 @@ function DashboardViewBody({
     dashboardId: dashboard.id,
     draft,
     setDraft: editor.change,
+    persist: editor.persist,
     ensureEditing: () => {
       if (!draft) editor.start()
     },
@@ -393,7 +394,7 @@ function DashboardViewBody({
           {draft ? (
             <Button
               type="button"
-              disabled={editor.saving}
+              disabled={editor.saving || assistant.running}
               onClick={editor.save}
               className="bg-[image:var(--gradient-brand)] text-primary-foreground"
             >
@@ -479,6 +480,7 @@ function DashboardViewBody({
             <Button
               type="button"
               variant="outline"
+              disabled={editor.saving}
               onClick={editor.requestDiscard}
             >
               Descartar
@@ -555,7 +557,7 @@ function DashboardViewBody({
         onNotFound={onNotFound}
       />
       {draft && <DashboardEditFields draft={draft} onChange={editor.change} />}
-      {editor.saveError && (
+      {editor.saveError && !(canUseAssistant && assistantOpen) && (
         <p role="alert" className="text-destructive text-sm">
           {editor.saveError}
         </p>
@@ -684,6 +686,26 @@ function DashboardViewBody({
           <AssistantPanel
             dashboardId={dashboard.id}
             assistant={assistant}
+            saving={editor.saving}
+            saveFeedback={
+              editor.saveError ? (
+                <div className="flex items-center justify-between gap-2 border-t px-3 py-2 text-sm">
+                  <span role="alert">{editor.saveError}</span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={editor.saving || assistant.running}
+                    onClick={editor.save}
+                  >
+                    Tentar salvar
+                  </Button>
+                </div>
+              ) : editor.saved && draft ? (
+                <p role="status" className="px-3 py-2 text-xs text-accent-text">
+                  Dashboard salvo.
+                </p>
+              ) : null
+            }
             onClose={() => {
               setAssistantOpen(false)
               writeAssistantOpen(false)
