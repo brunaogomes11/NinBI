@@ -1,5 +1,5 @@
 import { type McpToolDto, MESSAGES } from '@ninbi/contracts'
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { expect, it } from 'vitest'
 import {
@@ -31,7 +31,9 @@ const session = [
   sidebarHandler(),
 ]
 
-async function editMcp() {
+async function editMcp(
+  result = makeQueryResult({ columns: ['equipe'], rows: [['Suporte']] }),
+) {
   const dashboard = makeDashboard({
     connectionId: null,
     connectionType: null,
@@ -51,9 +53,7 @@ async function editMcp() {
       ),
       http.post('/api/dashboards/d-1/mcp/preview', async ({ request }) => {
         calls.push(await request.json())
-        return HttpResponse.json(
-          makeQueryResult({ columns: ['equipe'], rows: [['Suporte']] }),
-        )
+        return HttpResponse.json(result)
       }),
     ],
   })
@@ -160,7 +160,8 @@ it('MCP-22 editor oferece as listas tipadas declaradas pela ferramenta', async (
 })
 
 function dashboardHandlers(
-  onRun: (widget: string, params: unknown) => Response,
+  onRun: (widget: string, params: unknown) => Response | Promise<Response>,
+  override: Partial<ReturnType<typeof makeWidget>> = {},
 ) {
   const dashboard = makeDashboard({
     connectionId: null,
@@ -177,6 +178,7 @@ function dashboardHandlers(
             sourceKind: 'MCP',
             hasQuery: true,
             parameters: ['team'],
+            ...override,
           }),
           makeWidget({
             id: 'b',
@@ -211,6 +213,60 @@ function dashboardHandlers(
   ]
 }
 
+function widgetCard(title: string) {
+  const card = screen.getByRole('heading', { name: title }).parentElement
+  if (!card) throw new Error('Card não encontrado')
+  return within(card)
+}
+
+it('MCP-09 gráfico salvo mostra colunas quando a lista tipada está vazia', async () => {
+  renderApp('/dashboards/d-1', {
+    handlers: dashboardHandlers(
+      () =>
+        HttpResponse.json(
+          makeQueryResult({
+            columns: ['equipe', 'total'],
+            columnTypes: ['string', 'integer'],
+            rows: [],
+          }),
+        ),
+      {
+        visualization: 'BAR',
+        config: { mapping: { x: 'equipe', series: ['total'] } },
+      },
+    ),
+  })
+  await screen.findByRole('heading', { name: 'Fonte A' })
+  const empty = widgetCard('Fonte A')
+  expect(await empty.findByText(MESSAGES.queryNoData)).toBeInTheDocument()
+  expect(
+    empty.getByRole('columnheader', { name: 'equipe' }),
+  ).toBeInTheDocument()
+  expect(empty.getByRole('columnheader', { name: 'total' })).toBeInTheDocument()
+})
+
+it('MCP-11 prévia de gráfico sinaliza que o resultado é parcial', async () => {
+  const result = makeQueryResult({
+    columns: ['equipe', 'total'],
+    columnTypes: ['string', 'integer'],
+    rows: [['Suporte', 8]],
+    rowLimit: 1,
+    truncated: true,
+  })
+  const { user, dialog } = await editMcp(result)
+  await user.selectOptions(
+    dialog.getByLabelText('Lista de saída'),
+    '["chamados"]',
+  )
+  await user.click(dialog.getByRole('button', { name: 'Executar' }))
+  await dialog.findByText('Suporte')
+  await user.click(dialog.getByRole('combobox', { name: 'Visualização' }))
+  await user.click(screen.getByRole('option', { name: /^Barras$/ }))
+  const preview = within(dialog.getByRole('region', { name: 'Prévia' }))
+  expect(preview.getByText(MESSAGES.rowsTruncated(1))).toBeInTheDocument()
+  expect(preview.queryByRole('table')).not.toBeInTheDocument()
+})
+
 it('MCP-13 reabrir painel executa configuração persistida', async () => {
   let active = 0
   const handlers = dashboardHandlers((widget) =>
@@ -229,23 +285,46 @@ it('MCP-13 reabrir painel executa configuração persistida', async () => {
 
 it('MCP-14 filtro reexecuta apenas widget vinculado com o novo valor', async () => {
   const calls: [string, unknown][] = []
-  const { user } = renderApp('/dashboards/d-1', {
-    handlers: dashboardHandlers((widget, params) => {
+  let releaseOld: (() => void) | undefined
+  let returnedOld = false
+  const oldRequest = new Promise<void>((resolve) => {
+    releaseOld = resolve
+  })
+  renderApp('/dashboards/d-1', {
+    handlers: dashboardHandlers(async (widget, params) => {
       calls.push([widget, params])
+      const team = (params as { params?: { team?: string } }).params?.team
+      if (widget === 'a' && team === 'Suporte') {
+        await oldRequest
+        returnedOld = true
+      }
       return HttpResponse.json(
         makeQueryResult({
-          rows: [[widget === 'a' ? 'Dados de A' : 'Dados de B']],
+          rows: [
+            [widget === 'a' ? `Dados de ${team ?? 'Todas'}` : 'Dados de B'],
+          ],
         }),
       )
     }),
   })
   await screen.findByText('Dados de B')
   const input = screen.getByRole('textbox', { name: 'Equipe' })
-  await user.type(input, 'Suporte')
-  await waitFor(() =>
-    expect(calls).toContainEqual(['a', { params: { team: 'Suporte' } }]),
-  )
-  expect(calls.filter(([id]) => id === 'b')).toHaveLength(1)
+  try {
+    fireEvent.change(input, { target: { value: 'Suporte' } })
+    await waitFor(() =>
+      expect(calls).toContainEqual(['a', { params: { team: 'Suporte' } }]),
+    )
+    fireEvent.change(input, { target: { value: 'Plataforma' } })
+    const active = widgetCard('Fonte A')
+    expect(await active.findByText('Dados de Plataforma')).toBeInTheDocument()
+    releaseOld?.()
+    await waitFor(() => expect(returnedOld).toBe(true))
+    expect(active.getByText('Dados de Plataforma')).toBeInTheDocument()
+    expect(active.queryByText('Dados de Suporte')).not.toBeInTheDocument()
+    expect(calls.filter(([id]) => id === 'b')).toHaveLength(1)
+  } finally {
+    releaseOld?.()
+  }
 })
 
 it('MCP-15 falha de uma fonte mantém outro widget disponível', async () => {
@@ -259,6 +338,12 @@ it('MCP-15 falha de uma fonte mantém outro widget disponível', async () => {
         : HttpResponse.json(makeQueryResult({ rows: [['Dados de B']] })),
     ),
   })
-  expect(await screen.findByText(MESSAGES.widgetLoadFailed)).toBeInTheDocument()
-  expect(await screen.findByText('Dados de B')).toBeInTheDocument()
+  await screen.findByRole('heading', { name: 'Fonte A' })
+  const a = widgetCard('Fonte A')
+  const b = widgetCard('Fonte B')
+  expect(await a.findByRole('alert')).toHaveTextContent(
+    MESSAGES.widgetLoadFailed,
+  )
+  expect(await b.findByText('Dados de B')).toBeInTheDocument()
+  expect(b.queryByRole('alert')).not.toBeInTheDocument()
 })

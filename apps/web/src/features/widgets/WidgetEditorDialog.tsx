@@ -112,6 +112,11 @@ function Preview({
   }
   return (
     <div className="flex h-64 min-h-0 flex-col">
+      {result.columnTypes && result.truncated && (
+        <p className="text-sm text-muted-foreground">
+          {MESSAGES.rowsTruncated(result.rowLimit)}
+        </p>
+      )}
       <WidgetVisualization
         result={result}
         visualization={visualization}

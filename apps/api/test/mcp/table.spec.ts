@@ -40,12 +40,14 @@ const call: McpCall = {
 }
 const example = { equipe: 'Suporte', abertos: 8 }
 let requests = 0
+let readOnlyHint = true
 let tickets: unknown[] = []
 let fixture: Awaited<ReturnType<typeof startMcpFixture>>
 
 beforeAll(async () => {
   fixture = await startMcpFixture((method) => {
-    if (method === 'tools/list') return { tools: [tool] }
+    if (method === 'tools/list')
+      return { tools: [{ ...tool, annotations: { readOnlyHint } }] }
     requests++
     return {
       content: [],
@@ -90,6 +92,15 @@ it('MCP-07 ferramenta desabilitada não é chamada', async () => {
     { status: 403 },
   )
   expect(requests).toBe(before)
+  readOnlyHint = false
+  try {
+    await expect(service().execute(call, call.arguments)).rejects.toMatchObject(
+      { status: 403 },
+    )
+    expect(requests).toBe(before)
+  } finally {
+    readOnlyHint = true
+  }
 })
 
 it('MCP-08 resposta incompatível é recusada', async () => {
@@ -110,6 +121,10 @@ it('MCP-09 lista vazia preserva suas colunas tipadas', async () => {
 })
 
 it('MCP-11 resposta acima do limite é sinalizada como parcial', async () => {
+  tickets = Array.from({ length: 5000 }, () => example)
+  const boundary = await service().execute(call, call.arguments)
+  expect(boundary).toMatchObject({ rowLimit: 5000, truncated: false })
+  expect(boundary.rows).toHaveLength(5000)
   tickets = Array.from({ length: 5001 }, () => example)
   const result = await service().execute(call, call.arguments)
   expect(result).toMatchObject({ rowLimit: 5000, truncated: true })

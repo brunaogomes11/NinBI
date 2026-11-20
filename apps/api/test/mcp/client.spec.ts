@@ -4,7 +4,7 @@ import { startMcpFixture } from './server-fixture'
 
 const tool = (name: string) => ({ name, inputSchema: { type: 'object' } })
 
-it('MCP-02 catálogo vem da conexão escolhida', async () => {
+it('transporte devolve o catálogo do endpoint solicitado', async () => {
   const first = await startMcpFixture(() => ({ tools: [tool('tickets')] }))
   const second = await startMcpFixture(() => ({ tools: [tool('projects')] }))
   try {
@@ -48,11 +48,27 @@ it('MCP-10 chamada acima do prazo retorna erro de tempo limite', async () => {
 
 it('MCP-18 endpoint protegido retorna erro de autorização', async () => {
   const server = await startMcpFixture(() => ({}), 401)
+  const protectedCall = await startMcpFixture(
+    () => ({ tools: [tool('tickets')] }),
+    200,
+    403,
+  )
   try {
+    const client = new McpClientService(3000)
+    await expect(client.listTools(server.endpoint)).rejects.toMatchObject({
+      status: 422,
+      code: 'MCP_AUTH_REQUIRED',
+    })
+    expect(
+      (await client.listTools(protectedCall.endpoint)).map((item) => item.name),
+    ).toEqual(['tickets'])
     await expect(
-      new McpClientService(3000).listTools(server.endpoint),
-    ).rejects.toMatchObject({ code: 'MCP_AUTH_REQUIRED' })
+      client.run(protectedCall.endpoint, (session) =>
+        session.callTool({ name: 'tickets' }),
+      ),
+    ).rejects.toMatchObject({ status: 422, code: 'MCP_AUTH_REQUIRED' })
   } finally {
     await server.close()
+    await protectedCall.close()
   }
 })

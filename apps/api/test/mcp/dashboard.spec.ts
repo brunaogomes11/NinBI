@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto'
+import { createServer } from 'node:http'
+import type { AddressInfo } from 'node:net'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createTestApp } from '../harness'
 import { signInAs } from '../support/sign-in'
@@ -19,11 +21,44 @@ const values = {
   filterBindings: { team: 'team' },
 }
 
-function serverFixture(source: string) {
+async function protectedOrigin() {
+  const requests: (string | undefined)[] = []
+  const authorization = 'Bearer origin-test-token'
+  const server = createServer((req, res) => {
+    requests.push(req.headers.authorization)
+    if (req.headers.authorization !== authorization) {
+      res.writeHead(401).end()
+      return
+    }
+    res.end('A')
+  })
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+  const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/protected`
+  return {
+    requests,
+    authorization,
+    read: async () => (await fetch(url, { headers: { authorization } })).text(),
+    close: () =>
+      new Promise<void>((resolve) => {
+        server.close(() => resolve())
+        server.closeAllConnections()
+      }),
+  }
+}
+
+function serverFixture(source: string, readOrigin = async () => source) {
   const calls: unknown[] = []
-  return startMcpFixture((method, params) => {
-    if (method === 'tools/list')
+  return startMcpFixture(async (method, params) => {
+    if (method === 'tools/list') {
+      if ((params as { cursor?: string } | undefined)?.cursor === 'metadata') {
+        return {
+          tools: [
+            { name: `metadata_${source}`, inputSchema: { type: 'object' } },
+          ],
+        }
+      }
       return {
+        nextCursor: 'metadata',
         tools: [
           {
             name: 'list',
@@ -47,19 +82,34 @@ function serverFixture(source: string) {
                     required: ['source', 'team'],
                   },
                 },
+                summary: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: { total: { type: 'integer' } },
+                  },
+                },
+                nested: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: { detail: { type: 'object' } },
+                  },
+                },
               },
               required: ['records'],
             },
           },
         ],
       }
+    }
     calls.push(params)
     return {
       content: [],
       structuredContent: {
         records: [
           {
-            source,
+            source: await readOrigin(),
             team: (params as { arguments: { team: string } }).arguments.team,
           },
         ],
@@ -74,13 +124,16 @@ describe('execução de dashboards MCP', () => {
   let second: Awaited<ReturnType<typeof serverFixture>>
   let owner: Awaited<ReturnType<typeof signInAs>>['agent']
   let firstConnection: string
+  let secondConnection: string
+  let origin: Awaited<ReturnType<typeof protectedOrigin>>
   let url: string
   let widgetA: string
   let widgetB: string
 
   beforeAll(async () => {
     app = await createTestApp()
-    first = await serverFixture('A')
+    origin = await protectedOrigin()
+    first = await serverFixture('A', origin.read)
     second = await serverFixture('B')
     const { agent: admin } = await signInAs(
       app.app,
@@ -100,7 +153,7 @@ describe('execução de dashboards MCP', () => {
       return body.id as string
     }
     firstConnection = await register('A', first.endpoint)
-    const secondConnection = await register('B', second.endpoint)
+    secondConnection = await register('B', second.endpoint)
     ;({ agent: owner } = await signInAs(
       app.app,
       app.db,
@@ -132,8 +185,10 @@ describe('execução de dashboards MCP', () => {
               id,
               title: `Fonte ${index}`,
               cypher: null,
-              visualization: 'TABLE',
-              config: {},
+              visualization: 'LIST',
+              config: {
+                mapping: { primary: 'team', secondary: null, values: [] },
+              },
               layout: { x: index * 4, y: 0, w: 4, h: 4 },
               mcpCall: { connectionId, ...values },
             })),
@@ -146,7 +201,35 @@ describe('execução de dashboards MCP', () => {
   afterAll(async () => {
     await first?.close()
     await second?.close()
+    await origin?.close()
     await app?.close()
+  })
+
+  it('MCP-02 catálogo vem da conexão escolhida', async () => {
+    const catalog = (id: string) =>
+      owner.get(`/api/mcp/connections/${id}/tools`).expect(200)
+    const [a, b] = await Promise.all([
+      catalog(firstConnection),
+      catalog(secondConnection),
+    ])
+    expect(a.body.map((item: { name: string }) => item.name)).toEqual([
+      'list',
+      'metadata_A',
+    ])
+    expect(b.body.map((item: { name: string }) => item.name)).toEqual([
+      'list',
+      'metadata_B',
+    ])
+    expect(a.body[0].lists).toEqual([
+      {
+        path: ['records'],
+        columns: [
+          { name: 'source', type: 'string' },
+          { name: 'team', type: 'string' },
+        ],
+      },
+      { path: ['summary'], columns: [{ name: 'total', type: 'integer' }] },
+    ])
   })
 
   it('MCP-12 configuração da chamada é persistida no widget', async () => {
@@ -154,6 +237,8 @@ describe('execução de dashboards MCP', () => {
     expect(body.connectionId).toBeNull()
     expect(body.tabs[0].widgets[0]).toMatchObject({
       id: widgetA,
+      visualization: 'LIST',
+      config: { mapping: { primary: 'team', secondary: null, values: [] } },
       mcpCall: { ...values, connectionId: firstConnection },
       parameters: ['team'],
     })
@@ -190,11 +275,18 @@ describe('execução de dashboards MCP', () => {
       .send({})
       .expect(200)
     expect(body.rows).toEqual([['A', 'Todos']])
+    const { body: filtered } = await owner
+      .post(`${url}/widgets/${widgetA}/run`)
+      .send({ params: { team: 'Operações' } })
+      .expect(200)
+    expect(filtered.rows).toEqual([['A', 'Operações']])
     expect(app.chatModels.calls).toHaveLength(0)
   })
 
   it('MCP-20 prévia faz chamadas somente ao endpoint MCP cadastrado', async () => {
     const callsBefore = second.calls.length
+    const firstCallsBefore = first.calls.length
+    const originBefore = origin.requests.length
     const { body } = await owner
       .post(`${url}/mcp/preview`)
       .send({
@@ -208,5 +300,7 @@ describe('execução de dashboards MCP', () => {
       arguments: { team: 'Plataforma' },
     })
     expect(second.calls).toHaveLength(callsBefore)
+    expect(first.calls).toHaveLength(firstCallsBefore + 1)
+    expect(origin.requests.slice(originBefore)).toEqual([origin.authorization])
   })
 })

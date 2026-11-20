@@ -4,6 +4,7 @@ import type { AddressInfo } from 'node:net'
 export async function startMcpFixture(
   handler: (method: string, params: unknown) => unknown,
   status = 200,
+  callStatus?: number,
 ) {
   const server = createServer(async (req, res) => {
     if (status !== 200 || req.method !== 'POST') {
@@ -15,6 +16,10 @@ export async function startMcpFixture(
     const message = JSON.parse(Buffer.concat(chunks).toString())
     if (message.id === undefined) {
       res.writeHead(202).end()
+      return
+    }
+    if (message.method === 'tools/call' && callStatus) {
+      res.writeHead(callStatus).end()
       return
     }
     const result =

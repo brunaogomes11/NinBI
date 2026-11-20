@@ -108,9 +108,7 @@ function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
     return (
       <>
         <p className="text-sm text-muted-foreground">{MESSAGES.queryNoData}</p>
-        {query.data.columnTypes && widget.visualization === 'TABLE' && (
-          <ResultTable result={query.data} />
-        )}
+        {query.data.columnTypes && <ResultTable result={query.data} />}
         {refreshFailed}
       </>
     )
