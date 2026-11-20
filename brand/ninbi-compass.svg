@@ -1,4 +1,5 @@
 ﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <title>Bússola NinBI</title>
   <circle cx="40" cy="40" r="30" fill="#09303e" stroke="#86cbd1" stroke-width="2"/>
   <circle cx="40" cy="40" r="25" fill="none" stroke="#6294a0" stroke-width="1"/>
   <path d="M40 2 46 32 40 40 34 32Z M78 40 48 46 40 40 48 34Z M40 78 34 48 40 40 46 48Z M2 40 32 34 40 40 32 46Z" fill="#70d6d9"/>
