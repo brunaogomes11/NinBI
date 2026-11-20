@@ -124,7 +124,7 @@ flowchart TD
 
 **Done when**:
 
-- [ ] Dois servidores recebem somente as chamadas correspondentes ao widget e aos filtros. Uma requisição sem acesso não chega ao transporte.
+- [x] Dois servidores recebem somente as chamadas correspondentes ao widget e aos filtros. Uma requisição sem acesso não chega ao transporte.
 
 **Tests**: integration
 **Gate**: full

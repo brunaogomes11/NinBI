@@ -158,4 +158,55 @@ describe('execução de dashboards MCP', () => {
       parameters: ['team'],
     })
   })
+
+  it('MCP-21 widgets salvos executam em seus respectivos servidores', async () => {
+    const { body: a } = await owner
+      .post(`${url}/widgets/${widgetA}/run`)
+      .send({ params: { team: 'Suporte' } })
+      .expect(200)
+    const { body: b } = await owner
+      .post(`${url}/widgets/${widgetB}/run`)
+      .send({})
+      .expect(200)
+    expect(a.rows).toEqual([['A', 'Suporte']])
+    expect(b.rows).toEqual([['B', 'Todos']])
+  })
+
+  it('MCP-16 painel sem acesso não despacha chamada', async () => {
+    const callsBefore = first.calls.length
+    const { agent } = await signInAs(
+      app.app,
+      app.db,
+      'VIEWER',
+      'mcp-outsider@example.com',
+    )
+    await agent.post(`${url}/widgets/${widgetA}/run`).send({}).expect(404)
+    expect(first.calls).toHaveLength(callsBefore)
+  })
+
+  it('MCP-17 rota salva executa MCP sem chamar o provedor de IA', async () => {
+    const { body } = await owner
+      .post(`${url}/widgets/${widgetA}/run`)
+      .send({})
+      .expect(200)
+    expect(body.rows).toEqual([['A', 'Todos']])
+    expect(app.chatModels.calls).toHaveLength(0)
+  })
+
+  it('MCP-20 prévia faz chamadas somente ao endpoint MCP cadastrado', async () => {
+    const callsBefore = second.calls.length
+    const { body } = await owner
+      .post(`${url}/mcp/preview`)
+      .send({
+        call: { ...values, connectionId: firstConnection },
+        params: { team: 'Plataforma' },
+      })
+      .expect(200)
+    expect(body.rows).toEqual([['A', 'Plataforma']])
+    expect(first.calls.at(-1)).toMatchObject({
+      name: 'list',
+      arguments: { team: 'Plataforma' },
+    })
+    expect(second.calls).toHaveLength(callsBefore)
+  })
 })
