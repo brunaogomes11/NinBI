@@ -139,7 +139,7 @@ flowchart TD
 
 **Done when**:
 
-- [ ] O Admin cadastra um endpoint, consulta seu catálogo e habilita uma ferramenta. Para Editor, a edição do cadastro fica indisponível.
+- [x] O Admin cadastra um endpoint, consulta seu catálogo e habilita uma ferramenta. Para Editor, a edição do cadastro fica indisponível.
 
 **Tests**: component
 **Gate**: web

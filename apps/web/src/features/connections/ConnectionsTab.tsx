@@ -19,6 +19,7 @@ import { formatDateTime } from '@/lib/format'
 import { connectionTypeLabel, useConnections } from './api'
 import { ConnectionFormDialog } from './ConnectionFormDialog'
 import { ConnectionRowActions } from './ConnectionRowActions'
+import { McpConnectionsPanel } from './McpConnectionsPanel'
 
 const SKELETON_ROWS = 5
 
@@ -58,9 +59,7 @@ export function ConnectionsTab() {
         </TopBarAction>
       )}
       {canManage && (
-        <>
-          <ConnectionFormDialog open={newOpen} onOpenChange={setNewOpen} />
-        </>
+        <ConnectionFormDialog open={newOpen} onOpenChange={setNewOpen} />
       )}
       {connections.isError ? (
         <Card className="items-start gap-3 rounded-card p-6">
@@ -145,6 +144,7 @@ export function ConnectionsTab() {
           </Table>
         </Card>
       )}
+      <McpConnectionsPanel canManage={canManage} />
     </>
   )
 }
