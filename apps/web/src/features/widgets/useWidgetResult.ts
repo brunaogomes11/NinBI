@@ -6,7 +6,7 @@ import {
   type WidgetDto,
 } from '@ninbi/contracts'
 import { useQuery } from '@tanstack/react-query'
-import { runQuery, runWidget } from '@/features/dashboards/api'
+import { previewMcp, runQuery, runWidget } from '@/features/dashboards/api'
 import { useFilterParams } from '@/features/filters/filter-session'
 import { relevantParams } from '@/features/filters/filter-values'
 
@@ -23,7 +23,9 @@ export function hasWidgetQuery(
   widget: WidgetDto,
   edit?: WidgetEditSource,
 ): boolean {
-  return edit ? (widget.cypher ?? '').trim() !== '' : widget.hasQuery
+  return edit
+    ? Boolean(widget.mcpCall) || (widget.cypher ?? '').trim() !== ''
+    : widget.hasQuery
 }
 
 /** Só os parâmetros que o widget usa: em edição os do Cypher do rascunho, senão os salvos (FLT-09). */
@@ -33,7 +35,9 @@ export function widgetParams(
   allParams: FilterParams,
 ): FilterParams {
   const names = edit
-    ? extractParameterNames(widget.cypher ?? '', edit.language)
+    ? widget.mcpCall
+      ? Object.values(widget.mcpCall.filterBindings)
+      : extractParameterNames(widget.cypher ?? '', edit.language)
     : widget.parameters
   return relevantParams(names, allParams)
 }
@@ -52,7 +56,9 @@ export function widgetResultKey(
   const params = widgetParams(widget, edit, allParams)
   const withParams = Object.keys(params).length > 0
   const base = edit
-    ? (['query', dashboardId, edit.connectionId, widget.cypher] as const)
+    ? widget.mcpCall
+      ? (['mcp-preview', dashboardId, widget.mcpCall] as const)
+      : (['query', dashboardId, edit.connectionId, widget.cypher] as const)
     : (['widget-run', dashboardId, version, widget.id] as const)
   return withParams ? ([...base, params] as const) : base
 }
@@ -69,19 +75,24 @@ export function useWidgetResult(
   return useQuery<QueryResultDto>({
     queryKey: widgetResultKey(dashboardId, version, widget, edit, allParams),
     queryFn: ({ signal }) =>
-      edit
-        ? runQuery(
-            dashboardId,
-            {
-              cypher: widget.cypher ?? '',
-              connectionId: edit.connectionId ?? undefined,
-              ...(Object.keys(params).length > 0 && { params }),
-            },
-            signal,
-          )
-        : runWidget(dashboardId, widget.id, params, signal),
+      edit && widget.mcpCall
+        ? previewMcp(dashboardId, { call: widget.mcpCall, params }, signal)
+        : edit
+          ? runQuery(
+              dashboardId,
+              {
+                cypher: widget.cypher ?? '',
+                connectionId: edit.connectionId ?? undefined,
+                ...(Object.keys(params).length > 0 && { params }),
+              },
+              signal,
+            )
+          : runWidget(dashboardId, widget.id, params, signal),
     enabled: hasWidgetQuery(widget, edit),
-    staleTime: Number.POSITIVE_INFINITY,
+    staleTime:
+      widget.sourceKind === 'MCP' || widget.mcpCall
+        ? 0
+        : Number.POSITIVE_INFINITY,
     retry: false,
   })
 }

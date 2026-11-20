@@ -5,6 +5,7 @@ import { expect, it } from 'vitest'
 import {
   makeDashboard,
   makeQueryResult,
+  makeWidget,
   sidebarHandler,
 } from '@/test/fixtures/dashboards'
 import {
@@ -156,4 +157,108 @@ it('MCP-22 editor oferece as listas tipadas declaradas pela ferramenta', async (
   ).toBeInTheDocument()
   await user.selectOptions(select, '["equipes"]')
   expect(select).toHaveValue('["equipes"]')
+})
+
+function dashboardHandlers(
+  onRun: (widget: string, params: unknown) => Response,
+) {
+  const dashboard = makeDashboard({
+    connectionId: null,
+    connectionType: null,
+    tabs: [
+      {
+        id: 't-1',
+        name: 'Aba 1',
+        widgets: [
+          makeWidget({
+            id: 'a',
+            title: 'Fonte A',
+            cypher: null,
+            sourceKind: 'MCP',
+            hasQuery: true,
+            parameters: ['team'],
+          }),
+          makeWidget({
+            id: 'b',
+            title: 'Fonte B',
+            cypher: null,
+            sourceKind: 'MCP',
+            hasQuery: true,
+            parameters: [],
+          }),
+        ],
+      },
+    ],
+    filters: [
+      {
+        id: 'f-1',
+        label: 'Equipe',
+        parameter: 'team',
+        type: 'TEXT',
+        defaultValue: null,
+        options: null,
+      },
+    ],
+  })
+  return [
+    ...session,
+    http.get('/api/dashboards/d-1', () => HttpResponse.json(dashboard)),
+    http.post(
+      '/api/dashboards/d-1/widgets/:widget/run',
+      async ({ request, params }) =>
+        onRun(String(params.widget), await request.json()),
+    ),
+  ]
+}
+
+it('MCP-13 reabrir painel executa configuração persistida', async () => {
+  let active = 0
+  const handlers = dashboardHandlers((widget) =>
+    HttpResponse.json(
+      makeQueryResult({
+        rows: [[widget === 'a' ? `Fonte ativa ${++active}` : 'Dados de B']],
+      }),
+    ),
+  )
+  const current = renderApp('/dashboards/d-1', { handlers })
+  expect(await screen.findByText('Fonte ativa 1')).toBeInTheDocument()
+  current.unmount()
+  renderApp('/dashboards/d-1', { handlers })
+  expect(await screen.findByText('Fonte ativa 2')).toBeInTheDocument()
+})
+
+it('MCP-14 filtro reexecuta apenas widget vinculado com o novo valor', async () => {
+  const calls: [string, unknown][] = []
+  const { user } = renderApp('/dashboards/d-1', {
+    handlers: dashboardHandlers((widget, params) => {
+      calls.push([widget, params])
+      return HttpResponse.json(
+        makeQueryResult({
+          rows: [[widget === 'a' ? 'Dados de A' : 'Dados de B']],
+        }),
+      )
+    }),
+  })
+  await screen.findByText('Dados de B')
+  const input = screen.getByRole('textbox', { name: 'Equipe' })
+  await user.type(input, 'Suporte')
+  await waitFor(() =>
+    expect(calls).toContainEqual(['a', { params: { team: 'Suporte' } }]),
+  )
+  expect(calls.filter(([id]) => id === 'b')).toHaveLength(1)
+})
+
+it('MCP-15 falha de uma fonte mantém outro widget disponível', async () => {
+  renderApp('/dashboards/d-1', {
+    handlers: dashboardHandlers((widget) =>
+      widget === 'a'
+        ? HttpResponse.json(
+            { code: 'SOURCE_UNAVAILABLE', message: 'MCP offline' },
+            { status: 502 },
+          )
+        : HttpResponse.json(makeQueryResult({ rows: [['Dados de B']] })),
+    ),
+  })
+  expect(await screen.findByText(MESSAGES.widgetLoadFailed)).toBeInTheDocument()
+  expect(await screen.findByText('Dados de B')).toBeInTheDocument()
 })

@@ -128,13 +128,17 @@ export function DashboardGrid({
                     language: edit.language,
                     onEdit: () => edit.onEditWidget(widget.id),
                     onRemove: () => edit.onRemoveWidget(widget.id),
-                    ai: edit.ai && {
-                      available: edit.ai.available,
-                      busy: edit.ai.busy,
-                      state: edit.ai.stateOf(widget.id),
-                      onStart: (prompt) => edit.ai?.start(widget.id, prompt),
-                      onCancel: () => edit.ai?.cancel(widget.id),
-                    },
+                    ai:
+                      !widget.mcpCall && edit.ai
+                        ? {
+                            available: edit.ai.available,
+                            busy: edit.ai.busy,
+                            state: edit.ai.stateOf(widget.id),
+                            onStart: (prompt) =>
+                              edit.ai?.start(widget.id, prompt),
+                            onCancel: () => edit.ai?.cancel(widget.id),
+                          }
+                        : undefined,
                   }
                 }
               />

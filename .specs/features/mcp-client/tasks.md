@@ -169,7 +169,7 @@ flowchart TD
 
 **Done when**:
 
-- [ ] Reabrir o painel consulta os widgets salvos. Filtro atualiza apenas quem o usa e falha de uma conexão preserva a outra.
+- [x] Reabrir o painel consulta os widgets salvos. Filtro atualiza apenas quem o usa e falha de uma conexão preserva a outra.
 
 **Tests**: component
 **Gate**: web

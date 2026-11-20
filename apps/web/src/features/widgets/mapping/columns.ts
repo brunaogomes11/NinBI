@@ -12,6 +12,11 @@ export function toNumber(value: ResultValue): number | null {
 /** Coluna `number` tem ao menos um valor não nulo e todos os não nulos são números. */
 export function columnKinds(result: QueryResultDto): ('number' | 'other')[] {
   return result.columns.map((_, index) => {
+    const declared = result.columnTypes?.[index]
+    if (declared)
+      return declared === 'number' || declared === 'integer'
+        ? 'number'
+        : 'other'
     const values = result.rows
       .map((row) => row[index] ?? null)
       .filter((value) => value !== null)

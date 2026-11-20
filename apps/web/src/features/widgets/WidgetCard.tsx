@@ -23,6 +23,7 @@ import type { AiGenerationState } from '@/features/ai/useAiGenerations'
 import { WidgetExportMenu } from '@/features/export/WidgetExportMenu'
 import { formatClock } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { ResultTable } from './ResultTable'
 import {
   hasWidgetQuery,
   useWidgetResult,
@@ -63,7 +64,8 @@ export interface WidgetAi {
 function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
   const query = useWidgetResult(dashboardId, version, widget, edit)
   // Quem só vê não recebe o Cypher (`cypher` nulo) e nunca lê a mensagem crua do servidor (TBL-12).
-  const canSeeErrors = edit !== undefined || widget.cypher !== null
+  const canSeeErrors =
+    edit !== undefined || widget.cypher !== null || widget.mcpCall !== undefined
 
   if (!hasWidgetQuery(widget, edit)) {
     return (
@@ -106,12 +108,22 @@ function Body({ dashboardId, version, widget, edit }: WidgetCardProps) {
     return (
       <>
         <p className="text-sm text-muted-foreground">{MESSAGES.queryNoData}</p>
+        {query.data.columnTypes && widget.visualization === 'TABLE' && (
+          <ResultTable result={query.data} />
+        )}
         {refreshFailed}
       </>
     )
   }
   return (
     <>
+      {query.data.columnTypes &&
+        query.data.truncated &&
+        widget.visualization !== 'TABLE' && (
+          <p className="text-sm text-muted-foreground">
+            {MESSAGES.rowsTruncated(query.data.rowLimit)}
+          </p>
+        )}
       <WidgetVisualization
         result={query.data}
         visualization={widget.visualization}
