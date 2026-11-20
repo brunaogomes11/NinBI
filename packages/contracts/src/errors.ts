@@ -19,6 +19,8 @@ export const ERROR_CODES = [
   // não tinham task de contrato; entram aqui com a T22, que é a primeira a usá-los.
   'SOURCE_UNAVAILABLE',
   'SOURCE_TIMEOUT',
+  'MCP_AUTH_REQUIRED',
+  'MCP_RESULT_INVALID',
   'QUERY_NOT_SELECT',
   'CONNECTION_TYPE_LOCKED',
   'SCHEMA_PROPERTY_NOT_FOUND',

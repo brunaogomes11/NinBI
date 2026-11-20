@@ -79,7 +79,7 @@ flowchart TD
 
 **Done when**:
 
-- [ ] A descoberta identifica a conexão selecionada e classifica indisponibilidade, autorização e prazos acima do limite.
+- [x] A descoberta identifica a conexão selecionada e classifica indisponibilidade, autorização e prazos acima do limite.
 
 **Tests**: integration
 **Gate**: full
