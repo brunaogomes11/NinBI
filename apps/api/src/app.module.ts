@@ -12,6 +12,7 @@ import { FiltersModule } from './filters/filters.module'
 import { HealthModule } from './health/health.module'
 import { LlmModule } from './llm/llm.module'
 import { MapConfigModule } from './map-config/map-config.module'
+import { McpModule } from './mcp/mcp.module'
 import { QueriesModule } from './queries/queries.module'
 import { SchemaModule } from './schema/schema.module'
 import { SetupModule } from './setup/setup.module'
@@ -37,6 +38,7 @@ import { WebModule } from './web/web.module'
     HealthModule,
     LlmModule,
     MapConfigModule,
+    McpModule,
     QueriesModule,
     SchemaModule,
     SetupModule,

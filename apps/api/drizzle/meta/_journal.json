@@ -57,6 +57,13 @@
       "when": 1794908517524,
       "tag": "0007_assistant_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795211166293,
+      "tag": "0008_mcp_connections",
+      "breakpoints": true
     }
   ]
 }

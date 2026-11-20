@@ -133,6 +133,13 @@ export const connections = pgTable(
   ],
 )
 
+export const mcpConnections = pgTable('mcp_connections', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 80 }).notNull(),
+  endpoint: text('endpoint').notNull(),
+  enabledTools: jsonb('enabled_tools').$type<string[]>().notNull().default([]),
+})
+
 export const connectionSchemas = pgTable('connection_schemas', {
   connectionId: uuid('connection_id')
     .primaryKey()
