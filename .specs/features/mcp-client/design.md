@@ -2,7 +2,7 @@
 
 **Spec** — [MCP Client Specification](spec.md)
 
-**Status** — Em execução.
+**Status** — Implementado.
 
 ## Architecture Overview
 
@@ -82,7 +82,7 @@ sequenceDiagram
 | Catálogo remoto pode incluir ferramentas de escrita | `apps/api/src/mcp` | Só executar ferramentas habilitadas pelo Admin para leitura. Revalidar a seleção na hora da chamada. Uma anotação vinda do MCP serve como informação para o Admin. |
 | Endpoint remoto e payload são entradas externas | `apps/api/src/mcp` | Conectar somente aos endpoints cadastrados por Admin. Restringir o esquema a HTTP(S), desabilitar redirecionamentos e limitar prazo e volume recebido. Aplicar a política de rede da instalação aos destinos internos. |
 | Resposta antiga de filtro em trânsito | `apps/web/src/features/dashboards` | Reutilizar as chaves e o cancelamento do fluxo atual. O card renderiza a resposta da chave do filtro vigente. |
-| Verificação inicial do repositório | `pnpm lint` | A execução anterior às mudanças encontrou dois arquivos de consultas com formatação divergente no working tree e um SVG existente sem título. Resolver o gate inicial antes de iniciar o plano de execução. |
+| Verificação inicial do repositório | `pnpm lint` | A execução anterior às mudanças encontrou dois arquivos de consultas com formatação divergente no working tree e um SVG existente sem título. A formatação e o título do SVG foram corrigidos antes do encerramento do primeiro ciclo. |
 
 ## Tech Decisions
 

@@ -4,7 +4,7 @@
 
 **Spec** — [MCP Client Specification](spec.md)
 
-**Status** — Spec aprovada. Design e tasks preparados para revisão.
+**Status** — Piloto implementado e exercitado com dois servidores de teste.
 
 ## Feature Boundary
 

@@ -8,9 +8,9 @@ O NinBI cria dashboards a partir de conexões SQL e Neo4j. Ferramentas MCP que e
 
 ## Goals
 
-- [ ] Cadastrar mais de um servidor MCP na mesma instância do NinBI.
-- [ ] Descobrir ferramentas tabulares de leitura disponíveis em uma conexão e testar uma chamada.
-- [ ] Criar manualmente um dashboard com widgets de servidores MCP diferentes e consultar cada fonte novamente ao reabrir o painel ou alterar um filtro vinculado.
+- [x] Cadastrar mais de um servidor MCP na mesma instância do NinBI.
+- [x] Descobrir ferramentas tabulares de leitura disponíveis em uma conexão e testar uma chamada.
+- [x] Criar manualmente um dashboard com widgets de servidores MCP diferentes e consultar cada fonte novamente ao reabrir o painel ou alterar um filtro vinculado.
 
 ## Out of Scope
 
@@ -111,29 +111,29 @@ O NinBI cria dashboards a partir de conexões SQL e Neo4j. Ferramentas MCP que e
 
 | Requirement ID | Story | Phase | Status |
 | --- | --- | --- | --- |
-| MCP-01 | Cadastrar e descobrir ferramentas | T1 | Implementing |
-| MCP-02 | Cadastrar e descobrir ferramentas | T2 | Implementing |
-| MCP-03 | Cadastrar e descobrir ferramentas | T2 | Implementing |
-| MCP-04 | Cadastrar e descobrir ferramentas | T1 | Implementing |
-| MCP-05 | Executar uma chamada tabular | T3 | Implementing |
-| MCP-06 | Executar uma chamada tabular | T3 | Implementing |
-| MCP-07 | Executar uma chamada tabular | T3 | Implementing |
-| MCP-08 | Executar uma chamada tabular | T3 | Implementing |
-| MCP-09 | Executar uma chamada tabular | T3 | Implementing |
-| MCP-10 | Executar uma chamada tabular | T2 | Implementing |
-| MCP-11 | Executar uma chamada tabular | T3 | Implementing |
-| MCP-12 | Salvar e atualizar o dashboard | T4 | Implementing |
-| MCP-13 | Salvar e atualizar o dashboard | T8 | Implementing |
-| MCP-14 | Salvar e atualizar o dashboard | T8 | Implementing |
-| MCP-15 | Salvar e atualizar o dashboard | T8 | Implementing |
-| MCP-16 | Salvar e atualizar o dashboard | T5 | Implementing |
-| MCP-17 | Salvar e atualizar o dashboard | T5 | Implementing |
-| MCP-18 | Cadastrar e descobrir ferramentas | T2 | Implementing |
-| MCP-19 | Executar uma chamada tabular | T7 | Implementing |
-| MCP-20 | Executar uma chamada tabular | T5 | Implementing |
-| MCP-21 | Salvar e atualizar o dashboard | T5 | Implementing |
-| MCP-22 | Executar uma chamada tabular | T7 | Implementing |
-| MCP-23 | Executar uma chamada tabular | T3 | Implementing |
+| MCP-01 | Cadastrar e descobrir ferramentas | T1 | Verified |
+| MCP-02 | Cadastrar e descobrir ferramentas | T2 | Verified |
+| MCP-03 | Cadastrar e descobrir ferramentas | T2 | Verified |
+| MCP-04 | Cadastrar e descobrir ferramentas | T1 | Verified |
+| MCP-05 | Executar uma chamada tabular | T3 | Verified |
+| MCP-06 | Executar uma chamada tabular | T3 | Verified |
+| MCP-07 | Executar uma chamada tabular | T3 | Verified |
+| MCP-08 | Executar uma chamada tabular | T3 | Verified |
+| MCP-09 | Executar uma chamada tabular | T3 | Verified |
+| MCP-10 | Executar uma chamada tabular | T2 | Verified |
+| MCP-11 | Executar uma chamada tabular | T3 | Verified |
+| MCP-12 | Salvar e atualizar o dashboard | T4 | Verified |
+| MCP-13 | Salvar e atualizar o dashboard | T8 | Verified |
+| MCP-14 | Salvar e atualizar o dashboard | T8 | Verified |
+| MCP-15 | Salvar e atualizar o dashboard | T8 | Verified |
+| MCP-16 | Salvar e atualizar o dashboard | T5 | Verified |
+| MCP-17 | Salvar e atualizar o dashboard | T5 | Verified |
+| MCP-18 | Cadastrar e descobrir ferramentas | T2 | Verified |
+| MCP-19 | Executar uma chamada tabular | T7 | Verified |
+| MCP-20 | Executar uma chamada tabular | T5 | Verified |
+| MCP-21 | Salvar e atualizar o dashboard | T5 | Verified |
+| MCP-22 | Executar uma chamada tabular | T7 | Verified |
+| MCP-23 | Executar uma chamada tabular | T3 | Verified |
 
 <!-- TRACE:END -->
 
@@ -147,7 +147,7 @@ O NinBI cria dashboards a partir de conexões SQL e Neo4j. Ferramentas MCP que e
 
 ## Success Criteria
 
-- [ ] Duas conexões MCP cadastradas apresentam ferramentas dos respectivos servidores.
-- [ ] Uma ferramenta com listas tipadas `chamados` e `equipes` alimenta um widget com a lista selecionada pelo Editor.
-- [ ] Um dashboard salvo mostra widgets de dois servidores MCP e atualiza o widget afetado ao trocar o filtro.
-- [ ] Uma indisponibilidade do servidor é visível no widget afetado.
+- [x] Duas conexões MCP cadastradas apresentam ferramentas dos respectivos servidores.
+- [x] Uma ferramenta com listas tipadas `chamados` e `equipes` alimenta um widget com a lista selecionada pelo Editor.
+- [x] Um dashboard salvo mostra widgets de dois servidores MCP e atualiza o widget afetado ao trocar o filtro.
+- [x] Uma indisponibilidade do servidor é visível no widget afetado.

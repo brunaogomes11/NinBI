@@ -1,7 +1,7 @@
 # MCP Client Tasks
 
 **Design**: [MCP Client Design](design.md)
-**Status**: In Progress
+**Status**: Done
 **Approved**: 2026-11-20 - user: "pode implementar"
 **Build**: `pnpm build; pnpm typecheck; pnpm lint`
 **Run api**: `pnpm --filter @ninbi/api test test/mcp/`
@@ -203,13 +203,13 @@ Proof: run api | ✓ MCP-07 ferramenta desabilitada não é chamada
 Proof: run api | ✓ MCP-08 resposta incompatível é recusada
 
 **C9** - lista vazia preserva suas colunas tipadas (MCP-09, AC 5)
-Proof: run api | ✓ MCP-09 lista vazia preserva suas colunas tipadas
+Proof: run web | ✓ MCP-09 gráfico salvo mostra colunas quando a lista tipada está vazia
 
 **C10** - chamada acima do prazo retorna erro de tempo limite (MCP-10, AC 6)
 Proof: run api | ✓ MCP-10 chamada acima do prazo retorna erro de tempo limite
 
 **C11** - resposta acima do limite é sinalizada como parcial (MCP-11, AC 7)
-Proof: run api | ✓ MCP-11 resposta acima do limite é sinalizada como parcial
+Proof: run web | ✓ MCP-11 prévia de gráfico sinaliza que o resultado é parcial
 
 **C12** - configuração da chamada é persistida no widget (MCP-12, AC 1)
 Proof: run api | ✓ MCP-12 configuração da chamada é persistida no widget
@@ -251,5 +251,6 @@ Proof: run api | ✓ MCP-23 somente a lista selecionada abastece o resultado
 
 **Walked:** No NinBI compilado, com PostgreSQL em memória e dois servidores MCP HTTP locais, o Admin cadastrou Chamados e Projetos e habilitou suas ferramentas. No dashboard Piloto MCP, selecionou as listas `chamados` e `projetos` e conferiu as prévias. Após salvar e recarregar, os dois widgets retornaram seus dados. O filtro Equipe com valor `Plataforma` atualizou Chamados e manteve Projetos em `Todas`.
 
-O build, a checagem de tipos e o lint passaram. A execução focada de regressão passou com 123 testes de API e 83 de web. A verificação independente ainda está pendente.
+A regressão de dashboards, consultas, filtros, assistente e conexões passou na API e no web. Os contratos também passaram. A revisão independente registrou 11 achados, corrigidos em `e633e53`.
 
+**Dispatched:** Verifier em `d61c391`, concluído.
