@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 6,
+  "next_id": 19,
   "lessons": [
     {
       "id": "L-001",
@@ -94,6 +94,204 @@
       ],
       "created": "2026-11-17T13:12:12Z",
       "last_seen": "2026-11-17T13:12:12Z"
+    },
+    {
+      "id": "L-008",
+      "key": "weak_test::teste o catalogo pela rota com ids distintos para verificar a associacao entre conexao cadastrada e servidor",
+      "text": "Teste o catálogo pela rota com IDs distintos para verificar a associação entre conexão cadastrada e servidor.",
+      "signal": "weak_test",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F1 C2 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:48Z",
+      "last_seen": "2026-11-20T22:10:48Z"
+    },
+    {
+      "id": "L-009",
+      "key": "weak_test::teste a revogacao de leitura no catalogo remoto mesmo quando a ferramenta permanece habilitada no cadastro",
+      "text": "Teste a revogação de leitura no catálogo remoto mesmo quando a ferramenta permanece habilitada no cadastro.",
+      "signal": "weak_test",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F2 C7 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:48Z",
+      "last_seen": "2026-11-20T22:10:48Z"
+    },
+    {
+      "id": "L-010",
+      "key": "ac_gap::ao renderizar resultados tabulares vazios preserve as colunas declaradas mesmo em widgets com visualizacao grafica",
+      "text": "Ao renderizar resultados tabulares vazios, preserve as colunas declaradas mesmo em widgets com visualização gráfica.",
+      "signal": "ac_gap",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F3 C9 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:49Z",
+      "last_seen": "2026-11-20T22:10:49Z"
+    },
+    {
+      "id": "L-011",
+      "key": "ac_gap::mostre a indicacao de truncamento em cada visualizacao e teste exatamente o limite e uma linha acima dele",
+      "text": "Mostre a indicação de truncamento em cada visualização e teste exatamente o limite e uma linha acima dele.",
+      "signal": "ac_gap",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F4 C11 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:49Z",
+      "last_seen": "2026-11-20T22:10:49Z"
+    },
+    {
+      "id": "L-012",
+      "key": "weak_test::em testes de persistencia de widgets confira um mapeamento visual preenchido apos uma leitura independente",
+      "text": "Em testes de persistência de widgets, confira um mapeamento visual preenchido após uma leitura independente.",
+      "signal": "weak_test",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F5 C12 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:49Z",
+      "last_seen": "2026-11-20T22:10:49Z"
+    },
+    {
+      "id": "L-013",
+      "key": "weak_test::em testes de filtros concorrentes entregue a resposta antiga depois da atual e confira o valor no card",
+      "text": "Em testes de filtros concorrentes, entregue a resposta antiga depois da atual e confira o valor no card.",
+      "signal": "weak_test",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F6 C14 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:49Z",
+      "last_seen": "2026-11-20T22:10:49Z"
+    },
+    {
+      "id": "L-014",
+      "key": "weak_test::ao testar falhas isoladas no painel limite as assercoes ao card com erro e ao card que deve seguir funcionando",
+      "text": "Ao testar falhas isoladas no painel, limite as asserções ao card com erro e ao card que deve seguir funcionando.",
+      "signal": "weak_test",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F7 C15 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:49Z",
+      "last_seen": "2026-11-20T22:10:49Z"
+    },
+    {
+      "id": "L-015",
+      "key": "weak_test::confirme a independencia do provedor de ia tanto ao carregar o widget salvo quanto ao executar com um filtro ativo",
+      "text": "Confirme a independência do provedor de IA tanto ao carregar o widget salvo quanto ao executar com um filtro ativo.",
+      "signal": "weak_test",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F8 C17 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:49Z",
+      "last_seen": "2026-11-20T22:10:49Z"
+    },
+    {
+      "id": "L-016",
+      "key": "weak_test::teste a recusa de autorizacao na descoberta e na execucao de ferramentas com respostas http distintas",
+      "text": "Teste a recusa de autorização na descoberta e na execução de ferramentas com respostas HTTP distintas.",
+      "signal": "weak_test",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F9 C18 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:49Z",
+      "last_seen": "2026-11-20T22:10:49Z"
+    },
+    {
+      "id": "L-017",
+      "key": "weak_test::para verificar a fronteira de autenticacao exercite um servico de origem protegido e inspecione as chamadas que ele recebeu",
+      "text": "Para verificar a fronteira de autenticação, exercite um serviço de origem protegido e inspecione as chamadas que ele recebeu.",
+      "signal": "weak_test",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F10 C20 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:50Z",
+      "last_seen": "2026-11-20T22:10:50Z"
+    },
+    {
+      "id": "L-018",
+      "key": "weak_test::teste a derivacao de listas tabulares com a saida real de catalogo incluindo um formato que a interface deve excluir",
+      "text": "Teste a derivação de listas tabulares com a saída real de catálogo, incluindo um formato que a interface deve excluir.",
+      "signal": "weak_test",
+      "scope": "mcp-client",
+      "status": "candidate",
+      "features": [
+        "mcp-client"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F11 C22 (mcp-client)"
+      ],
+      "created": "2026-11-20T22:10:50Z",
+      "last_seen": "2026-11-20T22:10:50Z"
     }
   ]
 }
