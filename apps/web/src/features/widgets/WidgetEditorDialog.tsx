@@ -4,6 +4,7 @@ import {
   type CrossFilterConfig,
   type DashboardFilter,
   extractParameterNames,
+  type McpCall,
   MESSAGES,
   type QueryLanguage,
   type QueryResultDto,
@@ -41,13 +42,19 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { AskAiPanel } from '@/features/ai/AskAiPanel'
-import { runQuery } from '@/features/dashboards/api'
+import { previewMcp, runQuery } from '@/features/dashboards/api'
 import {
   useFilterParams,
   useOptionalFilterSession,
 } from '@/features/filters/filter-session'
 import { relevantParams } from '@/features/filters/filter-values'
 import { CypherEditor } from './CypherEditor'
+import {
+  McpWidgetSourceFields,
+  mcpSourceDraft,
+  parseMcpSource,
+  sourceSelectClass,
+} from './McpWidgetSourceFields'
 import {
   emptyMapping,
   type MappingDraft,
@@ -90,7 +97,10 @@ function Preview({
   if (!result) return null
   if (result.rows.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">{MESSAGES.queryNoData}</p>
+      <>
+        <p className="text-muted-foreground text-sm">{MESSAGES.queryNoData}</p>
+        {result.columnTypes && <ResultTable result={result} />}
+      </>
     )
   }
   if (visualization === 'TABLE') {
@@ -228,12 +238,18 @@ export function WidgetEditorDialog({
   onApply: (changes: {
     title: string
     cypher: string | null
+    mcpCall?: McpCall
     visualization: string
     config: Record<string, unknown>
   }) => void
   onClose: () => void
 }) {
   const [cypher, setCypher] = useState(initialCypher ?? widget.cypher ?? '')
+  const [source, setSource] = useState<'database' | 'mcp'>(
+    widget.mcpCall || !connectionId ? 'mcp' : 'database',
+  )
+  const [mcpDraft, setMcpDraft] = useState(() => mcpSourceDraft(widget.mcpCall))
+  const [sourceError, setSourceError] = useState<string | null>(null)
   const [visualization, setVisualization] = useState(
     initialVisualization(widget),
   )
@@ -256,6 +272,17 @@ export function WidgetEditorDialog({
   const run = useMutation({
     mutationFn: () => {
       setAiError(null)
+      if (source === 'mcp') {
+        const call = parseMcpSource(mcpDraft)
+        if (!call)
+          throw new Error(
+            'Escolha conexão, ferramenta e lista e informe argumentos JSON válidos.',
+          )
+        return previewMcp(dashboardId, {
+          call,
+          params: relevantParams(Object.values(call.filterBindings), allParams),
+        })
+      }
       // Os valores atuais dos filtros que o Cypher usa (FLT-19).
       const params = relevantParams(
         extractParameterNames(cypher, language),
@@ -277,7 +304,7 @@ export function WidgetEditorDialog({
       }
     },
   })
-  const empty = cypher.trim() === ''
+  const empty = source === 'mcp' ? !mcpDraft.listKey : cypher.trim() === ''
   const [prompt, setPrompt] = useState('')
   const running = ai?.state.running !== undefined
   const aiRequestError = ai?.state.error?.message ?? null
@@ -314,6 +341,14 @@ export function WidgetEditorDialog({
           <form
             noValidate
             onSubmit={form.handleSubmit((values) => {
+              const mcpCall =
+                source === 'mcp' ? parseMcpSource(mcpDraft) : undefined
+              if (source === 'mcp' && !mcpCall) {
+                setSourceError(
+                  'Escolha conexão, ferramenta e lista e informe argumentos JSON válidos.',
+                )
+                return
+              }
               const problem = validateMapping(visualization, mapping)
               if (problem) {
                 setMappingError(problem)
@@ -326,7 +361,8 @@ export function WidgetEditorDialog({
               }
               onApply({
                 title: values.title.trim(),
-                cypher: empty ? null : cypher,
+                cypher: mcpCall || empty ? null : cypher,
+                ...(mcpCall || widget.mcpCall ? { mcpCall } : {}),
                 visualization,
                 config: {
                   ...(visualization === 'TABLE' ? {} : { mapping }),
@@ -350,7 +386,27 @@ export function WidgetEditorDialog({
                 </FormItem>
               )}
             />
-            {ai && (
+            {connectionId && (
+              <label className="grid gap-1 text-sm">
+                Fonte do widget
+                <select
+                  className={sourceSelectClass}
+                  disabled={running || run.isPending}
+                  value={source}
+                  onChange={(event) => {
+                    setSource(event.target.value === 'mcp' ? 'mcp' : 'database')
+                    setSourceError(null)
+                    setAiError(null)
+                    setResult(null)
+                    run.reset()
+                  }}
+                >
+                  <option value="database">Banco do dashboard</option>
+                  <option value="mcp">Servidor MCP</option>
+                </select>
+              </label>
+            )}
+            {ai && source === 'database' && (
               <AskAiPanel
                 value={prompt}
                 onChange={setPrompt}
@@ -368,11 +424,31 @@ export function WidgetEditorDialog({
                 unavailable={!ai.available}
               />
             )}
-            <CypherEditor
-              value={cypher}
-              onChange={setCypher}
-              language={language}
-            />
+            {source === 'mcp' ? (
+              <fieldset disabled={run.isPending}>
+                <McpWidgetSourceFields
+                  value={mcpDraft}
+                  filters={filters}
+                  onChange={(next) => {
+                    setMcpDraft(next)
+                    setSourceError(null)
+                    setResult(null)
+                    run.reset()
+                  }}
+                />
+              </fieldset>
+            ) : (
+              <CypherEditor
+                value={cypher}
+                onChange={setCypher}
+                language={language}
+              />
+            )}
+            {sourceError && (
+              <p role="alert" className="text-destructive text-sm">
+                {sourceError}
+              </p>
+            )}
             <div>
               <Button
                 type="button"

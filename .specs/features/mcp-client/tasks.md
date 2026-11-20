@@ -154,7 +154,7 @@ flowchart TD
 
 **Done when**:
 
-- [ ] O Editor escolhe uma lista declarada e visualiza seu resultado. O formulário permite criar um painel sem conexão de banco e usa os vínculos selecionados no widget.
+- [x] O Editor escolhe uma lista declarada e visualiza seu resultado. O formulário permite criar um painel sem conexão de banco e usa os vínculos selecionados no widget.
 
 **Tests**: component
 **Gate**: web

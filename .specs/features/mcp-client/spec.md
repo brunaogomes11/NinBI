@@ -129,15 +129,15 @@ O NinBI cria dashboards a partir de conexões SQL e Neo4j. Ferramentas MCP que e
 | MCP-16 | Salvar e atualizar o dashboard | T5 | Implementing |
 | MCP-17 | Salvar e atualizar o dashboard | T5 | Implementing |
 | MCP-18 | Cadastrar e descobrir ferramentas | T2 | Implementing |
-| MCP-19 | Executar uma chamada tabular | - | Pending |
+| MCP-19 | Executar uma chamada tabular | T7 | Implementing |
 | MCP-20 | Executar uma chamada tabular | T5 | Implementing |
 | MCP-21 | Salvar e atualizar o dashboard | T5 | Implementing |
-| MCP-22 | Executar uma chamada tabular | - | Pending |
+| MCP-22 | Executar uma chamada tabular | T7 | Implementing |
 | MCP-23 | Executar uma chamada tabular | T3 | Implementing |
 
 <!-- TRACE:END -->
 
-**Coverage** — 23 critérios, 18 mapeados para tasks.
+**Coverage** — 23 critérios, 20 mapeados para tasks.
 
 ## Sources
 

@@ -38,6 +38,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useAiStatus } from '@/features/ai/api'
 import { useSession } from '@/features/auth/useSession'
 import { useConnections } from '@/features/connections/api'
+import { useMcpConnections } from '@/features/connections/mcp-api'
 import { ApiError } from '@/lib/api'
 import { useCreateDashboard } from './api'
 
@@ -54,6 +55,7 @@ export function NewDashboardDialog({
 }) {
   const navigate = useNavigate()
   const connections = useConnections()
+  const mcp = useMcpConnections(open)
   const create = useCreateDashboard()
   const { user } = useSession()
   const canUseAi = user ? can(user.role, 'ai.use') : false
@@ -72,6 +74,17 @@ export function NewDashboardDialog({
       options as never,
     )
     const parsed = assistantDescriptionSchema.safeParse(values.description)
+    if (describing && values.connectionId === null) {
+      return {
+        values: {},
+        errors: {
+          connectionId: {
+            type: 'validation',
+            message: 'Escolha uma conexão de banco para usar a IA.',
+          },
+        },
+      }
+    }
     if (!describing || parsed.success) {
       // o zod descarta o que o esquema não conhece: a descrição volta junto
       return {
@@ -94,7 +107,8 @@ export function NewDashboardDialog({
     resolver,
     defaultValues: { name: '', connectionId: '', description: '' },
   })
-  const noConnections = connections.data?.length === 0
+  const hasMcp = !describing && (mcp.data?.length ?? 0) > 0
+  const noConnections = connections.data?.length === 0 && !hasMcp
 
   function submit(values: NewDashboardValues) {
     const assistantPrompt = describing ? values.description.trim() : null
@@ -185,13 +199,21 @@ export function NewDashboardDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Conexão</FormLabel>
-                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                  <Select
+                    value={field.value ?? 'mcp'}
+                    onValueChange={(value) =>
+                      field.onChange(value === 'mcp' ? null : value)
+                    }
+                  >
                     <FormControl>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Escolha uma conexão" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      {hasMcp && (
+                        <SelectItem value="mcp">MCP por widget</SelectItem>
+                      )}
                       {(connections.data ?? []).map((connection) => (
                         <SelectItem key={connection.id} value={connection.id}>
                           {connection.name}

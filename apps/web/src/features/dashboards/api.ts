@@ -3,6 +3,7 @@ import {
   type DashboardDto,
   type DashboardSaveInput,
   type DashboardSummaryDto,
+  type McpPreviewInput,
   MESSAGES,
   type QueryParamValue,
   type QueryResultDto,
@@ -12,6 +13,17 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { toLayoutInput } from '@/features/sidebar/layout'
 import { apiFetch } from '@/lib/api'
+
+export function previewMcp(
+  dashboardId: string,
+  body: McpPreviewInput,
+  signal?: AbortSignal,
+): Promise<QueryResultDto> {
+  return apiFetch<QueryResultDto>(
+    `/api/dashboards/${dashboardId}/mcp/preview`,
+    { method: 'POST', body, signal },
+  )
+}
 
 /** Executa o Cypher salvo de um widget, pelo id (quem só vê usa esta rota). */
 export function runWidget(

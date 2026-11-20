@@ -1,9 +1,18 @@
-import type { McpToolDto } from '@ninbi/contracts'
-import { screen, waitFor } from '@testing-library/react'
+import { type McpToolDto, MESSAGES } from '@ninbi/contracts'
+import { screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { expect, it } from 'vitest'
-import { sidebarHandler } from '@/test/fixtures/dashboards'
-import { makeUser, renderApp, sessionHandler, setupStatusHandler } from '@/test/renderApp'
+import {
+  makeDashboard,
+  makeQueryResult,
+  sidebarHandler,
+} from '@/test/fixtures/dashboards'
+import {
+  makeUser,
+  renderApp,
+  sessionHandler,
+  setupStatusHandler,
+} from '@/test/renderApp'
 
 const sourceId = 'a1111111-1111-4111-8111-111111111111'
 const tool: McpToolDto = {
@@ -15,6 +24,73 @@ const tool: McpToolDto = {
     columns: [{ name: 'equipe', type: 'string' }],
   })),
 }
+const session = [
+  setupStatusHandler(false),
+  sessionHandler(makeUser()),
+  sidebarHandler(),
+]
+
+async function editMcp() {
+  const dashboard = makeDashboard({
+    connectionId: null,
+    connectionType: null,
+    tabs: [{ id: 't-1', name: 'Aba 1', widgets: [] }],
+  })
+  const calls: unknown[] = []
+  const app = renderApp('/dashboards/d-1?editar=1', {
+    handlers: [
+      ...session,
+      http.get('/api/connections', () => HttpResponse.json([])),
+      http.get('/api/dashboards/d-1', () => HttpResponse.json(dashboard)),
+      http.get('/api/mcp/connections', () =>
+        HttpResponse.json([{ id: sourceId, name: 'Fonte A' }]),
+      ),
+      http.get(`/api/mcp/connections/${sourceId}/tools`, () =>
+        HttpResponse.json([tool]),
+      ),
+      http.post('/api/dashboards/d-1/mcp/preview', async ({ request }) => {
+        calls.push(await request.json())
+        return HttpResponse.json(
+          makeQueryResult({ columns: ['equipe'], rows: [['Suporte']] }),
+        )
+      }),
+    ],
+  })
+  await app.user.click(
+    await screen.findByRole('button', { name: 'Novo widget' }),
+  )
+  const dialog = within(await screen.findByRole('dialog'))
+  await dialog.findByRole('option', { name: 'Fonte A' })
+  await app.user.selectOptions(dialog.getByLabelText('Conexão MCP'), sourceId)
+  await dialog.findByRole('option', { name: 'list' })
+  await app.user.selectOptions(dialog.getByLabelText('Ferramenta MCP'), 'list')
+  return { ...app, dialog, calls }
+}
+
+it('MCP-19 editor configura manualmente conexão ferramenta e argumentos', async () => {
+  const { user, dialog, calls } = await editMcp()
+  await user.selectOptions(
+    dialog.getByLabelText('Lista de saída'),
+    '["chamados"]',
+  )
+  const args = dialog.getByLabelText('Argumentos (JSON)')
+  await user.clear(args)
+  await user.paste('{"state":"open"}')
+  await user.click(dialog.getByRole('button', { name: 'Executar' }))
+  expect(await dialog.findByText('Suporte')).toBeInTheDocument()
+  expect(calls).toEqual([
+    {
+      call: {
+        connectionId: sourceId,
+        tool: 'list',
+        listPath: ['chamados'],
+        arguments: { state: 'open' },
+        filterBindings: {},
+      },
+      params: {},
+    },
+  ])
+})
 
 it('Admin cadastra uma conexão e habilita ferramenta tabular', async () => {
   const endpoint = 'https://mcp.example/stream'
@@ -70,4 +146,14 @@ it('Admin cadastra uma conexão e habilita ferramenta tabular', async () => {
     { id: sourceId, name: 'Chamados', endpoint, enabledTools: ['list'] },
   ])
   expect(updates).toEqual([{ enabledTools: ['list'] }])
+})
+
+it('MCP-22 editor oferece as listas tipadas declaradas pela ferramenta', async () => {
+  const { user, dialog } = await editMcp()
+  const select = dialog.getByLabelText('Lista de saída')
+  expect(
+    within(select).getByRole('option', { name: 'chamados (equipe: string)' }),
+  ).toBeInTheDocument()
+  await user.selectOptions(select, '["equipes"]')
+  expect(select).toHaveValue('["equipes"]')
 })
