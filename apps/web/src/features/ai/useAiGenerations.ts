@@ -113,7 +113,13 @@ export function useAiGenerations(options: UseAiGenerationsOptions) {
       const { dashboardId, draft, assistantBusy } = latest.current
       const found = findWidget(draft, widgetId)
       if (assistantBusy) return
-      if (!draft || !found || controllers.current.has(widgetId)) return
+      if (
+        !draft?.connectionId ||
+        !found ||
+        found.widget.mcpCall ||
+        controllers.current.has(widgetId)
+      )
+        return
       const controller = new AbortController()
       controllers.current.set(widgetId, controller)
       setState(widgetId, { running: { attempt: 1 } })

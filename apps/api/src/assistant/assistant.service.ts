@@ -96,7 +96,7 @@ export class AssistantService {
     role: Role
     dashboardId: string
     /** Conexão salva do dashboard; o rascunho pode trazer outra (AD-134). */
-    dashboardConnectionId: string
+    dashboardConnectionId: string | null
     body: AssistantBody
   }): Promise<PreparedAssistantRequest> {
     const snapshot = await this.settings.snapshot()

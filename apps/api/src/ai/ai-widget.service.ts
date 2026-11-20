@@ -97,7 +97,7 @@ export class AiWidgetService {
     userId: string
     role: Role
     /** Conexão do dashboard; vale quando o corpo não traz `connectionId` (AD-134). */
-    dashboardConnectionId: string
+    dashboardConnectionId: string | null
     body: AiWidgetBody
   }): Promise<PreparedGeneration> {
     const snapshot = await this.settings.snapshot()
@@ -112,6 +112,8 @@ export class AiWidgetService {
       throw new AppError(403, 'FORBIDDEN', MESSAGES.forbiddenRoute)
     }
     const connectionId = input.body.connectionId ?? input.dashboardConnectionId
+    if (!connectionId)
+      throw new AppError(400, 'VALIDATION_ERROR', MESSAGES.connectionRequired)
     const schema = await this.schemas.get(connectionId)
     // "Lido" é ter documento guardado, em qualquer estado (AD-085).
     if (schema.readAt === null) {

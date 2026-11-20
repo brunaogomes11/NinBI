@@ -12,7 +12,7 @@ import { relevantParams } from '@/features/filters/filter-values'
 
 /** Em edição o widget roda o Cypher do rascunho, na conexão do rascunho. */
 export interface WidgetEditSource {
-  connectionId: string
+  connectionId: string | null
   /** Linguagem da conexão do rascunho; sem ela vale Cypher. */
   language?: QueryLanguage
 }
@@ -74,7 +74,7 @@ export function useWidgetResult(
             dashboardId,
             {
               cypher: widget.cypher ?? '',
-              connectionId: edit.connectionId,
+              connectionId: edit.connectionId ?? undefined,
               ...(Object.keys(params).length > 0 && { params }),
             },
             signal,

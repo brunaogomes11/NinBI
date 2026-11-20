@@ -23,6 +23,7 @@ import {
   connections,
   dashboards,
   dashboardTabs,
+  mcpConnections,
   users,
   widgets,
 } from '../database/schema'
@@ -47,7 +48,7 @@ export class DashboardsService {
 
   async create(
     user: SessionUser,
-    input: { name: string; connectionId: string },
+    input: { name: string; connectionId: string | null },
   ): Promise<DashboardDto> {
     await this.assertConnectionExists(input.connectionId)
     const id = await this.db.transaction(async (tx) => {
@@ -148,6 +149,43 @@ export class DashboardsService {
         : []
       if (foreignTabs.length || foreignWidgets.length) throw invalidIds()
 
+      const sourceIds = [
+        ...new Set(
+          input.tabs.flatMap((tab) =>
+            tab.widgets.flatMap((widget) =>
+              widget.mcpCall ? [widget.mcpCall.connectionId] : [],
+            ),
+          ),
+        ),
+      ]
+      if (sourceIds.length) {
+        const sources = await tx
+          .select({
+            id: mcpConnections.id,
+            enabledTools: mcpConnections.enabledTools,
+          })
+          .from(mcpConnections)
+          .where(inArray(mcpConnections.id, sourceIds))
+        const available = new Map(
+          sources.map((source) => [source.id, source.enabledTools]),
+        )
+        if (
+          input.tabs.some((tab) =>
+            tab.widgets.some(
+              ({ mcpCall }) =>
+                mcpCall &&
+                !available.get(mcpCall.connectionId)?.includes(mcpCall.tool),
+            ),
+          )
+        ) {
+          throw new AppError(
+            400,
+            'VALIDATION_ERROR',
+            'Um widget usa uma ferramenta MCP indisponível.',
+          )
+        }
+      }
+
       await tx
         .delete(dashboardTabs)
         .where(eq(dashboardTabs.dashboardId, access.dashboardId))
@@ -160,16 +198,23 @@ export class DashboardsService {
         })),
       )
       const widgetRows = input.tabs.flatMap((tab) =>
-        tab.widgets.map((widget) => ({
-          id: widget.id,
-          dashboardId: access.dashboardId,
-          tabId: tab.id,
-          title: widget.title,
-          cypher: widget.cypher,
-          visualization: widget.visualization,
-          config: widget.config,
-          ...widget.layout,
-        })),
+        tab.widgets.map(({ mcpCall, ...widget }) => {
+          const { connectionId, ...call } = mcpCall ?? {}
+          return {
+            id: widget.id,
+            dashboardId: access.dashboardId,
+            tabId: tab.id,
+            title: widget.title,
+            cypher: widget.cypher,
+            mcpConnectionId: connectionId,
+            mcpCall: mcpCall
+              ? (call as Omit<typeof mcpCall, 'connectionId'>)
+              : null,
+            visualization: widget.visualization,
+            config: widget.config,
+            ...widget.layout,
+          }
+        }),
       )
       if (widgetRows.length) await tx.insert(widgets).values(widgetRows)
     })
@@ -194,15 +239,22 @@ export class DashboardsService {
       })
       .from(dashboards)
       .innerJoin(users, eq(users.id, dashboards.ownerId))
-      .innerJoin(connections, eq(connections.id, dashboards.connectionId))
+      .leftJoin(connections, eq(connections.id, dashboards.connectionId))
     return rows
-      .map((row) => ({ ...row, updatedAt: row.updatedAt.toISOString() }))
+      .map((row) => ({
+        ...row,
+        connectionName: row.connectionName ?? 'MCP',
+        updatedAt: row.updatedAt.toISOString(),
+      }))
       .sort((a, b) =>
         a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }),
       )
   }
 
-  private async assertConnectionExists(connectionId: string): Promise<void> {
+  private async assertConnectionExists(
+    connectionId: string | null,
+  ): Promise<void> {
+    if (connectionId === null) return
     const [connection] = await this.db
       .select({ id: connections.id })
       .from(connections)
@@ -235,7 +287,7 @@ export class DashboardsService {
       })
       .from(dashboards)
       .innerJoin(users, eq(users.id, dashboards.ownerId))
-      .innerJoin(connections, eq(connections.id, dashboards.connectionId))
+      .leftJoin(connections, eq(connections.id, dashboards.connectionId))
       .where(eq(dashboards.id, dashboardId))
     if (!row) throw dashboardNotFound()
 
@@ -251,7 +303,9 @@ export class DashboardsService {
       .orderBy(asc(widgets.y), asc(widgets.x), asc(widgets.id))
 
     // `$nome` dentro de string, comentário ou identificador não é parâmetro, no idioma da conexão (SQX-16).
-    const language = connectionLanguage(row.connectionType)
+    const language = row.connectionType
+      ? connectionLanguage(row.connectionType)
+      : null
     return {
       id: row.id,
       name: row.name,
@@ -260,7 +314,7 @@ export class DashboardsService {
       ownerId: row.ownerId,
       ownerName: row.ownerName,
       connectionId: row.connectionId,
-      connectionName: row.connectionName,
+      connectionName: row.connectionName ?? 'MCP',
       connectionType: row.connectionType,
       permissions: {
         edit: permissions.canEdit,
@@ -276,13 +330,24 @@ export class DashboardsService {
             id: widget.id,
             title: widget.title,
             cypher: permissions.canEdit ? widget.cypher : null,
-            hasQuery: widget.cypher !== null,
+            ...(permissions.canEdit && widget.mcpConnectionId && widget.mcpCall
+              ? {
+                  mcpCall: {
+                    connectionId: widget.mcpConnectionId,
+                    ...widget.mcpCall,
+                  },
+                }
+              : {}),
+            ...(widget.mcpCall ? { sourceKind: 'MCP' as const } : {}),
+            hasQuery: widget.cypher !== null || Boolean(widget.mcpCall),
             visualization: widget.visualization,
             config: widget.config,
             layout: { x: widget.x, y: widget.y, w: widget.w, h: widget.h },
-            parameters: widget.cypher
-              ? extractParameterNames(widget.cypher, language)
-              : [],
+            parameters: widget.mcpCall
+              ? [...new Set(Object.values(widget.mcpCall.filterBindings))]
+              : widget.cypher && language
+                ? extractParameterNames(widget.cypher, language)
+                : [],
           })),
       })),
       filters: row.filters.map((filter) =>

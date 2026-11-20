@@ -35,7 +35,7 @@ export function fetchDraftFilterOptions(
 export interface FilterOptionsSource {
   dashboardId: string
   version: number
-  edit?: { connectionId: string }
+  edit?: { connectionId: string | null }
 }
 
 export interface FilterOptionsState {
@@ -63,7 +63,7 @@ export function useFilterOptions(
       (edit
         ? await fetchDraftFilterOptions(
             dashboardId,
-            { cypher, connectionId: edit.connectionId },
+            { cypher, connectionId: edit.connectionId ?? undefined },
             signal,
           )
         : await fetchSavedFilterOptions(dashboardId, filter.id, signal)
@@ -71,7 +71,7 @@ export function useFilterOptions(
     enabled:
       staticValues === null &&
       filter.options?.source === 'QUERY' &&
-      (edit ? cypher.trim() !== '' : true),
+      (edit ? !!edit.connectionId && cypher.trim() !== '' : true),
     staleTime: Number.POSITIVE_INFINITY,
     retry: false,
   })

@@ -47,7 +47,7 @@ export class FilterOptionsController {
     if (filter.options.source === 'STATIC') {
       return { options: filter.options.values, truncated: false }
     }
-    if (!filter.options.cypher) throw filterNotFound()
+    if (!filter.options.cypher || !access.connectionId) throw filterNotFound()
     const result = await this.queries.run({
       userId: user.id,
       connectionId: access.connectionId,
@@ -67,9 +67,12 @@ export class FilterOptionsController {
     body: FilterOptionsDraftInput,
   ): Promise<FilterOptionsDto> {
     const access = await this.access.assert(user, id, 'edit')
+    const connectionId = body.connectionId ?? access.connectionId
+    if (!connectionId)
+      throw new AppError(400, 'VALIDATION_ERROR', MESSAGES.connectionRequired)
     const result = await this.queries.run({
       userId: user.id,
-      connectionId: body.connectionId ?? access.connectionId,
+      connectionId,
       cypher: body.cypher,
     })
     return optionsFromResult(result)

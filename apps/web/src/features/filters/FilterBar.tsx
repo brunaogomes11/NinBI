@@ -13,7 +13,7 @@ import { useFilterSession } from './filter-session'
 
 /** Só em modo de edição, para quem pode editar: criar, editar e remover filtros (FLT-18). */
 export interface FilterBarEdit {
-  connectionId: string
+  connectionId: string | null
   onNew: () => void
   onEdit: (filter: DashboardFilter) => void
   onRemove: (filter: DashboardFilter) => void

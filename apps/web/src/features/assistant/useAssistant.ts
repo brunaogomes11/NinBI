@@ -54,7 +54,7 @@ interface UndoPoint {
 function toRequestDraft(draft: DashboardDraft): AssistantRequest['draft'] {
   return {
     name: draft.name,
-    connectionId: draft.connectionId,
+    connectionId: draft.connectionId ?? '',
     tabs: draft.tabs.map((tab) => ({
       id: tab.id,
       name: tab.name,
@@ -180,7 +180,7 @@ export function useAssistant(options: UseAssistantOptions) {
   const start = useCallback(
     async (text: string, retryOf: string | null) => {
       const { dashboardId, draft } = latest.current
-      if (!draft || controller.current) return
+      if (!draft?.connectionId || controller.current) return
       const abort = new AbortController()
       controller.current = abort
       setRunning(true)

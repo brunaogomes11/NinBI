@@ -122,7 +122,7 @@ O NinBI cria dashboards a partir de conexões SQL e Neo4j. Ferramentas MCP que e
 | MCP-09 | Executar uma chamada tabular | T3 | Implementing |
 | MCP-10 | Executar uma chamada tabular | T2 | Implementing |
 | MCP-11 | Executar uma chamada tabular | T3 | Implementing |
-| MCP-12 | Salvar e atualizar o dashboard | - | Pending |
+| MCP-12 | Salvar e atualizar o dashboard | T4 | Implementing |
 | MCP-13 | Salvar e atualizar o dashboard | - | Pending |
 | MCP-14 | Salvar e atualizar o dashboard | - | Pending |
 | MCP-15 | Salvar e atualizar o dashboard | - | Pending |
@@ -137,7 +137,7 @@ O NinBI cria dashboards a partir de conexões SQL e Neo4j. Ferramentas MCP que e
 
 <!-- TRACE:END -->
 
-**Coverage** — 23 critérios, 13 mapeados para tasks.
+**Coverage** — 23 critérios, 14 mapeados para tasks.
 
 ## Sources
 

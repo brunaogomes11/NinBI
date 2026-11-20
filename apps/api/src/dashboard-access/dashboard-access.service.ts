@@ -13,7 +13,7 @@ import {
 export interface DashboardAccess {
   dashboardId: string
   ownerId: string
-  connectionId: string
+  connectionId: string | null
   canView: true
   canEdit: boolean
   canDelete: boolean

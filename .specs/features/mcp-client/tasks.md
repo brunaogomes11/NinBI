@@ -109,7 +109,7 @@ flowchart TD
 
 **Done when**:
 
-- [ ] Um painel sem banco pode ser salvo e listado. Os widgets mantêm configurações de fontes distintas após releitura. Fixtures SQL e Neo4j mantêm seus comportamentos.
+- [x] Um painel sem banco pode ser salvo e listado. Os widgets mantêm configurações de fontes distintas após releitura. Fixtures SQL e Neo4j mantêm seus comportamentos.
 
 **Tests**: integration
 **Gate**: full

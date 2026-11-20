@@ -83,7 +83,7 @@ export function FilterEditorDialog({
   onClose,
 }: {
   dashboardId: string
-  connectionId: string
+  connectionId: string | null
   /** Tipo da conexão do dashboard: define o rótulo e a linguagem da consulta de opções. */
   connectionType?: ConnectionType
   /** O filtro em edição; `null` cria um novo. */
@@ -117,7 +117,10 @@ export function FilterEditorDialog({
   const isSelection = SELECTION_TYPES.includes(type)
   const loadOptions = useMutation({
     mutationFn: () =>
-      fetchDraftFilterOptions(dashboardId, { cypher, connectionId }),
+      fetchDraftFilterOptions(dashboardId, {
+        cypher,
+        connectionId: connectionId ?? undefined,
+      }),
     onSuccess: (data) => setLoaded(data.options),
   })
 
@@ -241,7 +244,11 @@ export function FilterEditorDialog({
                   </SelectTrigger>
                   <SelectContent>
                     {OPTION_SOURCES.map((value) => (
-                      <SelectItem key={value} value={value}>
+                      <SelectItem
+                        key={value}
+                        value={value}
+                        disabled={value === 'QUERY' && !connectionId}
+                      >
                         {value === 'QUERY'
                           ? queryLabel(connectionType)
                           : OPTION_SOURCE_LABELS[value]}

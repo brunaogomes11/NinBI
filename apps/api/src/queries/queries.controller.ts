@@ -43,9 +43,13 @@ export class QueriesController {
     @Body(new ZodValidationPipe(queryRunSchema)) body: QueryRunInput,
   ): Promise<QueryResultDto> {
     const access = await this.access.assert(user, id, 'edit')
+    const connectionId = body.connectionId ?? access.connectionId
+    if (!connectionId) {
+      throw new AppError(400, 'VALIDATION_ERROR', MESSAGES.connectionRequired)
+    }
     return this.queries.run({
       userId: user.id,
-      connectionId: body.connectionId ?? access.connectionId,
+      connectionId,
       cypher: body.cypher,
       params: body.params,
     })
@@ -67,7 +71,7 @@ export class QueriesController {
       .from(widgets)
       .where(and(eq(widgets.id, widgetId), eq(widgets.dashboardId, id)))
     if (!widget) throw widgetNotFound()
-    if (widget.cypher === null || widget.cypher.trim() === '') {
+    if (!access.connectionId || widget.cypher === null || widget.cypher.trim() === '') {
       throw new AppError(400, 'VALIDATION_ERROR', MESSAGES.widgetNoQuery)
     }
     // FLT-28: só os parâmetros dos filtros salvos chegam ao Cypher do widget.

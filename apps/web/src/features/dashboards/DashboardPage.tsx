@@ -192,7 +192,7 @@ function DashboardEditFields({
       </div>
       <div className="flex min-w-48 flex-1 flex-col gap-1.5">
         <Label htmlFor="dashboard-connection">Conexão</Label>
-        <Select value={draft.connectionId} onValueChange={choose}>
+        <Select value={draft.connectionId ?? ''} onValueChange={choose}>
           <SelectTrigger id="dashboard-connection" className="w-full">
             <SelectValue />
           </SelectTrigger>
@@ -268,7 +268,7 @@ function DashboardViewBody({
           (connection) => connection.id === draft?.connectionId,
         )?.type
       : undefined) ?? dashboard.connectionType
-  const language = queryLanguage(draftType)
+  const language = draftType ? queryLanguage(draftType) : 'CYPHER'
   const edit = draft
     ? { connectionId: draft.connectionId, language }
     : undefined
@@ -290,7 +290,9 @@ function DashboardViewBody({
   const [newWidgetId, setNewWidgetId] = useState<string | null>(null)
   const canUseAi = sessionUser ? can(sessionUser.role, 'ai.use') : false
   const aiStatus = useAiStatus(draft !== null && canUseAi)
-  const canUseAssistant = canUseAi && dashboard.permissions.edit
+  const hasDatabase =
+    (draft ? draft.connectionId : dashboard.connectionId) !== null
+  const canUseAssistant = canUseAi && hasDatabase && dashboard.permissions.edit
   const location = useLocation()
   const navigate = useNavigate()
   const initialPrompt = useRef<string | null>(promptFromState(location.state))
@@ -430,7 +432,7 @@ function DashboardViewBody({
         <FilterEditorDialog
           dashboardId={dashboard.id}
           connectionId={draft.connectionId}
-          connectionType={draftType}
+          connectionType={draftType ?? undefined}
           filter={filterDialog.filter}
           otherFilters={draft.filters}
           onApply={(filter) =>
@@ -606,16 +608,17 @@ function DashboardViewBody({
                             setLayout(current, shownTab.id, layouts),
                           ),
                         onEditWidget: setEditingWidgetId,
-                        ai: canUseAi
-                          ? {
-                              available: aiStatus.data?.configured === true,
-                              busy: assistant.running,
-                              stateOf: ai.stateOf,
-                              start: (widgetId, prompt) =>
-                                void ai.start(widgetId, prompt),
-                              cancel: ai.cancel,
-                            }
-                          : undefined,
+                        ai:
+                          canUseAi && hasDatabase
+                            ? {
+                                available: aiStatus.data?.configured === true,
+                                busy: assistant.running,
+                                stateOf: ai.stateOf,
+                                start: (widgetId, prompt) =>
+                                  void ai.start(widgetId, prompt),
+                                cancel: ai.cancel,
+                              }
+                            : undefined,
                         onRemoveWidget: (widgetId) =>
                           editor.change((current) =>
                             removeWidget(current, shownTab.id, widgetId),
@@ -660,7 +663,7 @@ function DashboardViewBody({
                     )
                   }
                   ai={
-                    canUseAi && newWidgetId === editingWidget.id
+                    canUseAi && hasDatabase && newWidgetId === editingWidget.id
                       ? {
                           available: aiStatus.data?.configured === true,
                           state: ai.stateOf(editingWidget.id),

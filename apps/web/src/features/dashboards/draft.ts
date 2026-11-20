@@ -4,6 +4,7 @@ import {
   type DashboardDto,
   type DashboardFilter,
   type DashboardSaveInput,
+  filterParameterNames,
   MESSAGES,
   type RefreshInterval,
   type WidgetDto,
@@ -15,7 +16,7 @@ import {
 export interface DashboardDraft {
   version: number
   name: string
-  connectionId: string
+  connectionId: string | null
   tabs: DashboardDto['tabs']
   filters: DashboardFilter[]
   refreshIntervalSec: number
@@ -49,6 +50,7 @@ export function toSavePayload(draft: DashboardDraft): DashboardSaveInput {
         id: widget.id,
         title: widget.title,
         cypher: widget.cypher,
+        ...(widget.mcpCall ? { mcpCall: widget.mcpCall } : {}),
         visualization: widget.visualization as WidgetVisualization,
         config: widget.config,
         layout: widget.layout,
@@ -154,7 +156,7 @@ export function updateWidget(
   tabId: string,
   widgetId: string,
   changes: Partial<
-    Pick<WidgetDto, 'title' | 'cypher' | 'visualization' | 'config'>
+    Pick<WidgetDto, 'title' | 'cypher' | 'mcpCall' | 'visualization' | 'config'>
   >,
 ): DashboardDraft {
   return mapTab(draft, tabId, (widgets) =>
@@ -163,10 +165,14 @@ export function updateWidget(
         ? {
             ...widget,
             ...changes,
+            ...(Object.hasOwn(changes, 'mcpCall')
+              ? { sourceKind: changes.mcpCall ? ('MCP' as const) : undefined }
+              : {}),
             hasQuery:
               changes.cypher === undefined
                 ? widget.hasQuery
-                : (changes.cypher ?? '').trim() !== '',
+                : Boolean(changes.mcpCall) ||
+                  (changes.cypher ?? '').trim() !== '',
           }
         : widget,
     ),
@@ -215,7 +221,7 @@ export function setName(draft: DashboardDraft, name: string): DashboardDraft {
 
 export function setConnection(
   draft: DashboardDraft,
-  connectionId: string,
+  connectionId: string | null,
 ): DashboardDraft {
   return { ...draft, connectionId }
 }
@@ -266,6 +272,8 @@ export function removeFilter(
   draft: DashboardDraft,
   filterId: string,
 ): DashboardDraft {
+  const removed = draft.filters.find((filter) => filter.id === filterId)
+  const parameters = new Set(removed ? filterParameterNames(removed) : [])
   return {
     ...draft,
     filters: draft.filters.filter((f) => f.id !== filterId),
@@ -275,9 +283,24 @@ export function removeFilter(
         const crossFilter = widget.config.crossFilter as
           | CrossFilterConfig
           | undefined
-        if (crossFilter?.filterId !== filterId) return widget
         const { crossFilter: _removed, ...config } = widget.config
-        return { ...widget, config }
+        const mcpCall = widget.mcpCall
+        return {
+          ...widget,
+          config: crossFilter?.filterId === filterId ? config : widget.config,
+          ...(mcpCall
+            ? {
+                mcpCall: {
+                  ...mcpCall,
+                  filterBindings: Object.fromEntries(
+                    Object.entries(mcpCall.filterBindings).filter(
+                      ([, parameter]) => !parameters.has(parameter),
+                    ),
+                  ),
+                },
+              }
+            : {}),
+        }
       }),
     })),
   }

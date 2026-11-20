@@ -64,6 +64,13 @@
       "when": 1795211166293,
       "tag": "0008_mcp_connections",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1795211359516,
+      "tag": "0009_mcp_widgets",
+      "breakpoints": true
     }
   ]
 }

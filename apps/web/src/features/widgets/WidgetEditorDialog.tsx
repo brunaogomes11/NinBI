@@ -215,7 +215,7 @@ export function WidgetEditorDialog({
   onClose,
 }: {
   dashboardId: string
-  connectionId: string
+  connectionId: string | null
   /** Linguagem da conexão do rascunho: define o editor e os parâmetros da consulta. */
   language?: QueryLanguage
   widget: WidgetDto
@@ -263,7 +263,7 @@ export function WidgetEditorDialog({
       )
       return runQuery(dashboardId, {
         cypher,
-        connectionId,
+        connectionId: connectionId ?? undefined,
         ...(Object.keys(params).length > 0 && { params }),
       })
     },

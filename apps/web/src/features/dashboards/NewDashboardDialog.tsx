@@ -185,7 +185,7 @@ export function NewDashboardDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Conexão</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select value={field.value ?? ''} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Escolha uma conexão" />

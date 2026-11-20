@@ -4,10 +4,11 @@ import {
   CROSS_FILTER_TYPES,
   type DashboardFilter,
   dashboardFiltersSchema,
+  filterParameterNames,
   queryParamsSchema,
   REFRESH_INTERVALS,
 } from './filters'
-import type { McpColumnType } from './mcp'
+import { type McpCall, type McpColumnType, mcpCallSchema } from './mcp'
 import { MESSAGES } from './messages'
 import { WIDGET_VISUALIZATIONS, widgetConfigSchema } from './widget-config'
 
@@ -25,6 +26,8 @@ export interface WidgetDto {
   id: string
   title: string
   cypher: string | null
+  mcpCall?: McpCall
+  sourceKind?: 'MCP'
   hasQuery: boolean
   visualization: string
   config: Record<string, unknown>
@@ -46,9 +49,9 @@ export interface DashboardDto {
   updatedAt: string
   ownerId: string
   ownerName: string
-  connectionId: string
+  connectionId: string | null
   connectionName: string
-  connectionType: ConnectionType
+  connectionType: ConnectionType | null
   permissions: { edit: boolean; delete: boolean; share: boolean }
   tabs: DashboardTabDto[]
   filters: DashboardFilter[]
@@ -132,7 +135,7 @@ export const widgetLayoutSchema = z
 
 export const dashboardCreateSchema = z.object({
   name: dashboardName,
-  connectionId,
+  connectionId: connectionId.nullable(),
 })
 
 const widgetSchema = z
@@ -143,11 +146,19 @@ const widgetSchema = z
       .string()
       .max(MAX_CYPHER_LENGTH, MESSAGES.cypherTooLong)
       .nullable(),
+    mcpCall: mcpCallSchema.optional(),
     visualization: z.enum(WIDGET_VISUALIZATIONS),
     config: z.record(z.string(), z.unknown()),
     layout: widgetLayoutSchema,
   })
   .superRefine((widget, ctx) => {
+    if (widget.mcpCall && widget.cypher !== null) {
+      ctx.addIssue({
+        code: 'custom',
+        message: MESSAGES.validationError,
+        path: ['mcpCall'],
+      })
+    }
     const parsed = widgetConfigSchema(widget.visualization).safeParse(
       widget.config,
     )
@@ -178,15 +189,35 @@ export const dashboardSaveSchema = z
   .object({
     version: z.number().int().min(1),
     name: dashboardName,
-    connectionId,
+    connectionId: connectionId.nullable(),
     tabs: z.array(tabSchema).min(1),
     filters: dashboardFiltersSchema.default([]),
     refreshIntervalSec: refreshIntervalSchema.default(0),
   })
   .superRefine((dashboard, ctx) => {
     const byId = new Map(dashboard.filters.map((f) => [f.id, f]))
+    const parameters = new Set(dashboard.filters.flatMap(filterParameterNames))
     dashboard.tabs.forEach((tab, ti) => {
       tab.widgets.forEach((widget, wi) => {
+        if (
+          widget.mcpCall &&
+          Object.values(widget.mcpCall.filterBindings).some(
+            (parameter) => !parameters.has(parameter),
+          )
+        ) {
+          ctx.addIssue({
+            code: 'custom',
+            message: 'Filtro da chamada MCP inválido.',
+            path: ['tabs', ti, 'widgets', wi, 'mcpCall'],
+          })
+        }
+        if (widget.cypher !== null && dashboard.connectionId === null) {
+          ctx.addIssue({
+            code: 'custom',
+            message: MESSAGES.connectionRequired,
+            path: ['connectionId'],
+          })
+        }
         const cross = widget.config.crossFilter
         if (cross === undefined) return
         const filterId =
@@ -260,6 +291,13 @@ export const queryRunSchema = z.object({
 export const widgetRunSchema = z.object({
   params: queryParamsSchema.optional(),
 })
+
+export const mcpPreviewSchema = z.object({
+  call: mcpCallSchema,
+  params: queryParamsSchema.optional(),
+})
+
+export type McpPreviewInput = z.infer<typeof mcpPreviewSchema>
 
 export type DashboardCreateInput = z.input<typeof dashboardCreateSchema>
 export type DashboardSaveInput = z.input<typeof dashboardSaveSchema>

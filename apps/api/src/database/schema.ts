@@ -1,6 +1,7 @@
 import type {
   AssistantReplyDetails,
   DashboardFilter,
+  McpCall,
   SidebarLayoutInput,
 } from '@ninbi/contracts'
 import { sql } from 'drizzle-orm'
@@ -178,9 +179,9 @@ export const dashboards = pgTable(
     ownerId: uuid('owner_id')
       .notNull()
       .references(() => users.id),
-    connectionId: uuid('connection_id')
-      .notNull()
-      .references(() => connections.id, { onDelete: 'restrict' }),
+    connectionId: uuid('connection_id').references(() => connections.id, {
+      onDelete: 'restrict',
+    }),
     version: integer('version').notNull().default(1),
     filters: jsonb('filters').$type<DashboardFilter[]>().notNull().default([]),
     refreshIntervalSec: integer('refresh_interval_sec').notNull().default(0),
@@ -218,6 +219,11 @@ export const widgets = pgTable(
       .references(() => dashboardTabs.id, { onDelete: 'cascade' }),
     title: varchar('title', { length: 80 }).notNull(),
     cypher: text('cypher'),
+    mcpConnectionId: uuid('mcp_connection_id').references(
+      () => mcpConnections.id,
+      { onDelete: 'restrict' },
+    ),
+    mcpCall: jsonb('mcp_call').$type<Omit<McpCall, 'connectionId'>>(),
     visualization: varchar('visualization', { length: 40 })
       .notNull()
       .default('TABLE'),
