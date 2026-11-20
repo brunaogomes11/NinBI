@@ -94,7 +94,7 @@ flowchart TD
 
 **Done when**:
 
-- [ ] Uma resposta com duas listas retorna somente a lista escolhida. Saída vazia preserva os tipos. Argumentos inválidos e ferramenta desabilitada não geram chamadas.
+- [x] Uma resposta com duas listas retorna somente a lista escolhida. Saída vazia preserva os tipos. Argumentos inválidos e ferramenta desabilitada não geram chamadas.
 
 **Tests**: unit
 **Gate**: quick

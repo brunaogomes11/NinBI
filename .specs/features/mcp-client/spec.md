@@ -115,13 +115,13 @@ O NinBI cria dashboards a partir de conexões SQL e Neo4j. Ferramentas MCP que e
 | MCP-02 | Cadastrar e descobrir ferramentas | T2 | Implementing |
 | MCP-03 | Cadastrar e descobrir ferramentas | T2 | Implementing |
 | MCP-04 | Cadastrar e descobrir ferramentas | T1 | Implementing |
-| MCP-05 | Executar uma chamada tabular | - | Pending |
-| MCP-06 | Executar uma chamada tabular | - | Pending |
-| MCP-07 | Executar uma chamada tabular | - | Pending |
-| MCP-08 | Executar uma chamada tabular | - | Pending |
-| MCP-09 | Executar uma chamada tabular | - | Pending |
+| MCP-05 | Executar uma chamada tabular | T3 | Implementing |
+| MCP-06 | Executar uma chamada tabular | T3 | Implementing |
+| MCP-07 | Executar uma chamada tabular | T3 | Implementing |
+| MCP-08 | Executar uma chamada tabular | T3 | Implementing |
+| MCP-09 | Executar uma chamada tabular | T3 | Implementing |
 | MCP-10 | Executar uma chamada tabular | T2 | Implementing |
-| MCP-11 | Executar uma chamada tabular | - | Pending |
+| MCP-11 | Executar uma chamada tabular | T3 | Implementing |
 | MCP-12 | Salvar e atualizar o dashboard | - | Pending |
 | MCP-13 | Salvar e atualizar o dashboard | - | Pending |
 | MCP-14 | Salvar e atualizar o dashboard | - | Pending |
@@ -133,11 +133,11 @@ O NinBI cria dashboards a partir de conexões SQL e Neo4j. Ferramentas MCP que e
 | MCP-20 | Executar uma chamada tabular | - | Pending |
 | MCP-21 | Salvar e atualizar o dashboard | - | Pending |
 | MCP-22 | Executar uma chamada tabular | - | Pending |
-| MCP-23 | Executar uma chamada tabular | - | Pending |
+| MCP-23 | Executar uma chamada tabular | T3 | Implementing |
 
 <!-- TRACE:END -->
 
-**Coverage** — 23 critérios, 6 mapeados para tasks.
+**Coverage** — 23 critérios, 13 mapeados para tasks.
 
 ## Sources
 

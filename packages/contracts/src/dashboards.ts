@@ -7,6 +7,7 @@ import {
   queryParamsSchema,
   REFRESH_INTERVALS,
 } from './filters'
+import type { McpColumnType } from './mcp'
 import { MESSAGES } from './messages'
 import { WIDGET_VISUALIZATIONS, widgetConfigSchema } from './widget-config'
 
@@ -91,6 +92,7 @@ export type ResultValue =
 
 export interface QueryResultDto {
   columns: string[]
+  columnTypes?: McpColumnType[]
   rows: ResultValue[][]
   truncated: boolean
   rowLimit: number
