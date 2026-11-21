@@ -1,9 +1,13 @@
 FROM node:24-alpine AS build
 RUN corepack enable
 WORKDIR /repo
-COPY . .
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json ./apps/api/
+COPY apps/web/package.json ./apps/web/
+COPY packages/contracts/package.json ./packages/contracts/
 RUN pnpm install --frozen-lockfile
-RUN pnpm build
+COPY . .
+RUN pnpm -r --workspace-concurrency=1 build
 RUN pnpm --filter @ninbi/api deploy --prod --legacy /out
 
 FROM node:24-alpine
@@ -22,4 +26,4 @@ COPY --from=build /repo/apps/api/drizzle ./drizzle
 COPY --from=build /repo/apps/web/dist ./web
 EXPOSE 8080
 # Aplica as migrações e abre a porta.
-CMD ["sh", "-c", "node dist/database/migrate-cli.js && node dist/main.js"]
+CMD ["sh", "-c", "node dist/database/migrate-cli.js && exec node dist/main.js"]
