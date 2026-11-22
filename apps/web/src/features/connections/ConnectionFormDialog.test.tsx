@@ -294,7 +294,7 @@ async function fillSql(
 }
 
 describe('ConnectionFormDialog por tipo', () => {
-  it('SRC-01 Nova conexão oferece Neo4j, PostgreSQL, MySQL e SQL Server', async () => {
+  it('SRC-01 Nova conexão oferece Neo4j, PostgreSQL, MySQL, SQL Server e MCP', async () => {
     const view = openConnections()
     await openNew(view)
 
@@ -305,6 +305,7 @@ describe('ConnectionFormDialog por tipo', () => {
       'PostgreSQL',
       'MySQL',
       'SQL Server',
+      'MCP',
     ])
   })
 

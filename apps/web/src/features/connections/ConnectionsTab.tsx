@@ -1,6 +1,6 @@
 import { type ConnectionDto, can, MESSAGES } from '@ninbi/contracts'
 import { Plus } from 'lucide-react'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -19,7 +19,8 @@ import { formatDateTime } from '@/lib/format'
 import { connectionTypeLabel, useConnections } from './api'
 import { ConnectionFormDialog } from './ConnectionFormDialog'
 import { ConnectionRowActions } from './ConnectionRowActions'
-import { McpConnectionsPanel } from './McpConnectionsPanel'
+import { McpCatalog } from './McpCatalog'
+import { useMcpConnections } from './mcp-api'
 
 const SKELETON_ROWS = 5
 
@@ -41,8 +42,12 @@ export function ConnectionsTab() {
   const { user } = useSession()
   const canManage = !!user && can(user.role, 'connections.manage')
   const connections = useConnections()
+  const mcpConnections = useMcpConnections()
   const [newOpen, setNewOpen] = useState(false)
+  const [expandedMcp, setExpandedMcp] = useState<string | null>(null)
   const columns = canManage ? 6 : 5
+  const empty =
+    connections.data?.length === 0 && mcpConnections.data?.length === 0
 
   return (
     <>
@@ -59,9 +64,13 @@ export function ConnectionsTab() {
         </TopBarAction>
       )}
       {canManage && (
-        <ConnectionFormDialog open={newOpen} onOpenChange={setNewOpen} />
+        <ConnectionFormDialog
+          open={newOpen}
+          onOpenChange={setNewOpen}
+          onMcpCreated={setExpandedMcp}
+        />
       )}
-      {connections.isError ? (
+      {connections.isError && (
         <Card className="items-start gap-3 rounded-card p-6">
           <p role="alert" className="text-destructive">
             {MESSAGES.connectionsLoadFailed}
@@ -74,7 +83,25 @@ export function ConnectionsTab() {
             Tentar novamente
           </Button>
         </Card>
-      ) : (
+      )}
+      {mcpConnections.isError && (
+        <Card className="items-start gap-3 rounded-card p-6">
+          <p role="alert" className="text-destructive">
+            Não foi possível carregar as conexões MCP.{' '}
+            {mcpConnections.error.message}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => mcpConnections.refetch()}
+          >
+            Tentar novamente carregar MCP
+          </Button>
+        </Card>
+      )}
+      {(!connections.isError ||
+        mcpConnections.isPending ||
+        !!mcpConnections.data?.length) && (
         <Card className="rounded-card py-2">
           <Table>
             <TableHeader>
@@ -91,8 +118,10 @@ export function ConnectionsTab() {
                 )}
               </TableRow>
             </TableHeader>
-            <TableBody aria-busy={connections.isPending}>
-              {connections.isPending ? (
+            <TableBody
+              aria-busy={connections.isPending || mcpConnections.isPending}
+            >
+              {(connections.isPending || mcpConnections.isPending) &&
                 Array.from({ length: SKELETON_ROWS }, (_, index) => (
                   // biome-ignore lint/suspicious/noArrayIndexKey: linhas de esqueleto são todas iguais
                   <TableRow key={index}>
@@ -103,8 +132,8 @@ export function ConnectionsTab() {
                       </TableCell>
                     ))}
                   </TableRow>
-                ))
-              ) : connections.data.length === 0 ? (
+                ))}
+              {empty && (
                 <TableRow>
                   <TableCell
                     colSpan={columns}
@@ -113,38 +142,78 @@ export function ConnectionsTab() {
                     {MESSAGES.connectionsEmpty}
                   </TableCell>
                 </TableRow>
-              ) : (
-                connections.data.map((connection) => (
-                  <TableRow key={connection.id}>
+              )}
+              {connections.data?.map((connection) => (
+                <TableRow key={connection.id}>
+                  <TableCell className="font-medium">
+                    <Link
+                      to={`/configuracoes/conexoes/${connection.id}`}
+                      className="text-accent-text hover:underline"
+                    >
+                      {connection.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{address(connection)}</TableCell>
+                  <TableCell>
+                    {connection.database ?? 'Padrão do servidor'}
+                  </TableCell>
+                  <TableCell>{lastRead(connection)}</TableCell>
+                  <TableCell>{connectionTypeLabel(connection.type)}</TableCell>
+                  {canManage && (
+                    <TableCell>
+                      <ConnectionRowActions connection={connection} />
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+              {mcpConnections.data?.map((connection) => (
+                <Fragment key={connection.id}>
+                  <TableRow>
                     <TableCell className="font-medium">
-                      <Link
-                        to={`/configuracoes/conexoes/${connection.id}`}
-                        className="text-accent-text hover:underline"
-                      >
-                        {connection.name}
-                      </Link>
+                      {connection.name}
                     </TableCell>
-                    <TableCell>{address(connection)}</TableCell>
-                    <TableCell>
-                      {connection.database ?? 'Padrão do servidor'}
+                    <TableCell className="max-w-80 whitespace-normal break-all">
+                      {connection.endpoint ?? '—'}
                     </TableCell>
-                    <TableCell>{lastRead(connection)}</TableCell>
-                    <TableCell>
-                      {connectionTypeLabel(connection.type)}
-                    </TableCell>
+                    <TableCell>—</TableCell>
+                    <TableCell>—</TableCell>
+                    <TableCell>MCP</TableCell>
                     {canManage && (
                       <TableCell>
-                        <ConnectionRowActions connection={connection} />
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          aria-expanded={expandedMcp === connection.id}
+                          onClick={() =>
+                            setExpandedMcp(
+                              expandedMcp === connection.id
+                                ? null
+                                : connection.id,
+                            )
+                          }
+                        >
+                          Ferramentas
+                        </Button>
                       </TableCell>
                     )}
                   </TableRow>
-                ))
-              )}
+                  {canManage && expandedMcp === connection.id && (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns}
+                        className="whitespace-normal p-4"
+                      >
+                        <McpCatalog connection={connection} />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </Fragment>
+              ))}
             </TableBody>
           </Table>
         </Card>
       )}
-      <McpConnectionsPanel canManage={canManage} />
     </>
   )
 }

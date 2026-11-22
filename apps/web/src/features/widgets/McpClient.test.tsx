@@ -2,6 +2,7 @@ import { type McpToolDto, MESSAGES } from '@ninbi/contracts'
 import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { expect, it } from 'vitest'
+import { makeConnection } from '@/test/fixtures/connections'
 import {
   makeDashboard,
   makeQueryResult,
@@ -93,7 +94,7 @@ it('MCP-19 editor configura manualmente conexão ferramenta e argumentos', async
   ])
 })
 
-it('Admin cadastra uma conexão e habilita ferramenta tabular', async () => {
+it('Admin cadastra MCP no mesmo diálogo e lista do SQL e habilita ferramenta tabular', async () => {
   const endpoint = 'https://mcp.example/stream'
   const updates: unknown[] = []
   let current: {
@@ -107,7 +108,11 @@ it('Admin cadastra uma conexão e habilita ferramenta tabular', async () => {
       setupStatusHandler(false),
       sessionHandler(makeUser({ role: 'ADMIN' })),
       sidebarHandler(),
-      http.get('/api/connections', () => HttpResponse.json([])),
+      http.get('/api/connections', () =>
+        HttpResponse.json([
+          makeConnection({ name: 'Banco SQL', type: 'POSTGRES' }),
+        ]),
+      ),
       http.get('/api/mcp/connections', () => HttpResponse.json(current)),
       http.post('/api/mcp/connections', async ({ request }) => {
         const values = (await request.json()) as {
@@ -133,13 +138,25 @@ it('Admin cadastra uma conexão e habilita ferramenta tabular', async () => {
       }),
     ],
   })
-  await user.type(
-    await screen.findByLabelText('Nome da conexão MCP'),
-    'Chamados',
+  await user.click(await screen.findByRole('button', { name: 'Nova conexão' }))
+  const dialog = within(
+    await screen.findByRole('dialog', { name: 'Nova conexão' }),
   )
-  await user.type(screen.getByLabelText('URL do servidor MCP'), endpoint)
-  await user.click(screen.getByRole('button', { name: 'Cadastrar MCP' }))
+  await user.click(dialog.getByRole('combobox', { name: 'Tipo' }))
+  expect(screen.getByRole('option', { name: 'PostgreSQL' })).toBeInTheDocument()
+  await user.click(screen.getByRole('option', { name: 'MCP' }))
+  expect(dialog.queryByLabelText('Senha')).not.toBeInTheDocument()
+  await user.type(dialog.getByLabelText('Nome'), 'Chamados')
+  await user.type(dialog.getByLabelText('URL do servidor MCP'), endpoint)
+  await user.click(dialog.getByRole('button', { name: 'Salvar' }))
   const checkbox = await screen.findByRole('checkbox', { name: 'list' })
+  const table = within(screen.getByRole('table'))
+  expect(
+    table.getByRole('row', { name: /Banco SQL.*PostgreSQL/ }),
+  ).toBeInTheDocument()
+  expect(table.getByRole('row', { name: /Chamados.*MCP/ })).toHaveTextContent(
+    endpoint,
+  )
   expect(checkbox).not.toBeChecked()
   await user.click(checkbox)
   await waitFor(() => expect(checkbox).toBeChecked())

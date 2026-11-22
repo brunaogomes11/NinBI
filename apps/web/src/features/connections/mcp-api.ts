@@ -1,9 +1,26 @@
-import type { McpConnectionDto, McpToolDto } from '@ninbi/contracts'
-import { useQuery } from '@tanstack/react-query'
+import type {
+  McpConnectionCreate,
+  McpConnectionDto,
+  McpToolDto,
+} from '@ninbi/contracts'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
 
 export const mcpConnectionsKey = ['mcp-connections'] as const
 export const mcpToolsKey = (id: string) => ['mcp-tools', id] as const
+
+export function useCreateMcpConnection() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: McpConnectionCreate) =>
+      apiFetch<McpConnectionDto>('/api/mcp/connections', {
+        method: 'POST',
+        body,
+      }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: mcpConnectionsKey }),
+  })
+}
 
 export function useMcpConnections(enabled = true) {
   return useQuery({
