@@ -15,7 +15,7 @@ export interface UserDto {
   name: string
   email: string
   role: Role
-  status: 'ACTIVE' | 'DISABLED'
+  status: 'ACTIVE' | 'DISABLED' | 'PENDING'
   mustChangePassword: boolean
 }
 
@@ -55,6 +55,8 @@ export const setupAdminSchema = z
     path: ['confirmPassword'],
   })
 
+export const registerSchema = z.object({ name, email })
+
 export const newUserSchema = z.object({
   name,
   email,
@@ -85,6 +87,7 @@ export const changeRoleSchema = z.object({ role })
 
 export type LoginInput = z.infer<typeof loginSchema>
 export type SetupAdminInput = z.infer<typeof setupAdminSchema>
+export type RegisterInput = z.infer<typeof registerSchema>
 export type NewUserInput = z.infer<typeof newUserSchema>
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
 export type InitialPasswordInput = z.infer<typeof initialPasswordSchema>

@@ -9,6 +9,7 @@ import {
 } from '@/features/auth/guards'
 import { InitialPasswordPage } from '@/features/auth/InitialPasswordPage'
 import { LoginPage } from '@/features/auth/LoginPage'
+import { RegistrationPage } from '@/features/auth/RegistrationPage'
 import { SetupPage } from '@/features/auth/SetupPage'
 import { SchemaPage } from '@/features/connections/SchemaPage'
 import { DashboardPage } from '@/features/dashboards/DashboardPage'
@@ -29,9 +30,11 @@ export const appRoutes: RouteObject[] = [
     element: <RequireSetupDone />,
     children: [
       {
-        path: '/entrar',
         element: <RedirectIfAuthenticated />,
-        children: [{ index: true, element: <LoginPage /> }],
+        children: [
+          { path: '/entrar', element: <LoginPage /> },
+          { path: '/cadastro', element: <RegistrationPage /> },
+        ],
       },
       {
         element: <RequireAuth />,

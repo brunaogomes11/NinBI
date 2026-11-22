@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -56,7 +57,7 @@ import {
 import { apiFetch } from '@/lib/api'
 import { USERS_QUERY_KEY } from './queryKeys'
 
-type Action = 'role' | 'reset' | 'deactivate'
+type Action = 'role' | 'reset' | 'deactivate' | 'approve'
 
 const GRADIENT_BUTTON =
   'bg-[image:var(--gradient-brand)] text-primary-foreground'
@@ -144,12 +145,14 @@ function ChangeRoleDialog({
   )
 }
 
-function ResetPasswordDialog({
+function TemporaryPasswordDialog({
   user,
   onClose,
+  approving,
 }: {
   user: UserDto
   onClose: () => void
+  approving: boolean
 }) {
   const form = useForm<ResetPasswordInput>({
     resolver: zodResolver(resetPasswordSchema),
@@ -157,19 +160,31 @@ function ResetPasswordDialog({
   })
   const reset = useUserMutation(
     (values: ResetPasswordInput) =>
-      apiFetch(`/api/users/${user.id}/reset-password`, {
-        method: 'POST',
-        body: values,
-      }),
+      apiFetch(
+        `/api/users/${user.id}/${approving ? 'approve-registration' : 'reset-password'}`,
+        {
+          method: 'POST',
+          body: values,
+        },
+      ),
     onClose,
-    'Senha redefinida',
+    approving ? 'Cadastro aprovado' : 'Senha redefinida',
   )
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Redefinir senha de {user.name}</DialogTitle>
+          <DialogTitle>
+            {approving ? 'Aprovar cadastro de' : 'Redefinir senha de'}{' '}
+            {user.name}
+          </DialogTitle>
+          {approving && (
+            <DialogDescription>
+              Confirme a identidade da pessoa que solicitou acesso com{' '}
+              {user.email}. Entregue a senha provisória diretamente a ela.
+            </DialogDescription>
+          )}
         </DialogHeader>
         <Form {...form}>
           <form
@@ -201,7 +216,7 @@ function ResetPasswordDialog({
                 disabled={reset.isPending}
                 className={GRADIENT_BUTTON}
               >
-                Salvar
+                {approving ? 'Aprovar cadastro' : 'Salvar'}
               </Button>
             </DialogFooter>
           </form>
@@ -263,8 +278,14 @@ export function UserRowActions({ user }: { user: UserDto }) {
   let dialog: ReactNode = null
   if (action === 'role')
     dialog = <ChangeRoleDialog user={user} onClose={close} />
-  if (action === 'reset')
-    dialog = <ResetPasswordDialog user={user} onClose={close} />
+  if (action === 'reset' || action === 'approve')
+    dialog = (
+      <TemporaryPasswordDialog
+        user={user}
+        onClose={close}
+        approving={action === 'approve'}
+      />
+    )
   if (action === 'deactivate')
     dialog = <DeactivateDialog user={user} onClose={close} />
 
@@ -282,26 +303,34 @@ export function UserRowActions({ user }: { user: UserDto }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onSelect={() => setAction('role')}>
-            Alterar papel
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setAction('reset')}>
-            Redefinir senha
-          </DropdownMenuItem>
-          {user.status === 'ACTIVE' ? (
-            <DropdownMenuItem onSelect={() => setAction('deactivate')}>
-              Desativar
+          {user.status === 'PENDING' ? (
+            <DropdownMenuItem onSelect={() => setAction('approve')}>
+              Aprovar cadastro
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem
-              onSelect={() =>
-                reactivate.mutate(undefined, {
-                  onError: (error) => toast.error(error.message),
-                })
-              }
-            >
-              Reativar
-            </DropdownMenuItem>
+            <>
+              <DropdownMenuItem onSelect={() => setAction('role')}>
+                Alterar papel
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setAction('reset')}>
+                Redefinir senha
+              </DropdownMenuItem>
+              {user.status === 'ACTIVE' ? (
+                <DropdownMenuItem onSelect={() => setAction('deactivate')}>
+                  Desativar
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  onSelect={() =>
+                    reactivate.mutate(undefined, {
+                      onError: (error) => toast.error(error.message),
+                    })
+                  }
+                >
+                  Reativar
+                </DropdownMenuItem>
+              )}
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>

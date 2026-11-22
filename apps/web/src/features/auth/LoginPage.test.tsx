@@ -34,6 +34,50 @@ async function submit(
 }
 
 describe('LoginPage', () => {
+  it('abre o cadastro pelo login e confirma que a conta ficará pendente', async () => {
+    const bodies: unknown[] = []
+    const { user, router } = renderApp('/entrar?voltar=%2Fdashboards%2Fd-1', {
+      handlers: [
+        ...base,
+        http.post('/api/auth/register', async ({ request }) => {
+          bodies.push(await request.json())
+          return new HttpResponse(null, { status: 204 })
+        }),
+      ],
+    })
+    await user.click(await screen.findByRole('link', { name: 'Criar conta' }))
+    await user.type(screen.getByLabelText('Nome'), 'Bia')
+    await user.type(screen.getByLabelText('E-mail'), 'bia@x.com')
+    await user.click(screen.getByRole('button', { name: 'Solicitar cadastro' }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'pendente até a aprovação de um administrador',
+    )
+    expect(bodies).toEqual([
+      {
+        name: 'Bia',
+        email: 'bia@x.com',
+      },
+    ])
+    await user.click(screen.getByRole('link', { name: 'Voltar para o login' }))
+    expect(
+      await screen.findByRole('heading', { name: 'Entrar' }),
+    ).toBeInTheDocument()
+    expect(router.state.location.search).toBe('?voltar=%2Fdashboards%2Fd-1')
+  })
+
+  it('abre a recuperação de senha e volta ao login', async () => {
+    const { user } = renderApp('/entrar', { handlers: base })
+    await user.click(
+      await screen.findByRole('button', { name: 'Esqueceu a senha?' }),
+    )
+    expect(
+      await screen.findByRole('dialog', { name: 'Recuperar senha' }),
+    ).toHaveAccessibleDescription(/administrador.*senha provisória/)
+    await user.click(screen.getByRole('button', { name: 'Voltar ao login' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument()
+  })
   it('AUTH-01 entrar com dados corretos abre a página inicial', async () => {
     const bodies: unknown[] = []
     const { user, router } = renderApp('/entrar', {

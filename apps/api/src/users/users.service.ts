@@ -5,7 +5,7 @@ import {
   type Role,
   type UserDto,
 } from '@ninbi/contracts'
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, ne, sql } from 'drizzle-orm'
 import { PasswordHasher } from '../auth/password-hasher'
 import { SessionService } from '../auth/session.service'
 import { AppError } from '../common/app-error'
@@ -110,9 +110,51 @@ export class UsersService {
     const [updated] = await this.db
       .update(users)
       .set({ status: 'ACTIVE', updatedAt: sql`now()` })
-      .where(eq(users.id, id))
+      .where(and(eq(users.id, id), ne(users.status, 'PENDING')))
       .returning()
-    if (!updated) throw notFound()
+    if (!updated) {
+      const [target] = await this.db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, id))
+      if (!target) throw notFound()
+      throw new AppError(
+        409,
+        'REGISTRATION_STATUS_CONFLICT',
+        'Aprove o cadastro com uma senha provisória',
+      )
+    }
+    return toUserDto(updated)
+  }
+
+  async approveRegistration(
+    id: string,
+    temporaryPassword: string,
+  ): Promise<UserDto> {
+    if (!UUID_PATTERN.test(id)) throw notFound()
+    const passwordHash = await this.hasher.hash(temporaryPassword)
+    const [updated] = await this.db
+      .update(users)
+      .set({
+        status: 'ACTIVE',
+        passwordHash,
+        mustChangePassword: true,
+        updatedAt: sql`now()`,
+      })
+      .where(and(eq(users.id, id), eq(users.status, 'PENDING')))
+      .returning()
+    if (!updated) {
+      const [target] = await this.db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.id, id))
+      if (!target) throw notFound()
+      throw new AppError(
+        409,
+        'REGISTRATION_STATUS_CONFLICT',
+        'O cadastro já foi aprovado',
+      )
+    }
     return toUserDto(updated)
   }
 
@@ -138,6 +180,13 @@ export class UsersService {
         .where(eq(users.id, id))
         .for('update')
       if (!target) throw notFound()
+      if (target.status === 'PENDING') {
+        throw new AppError(
+          409,
+          'REGISTRATION_STATUS_CONFLICT',
+          'Aprove o cadastro com uma senha provisória',
+        )
+      }
 
       const isActiveAdmin = activeAdmins.some((admin) => admin.id === id)
       if (isActiveAdmin && removesAdmin() && activeAdmins.length <= 1) {

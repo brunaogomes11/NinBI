@@ -15,6 +15,8 @@ import {
   initialPasswordSchema,
   type LoginInput,
   loginSchema,
+  type RegisterInput,
+  registerSchema,
   type SessionUserDto,
 } from '@ninbi/contracts'
 import type { Request, Response } from 'express'
@@ -34,6 +36,15 @@ export class AuthController {
     @Inject(AuthService) private readonly auth: AuthService,
     @Inject(SessionService) private readonly sessions: SessionService,
   ) {}
+
+  @Public()
+  @Post('register')
+  @HttpCode(204)
+  async register(
+    @Body(new ZodValidationPipe(registerSchema)) body: RegisterInput,
+  ): Promise<void> {
+    await this.auth.register(body)
+  }
 
   @Public()
   @Post('login')

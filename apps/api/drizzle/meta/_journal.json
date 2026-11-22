@@ -71,6 +71,13 @@
       "when": 1795211359516,
       "tag": "0009_mcp_widgets",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795383491495,
+      "tag": "0010_public_registration",
+      "breakpoints": true
     }
   ]
 }

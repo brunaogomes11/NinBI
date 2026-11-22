@@ -13,10 +13,16 @@ import {
 interface Calls {
   role: unknown[]
   reset: unknown[]
+  approve: unknown[]
 }
 
 /** Servidor em memória: cada ação muda a lista que o GET seguinte devolve. */
-function openUsers(options: { lastAdminOnDeactivate?: boolean } = {}) {
+function openUsers(
+  options: {
+    lastAdminOnDeactivate?: boolean
+    pendingRegistration?: boolean
+  } = {},
+) {
   const users: UserDto[] = [
     makeUserRow({ id: 'u-ana' }),
     makeUserRow({
@@ -30,10 +36,10 @@ function openUsers(options: { lastAdminOnDeactivate?: boolean } = {}) {
       name: 'Carla Dias',
       email: 'carla@x.com',
       role: 'VIEWER',
-      status: 'DISABLED',
+      status: options.pendingRegistration ? 'PENDING' : 'DISABLED',
     }),
   ]
-  const calls: Calls = { role: [], reset: [] }
+  const calls: Calls = { role: [], reset: [], approve: [] }
   const find = (id: unknown) => users.find((user) => user.id === id) as UserDto
   const view = renderApp('/configuracoes/usuarios', {
     handlers: [
@@ -67,6 +73,16 @@ function openUsers(options: { lastAdminOnDeactivate?: boolean } = {}) {
         user.status = 'ACTIVE'
         return HttpResponse.json(user)
       }),
+      http.post(
+        '/api/users/:id/approve-registration',
+        async ({ params, request }) => {
+          calls.approve.push(await request.json())
+          const user = find(params.id)
+          user.status = 'ACTIVE'
+          user.mustChangePassword = true
+          return HttpResponse.json(user)
+        },
+      ),
     ],
   })
   return { ...view, calls }
@@ -83,6 +99,32 @@ const rowOf = async (name: string) =>
   within(await screen.findByRole('row', { name: new RegExp(name) }))
 
 describe('UserRowActions', () => {
+  it('aprova o cadastro pendente com uma senha provisória', async () => {
+    const view = openUsers({ pendingRegistration: true })
+    expect(
+      (await rowOf('Carla Dias')).getByText('Aguardando aprovação'),
+    ).toBeInTheDocument()
+    await openMenu(view, 'Carla Dias')
+    await view.user.click(
+      await screen.findByRole('menuitem', { name: 'Aprovar cadastro' }),
+    )
+    const dialog = within(
+      await screen.findByRole('dialog', {
+        name: 'Aprovar cadastro de Carla Dias',
+      }),
+    )
+    await view.user.type(
+      dialog.getByLabelText('Senha provisória'),
+      'provisoria-123',
+    )
+    await view.user.click(
+      dialog.getByRole('button', { name: 'Aprovar cadastro' }),
+    )
+    expect((await rowOf('Carla Dias')).getByText('Ativo')).toBeInTheDocument()
+    expect(view.calls.approve).toEqual([
+      { temporaryPassword: 'provisoria-123' },
+    ])
+  })
   it('USR-08 Desativar pede confirmação com o nome', async () => {
     const view = openUsers()
     await openMenu(view, 'Bruno Lima')

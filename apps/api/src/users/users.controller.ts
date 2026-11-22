@@ -63,6 +63,15 @@ export class UsersController {
     return this.users.deactivate(id)
   }
 
+  @Post(':id/approve-registration')
+  @HttpCode(200)
+  approveRegistration(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(resetPasswordSchema)) body: ResetPasswordInput,
+  ): Promise<UserDto> {
+    return this.users.approveRegistration(id, body.temporaryPassword)
+  }
+
   @Post(':id/reactivate')
   @HttpCode(200)
   reactivate(@Param('id') id: string): Promise<UserDto> {

@@ -28,6 +28,88 @@ function sessionCookie(response: Response): string {
   return cookie
 }
 
+describe('cadastro público', () => {
+  const account = {
+    name: 'Bia',
+    email: 'bia@x.com',
+  }
+
+  it('preserva o primeiro acesso da instalação', async () => {
+    const test = await setup()
+    const response = await test.http.post('/api/auth/register').send(account)
+    expect(response.status).toBe(409)
+    expect(await test.db.select().from(users)).toEqual([])
+    expect((await test.http.get('/api/setup/status')).body).toEqual({
+      needsSetup: true,
+    })
+  })
+
+  it('cria um Visualizador pendente que só entra após a aprovação do Admin', async () => {
+    const test = await setup()
+    const admin = await createUser(test.db, { role: 'ADMIN' })
+    const guest = request.agent(test.app.getHttpServer())
+    const registered = await guest
+      .post('/api/auth/register')
+      .send({ ...account, role: 'ADMIN', status: 'ACTIVE', password: PASSWORD })
+    expect(registered.status).toBe(204)
+    expect(registered.headers['set-cookie']).toBeUndefined()
+
+    const credentials = { email: account.email, password: PASSWORD }
+    expect((await guest.post('/api/auth/login').send(credentials)).status).toBe(
+      401,
+    )
+    await test.http
+      .post('/api/auth/login')
+      .send({ email: admin.email, password: PASSWORD })
+      .expect(200)
+    const list = await test.http.get('/api/users').expect(200)
+    const pending = list.body.find(
+      (user: { email: string }) => user.email === account.email,
+    )
+    expect(pending).toMatchObject({
+      name: account.name,
+      role: 'VIEWER',
+      status: 'PENDING',
+    })
+    await test.http.post(`/api/users/${pending.id}/deactivate`).expect(409)
+    await test.http.post(`/api/users/${pending.id}/reactivate`).expect(409)
+    const approval = `/api/users/${pending.id}/approve-registration`
+    const temporaryPassword = 'provisoria-123'
+    await guest.post(approval).send({ temporaryPassword }).expect(401)
+    await test.http.post(approval).send({ temporaryPassword }).expect(200)
+    await test.http
+      .post(approval)
+      .send({ temporaryPassword: 'outra-senha-123' })
+      .expect(409)
+    await guest.post('/api/auth/login').send(credentials).expect(401)
+    const login = await guest
+      .post('/api/auth/login')
+      .send({ email: account.email, password: temporaryPassword })
+      .expect(200)
+    expect(login.body).toMatchObject({
+      id: pending.id,
+      role: 'VIEWER',
+      mustChangePassword: true,
+    })
+  })
+
+  it('mantém a conta existente quando o e-mail coincide sem distinção de maiúsculas', async () => {
+    const test = await setup()
+    const admin = await createUser(test.db, {
+      email: account.email,
+      role: 'ADMIN',
+    })
+    await test.http
+      .post('/api/auth/register')
+      .send({
+        ...account,
+        email: account.email.toUpperCase(),
+      })
+      .expect(204)
+    expect(await test.db.select().from(users)).toEqual([admin])
+  })
+})
+
 describe('login, logout e sessão atual', () => {
   it('AUTH-01 login correto cria a sessão', async () => {
     const test = await setup()

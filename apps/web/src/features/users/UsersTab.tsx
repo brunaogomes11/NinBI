@@ -28,7 +28,7 @@ function StatusBadge({ status }: { status: UserDto['status'] }) {
     <Badge variant="secondary">Ativo</Badge>
   ) : (
     <Badge variant="outline" className="text-muted-foreground">
-      Desativado
+      {status === 'PENDING' ? 'Aguardando aprovação' : 'Desativado'}
     </Badge>
   )
 }

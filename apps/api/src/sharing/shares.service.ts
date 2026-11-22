@@ -257,7 +257,7 @@ interface ShareRow {
   userName: string | null
   userEmail: string | null
   userRole: 'ADMIN' | 'EDITOR' | 'VIEWER' | null
-  userStatus: 'ACTIVE' | 'DISABLED' | null
+  userStatus: (typeof users.$inferSelect)['status'] | null
   teamId: string | null
   teamName: string | null
 }
@@ -273,7 +273,7 @@ function toShareDto(row: ShareRow): ShareDto {
         name: row.userName ?? '',
         email: row.userEmail ?? '',
         role: row.userRole,
-        disabled: row.userStatus === 'DISABLED',
+        disabled: row.userStatus !== 'ACTIVE',
       },
     }
   }

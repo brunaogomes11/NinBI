@@ -24,7 +24,11 @@ import {
 } from 'drizzle-orm/pg-core'
 
 export const roleEnum = pgEnum('role', ['ADMIN', 'EDITOR', 'VIEWER'])
-export const userStatusEnum = pgEnum('user_status', ['ACTIVE', 'DISABLED'])
+export const userStatusEnum = pgEnum('user_status', [
+  'ACTIVE',
+  'DISABLED',
+  'PENDING',
+])
 export const schemaStatusEnum = pgEnum('schema_status', [
   'NEVER',
   'READING',

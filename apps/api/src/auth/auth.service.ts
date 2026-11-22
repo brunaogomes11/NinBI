@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { MESSAGES, type SessionUserDto } from '@ninbi/contracts'
-import { eq, sql } from 'drizzle-orm'
+import {
+  MESSAGES,
+  type RegisterInput,
+  type SessionUserDto,
+} from '@ninbi/contracts'
+import { and, eq, sql } from 'drizzle-orm'
 import { AppError } from '../common/app-error'
 import { type AppDatabase, DB } from '../database/database.module'
 import { users } from '../database/schema'
@@ -20,6 +24,32 @@ export class AuthService {
     private readonly throttle: LoginThrottleService,
   ) {}
 
+  async register(input: RegisterInput): Promise<void> {
+    const [admin] = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.role, 'ADMIN'), eq(users.status, 'ACTIVE')))
+      .limit(1)
+    if (!admin) {
+      throw new AppError(
+        409,
+        'SETUP_REQUIRED',
+        'Conclua o primeiro acesso para liberar o cadastro',
+      )
+    }
+
+    await this.db
+      .insert(users)
+      .values({
+        name: input.name,
+        email: input.email,
+        passwordHash: '',
+        role: 'VIEWER',
+        status: 'PENDING',
+      })
+      .onConflictDoNothing()
+  }
+
   async login(
     email: string,
     password: string,
@@ -32,10 +62,10 @@ export class AuthService {
       .from(users)
       .where(sql`lower(${users.email}) = ${email.toLowerCase()}`)
 
-    // Sem usuário, verifica contra um hash fictício para o tempo não revelar o e-mail.
+    // Sem credencial, verifica contra um hash fictício para o tempo não revelar o e-mail.
     const passwordOk = await this.hasher.verify(
       password,
-      user?.passwordHash ?? (await this.getDummyHash()),
+      user?.passwordHash || (await this.getDummyHash()),
     )
     if (!user || !passwordOk || user.status !== 'ACTIVE') {
       await this.throttle.registerFailure(email)

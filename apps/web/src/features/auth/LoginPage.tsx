@@ -6,9 +6,19 @@ import {
 } from '@ninbi/contracts'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
-import { useNavigate, useSearchParams } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import {
   Form,
   FormControl,
@@ -63,7 +73,7 @@ export function LoginPage() {
             <h1>Entrar</h1>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="grid gap-4">
           <Form {...form}>
             <form
               noValidate
@@ -114,6 +124,42 @@ export function LoginPage() {
               </Button>
             </form>
           </Form>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Link
+              to={{ pathname: '/cadastro', search: params.toString() }}
+              className="text-accent-text text-sm hover:underline"
+            >
+              Criar conta
+            </Link>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto p-0 text-accent-text"
+                >
+                  Esqueceu a senha?
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Recuperar senha</DialogTitle>
+                  <DialogDescription>
+                    Peça ao administrador da sua instalação uma senha provisória
+                    para o e-mail da sua conta. Ao entrar com ela, você poderá
+                    definir uma nova senha.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button type="button" variant="outline">
+                      Voltar ao login
+                    </Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </CardContent>
       </Card>
     </main>
