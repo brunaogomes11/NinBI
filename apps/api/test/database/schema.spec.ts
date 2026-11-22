@@ -28,6 +28,7 @@ describe('schema do banco', () => {
       'installation',
       'llm_settings',
       'login_throttle',
+      'mcp_connections',
       'schema_example_opt_outs',
       'sessions',
       'sidebar_layouts',
