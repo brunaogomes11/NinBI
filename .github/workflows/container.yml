@@ -62,4 +62,10 @@ jobs:
         shell: bash
         run: |
           docker push "$NINBI_IMAGE"
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
+            moving="${NINBI_IMAGE%%:*}:main"
+            docker tag "$NINBI_IMAGE" "$moving"
+            docker push "$moving"
+            echo "NINBI_IMAGE=$moving (tag móvel)" >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo "\`NINBI_IMAGE=$NINBI_IMAGE\`" >> "$GITHUB_STEP_SUMMARY"
