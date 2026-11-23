@@ -96,6 +96,42 @@
       "last_seen": "2026-11-17T13:12:12Z"
     },
     {
+      "id": "L-006",
+      "key": "ac_gap::quando o criterio diz cria ou altera o teste precisa cobrir as duas acoes cobrir so a de criar deixa a de alterar sem prova",
+      "text": "Quando o criterio diz cria ou altera, o teste precisa cobrir as duas acoes; cobrir so a de criar deixa a de alterar sem prova.",
+      "signal": "ac_gap",
+      "scope": "assistant",
+      "status": "candidate",
+      "features": [
+        "assistente-sql"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F1 C12 ASQ-12 (assistant)"
+      ],
+      "created": "2026-11-17T21:46:52Z",
+      "last_seen": "2026-11-17T21:46:52Z"
+    },
+    {
+      "id": "L-007",
+      "key": "weak_test::prova de que o neo4j nao mudou compara com o texto literal esperado nunca com outro caminho do mesmo codigo asserte o conteudo nao so o tamanho da lista",
+      "text": "Prova de que o Neo4j nao mudou compara com o texto literal esperado, nunca com outro caminho do mesmo codigo; asserte o conteudo, nao so o tamanho da lista.",
+      "signal": "weak_test",
+      "scope": "tests",
+      "status": "candidate",
+      "features": [
+        "assistente-sql"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "F5 ASQ-02 ASQ-08 (tests)"
+      ],
+      "created": "2026-11-17T21:46:53Z",
+      "last_seen": "2026-11-17T21:46:53Z"
+    },
+    {
       "id": "L-008",
       "key": "weak_test::teste o catalogo pela rota com ids distintos para verificar a associacao entre conexao cadastrada e servidor",
       "text": "Teste o catálogo pela rota com IDs distintos para verificar a associação entre conexão cadastrada e servidor.",

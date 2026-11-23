@@ -44,7 +44,7 @@ jobs:
           export NINBI_ENCRYPTION_KEY="$(openssl rand -base64 32)"
           compose=(docker compose -f docker-compose.coolify.yml)
           trap '"${compose[@]}" down -v' EXIT
-          if ! "${compose[@]}" up --wait --wait-timeout 120 --no-build; then
+          if ! "${compose[@]}" up --wait --wait-timeout 120 --no-build --pull never; then
             "${compose[@]}" logs --no-color
             exit 1
           fi

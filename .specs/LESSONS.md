@@ -44,6 +44,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: F3 F4 C44 C25 (drivers)
 - last seen: 2026-11-17T13:12:12Z
 
+### L-006 - Quando o criterio diz cria ou altera, o teste precisa cobrir as duas acoes; cobrir so a de criar deixa a de alterar sem prova.
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `assistant` · harmful: 0
+- features: assistente-sql
+- evidence: F1 C12 ASQ-12 (assistant)
+- last seen: 2026-11-17T21:46:52Z
+
+### L-007 - Prova de que o Neo4j nao mudou compara com o texto literal esperado, nunca com outro caminho do mesmo codigo; asserte o conteudo, nao so o tamanho da lista.
+- signal: `weak_test` · recurrence: 1 feature(s) · scope: `tests` · harmful: 0
+- features: assistente-sql
+- evidence: F5 ASQ-02 ASQ-08 (tests)
+- last seen: 2026-11-17T21:46:53Z
+
 ### L-008 - Teste o catálogo pela rota com IDs distintos para verificar a associação entre conexão cadastrada e servidor.
 - signal: `weak_test` · recurrence: 1 feature(s) · scope: `mcp-client` · harmful: 0
 - features: mcp-client
