@@ -3,7 +3,7 @@ name: ninbi
 services:
   app:
     image: ${NINBI_IMAGE:?Defina NINBI_IMAGE com a imagem publicada pelo GitHub Actions}
-    pull_policy: always
+    pull_policy: ${NINBI_PULL_POLICY:-always}
     expose:
       - "8080"
     environment:

@@ -38,13 +38,14 @@ jobs:
       - name: Verificar a imagem com PostgreSQL
         env:
           NINBI_IMAGE: ${{ steps.image.outputs.ref }}
+          NINBI_PULL_POLICY: never
         shell: bash
         run: |
           export NINBI_POSTGRES_PASSWORD="$(openssl rand -hex 32)"
           export NINBI_ENCRYPTION_KEY="$(openssl rand -base64 32)"
           compose=(docker compose -f docker-compose.coolify.yml)
           trap '"${compose[@]}" down -v' EXIT
-          if ! "${compose[@]}" up --wait --wait-timeout 120 --no-build --pull never; then
+          if ! "${compose[@]}" up --wait --wait-timeout 120 --no-build; then
             "${compose[@]}" logs --no-color
             exit 1
           fi
