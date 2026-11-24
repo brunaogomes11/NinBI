@@ -6,9 +6,14 @@ import {
 import Prism from 'prismjs'
 import 'prismjs/components/prism-cypher'
 import { useId } from 'react'
-import Editor from 'react-simple-code-editor'
+import EditorModule from 'react-simple-code-editor'
 import { Label } from '@/components/ui/label'
 import { languageLabel } from '@/features/connections/api'
+
+// Em build de produção o import padrão de um módulo CJS pode vir como `{ default }`.
+const Editor = (
+  'default' in EditorModule ? EditorModule.default : EditorModule
+) as typeof EditorModule
 
 const SQL_KEYWORDS = new Set(
   (
