@@ -27,6 +27,8 @@ interface Script {
   rows?: unknown[][]
   hang?: boolean
   fail?: Error
+  /** Simula o MariaDB, que não tem `max_execution_time`. */
+  mariadb?: boolean
 }
 
 /** Conexão falsa que registra as instruções enviadas e simula o fluxo de linhas. */
@@ -48,6 +50,11 @@ class FakeMysqlConnection implements MysqlConnection {
 
   async query(sql: string): Promise<void> {
     this.log.push(sql)
+    if (sql.includes('max_execution_time') && this.script.mariadb) {
+      throw Object.assign(new Error('Unknown system variable'), {
+        errno: 1193,
+      })
+    }
   }
 
   stream(sql: string, values: unknown[]): MysqlRows {
@@ -167,6 +174,19 @@ describe('gateway do MySQL', () => {
     ).toBeGreaterThan(begin)
     // A data vai ao MySQL como o texto `AAAA-MM-DD` (SQX-20).
     expect(connections[0]?.values).toEqual(['2024-01-15', 7])
+  })
+
+  it('MariaDB usa max_statement_time quando max_execution_time não existe', async () => {
+    const { gateway, connections } = gatewayWith({
+      fields: ['id'],
+      rows: [[1]],
+      mariadb: true,
+    })
+
+    const result = await gateway.read(cfg, 'SELECT 1', [], { timeoutMs: 8000 })
+
+    expect(result.rows).toEqual([[1]])
+    expect(connections[0]?.log).toContain('SET SESSION max_statement_time = 8')
   })
 
   it('SQX-10 MySQL aplica o prazo e cancela ao estourar', async () => {

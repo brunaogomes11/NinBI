@@ -24,6 +24,10 @@ const DRIVER_TIMEOUT_MARGIN_MS = 5_000
 const STREAM_HIGH_WATER_MARK = 500
 /** `ER_QUERY_TIMEOUT`: o `max_execution_time` venceu do lado do banco. */
 const MYSQL_QUERY_TIMEOUT = 3024
+/** `ER_STATEMENT_TIMEOUT` do MariaDB, que usa `max_statement_time`. */
+const MARIADB_STATEMENT_TIMEOUT = 1969
+/** `ER_UNKNOWN_SYSTEM_VARIABLE`: o servidor não é MySQL (é MariaDB). */
+const UNKNOWN_SYSTEM_VARIABLE = 1193
 
 const DATE_TIME = /^\d{4,}-\d\d-\d\d \d/
 
@@ -146,7 +150,8 @@ export const createMysqlConnection: MysqlConnectionFactory = (options) => {
 }
 
 function isQueryTimeout(error: unknown): boolean {
-  return (error as { errno?: unknown } | null)?.errno === MYSQL_QUERY_TIMEOUT
+  const errno = (error as { errno?: unknown } | null)?.errno
+  return errno === MYSQL_QUERY_TIMEOUT || errno === MARIADB_STATEMENT_TIMEOUT
 }
 
 /** O código do MySQL é o número do erro (`1064`); o de rede segue (`ECONNRESET`). */
@@ -217,9 +222,23 @@ export class MysqlGateway implements SqlGateway {
         connected = true
         await connection.query("SET SESSION time_zone = '+00:00'")
         await connection.query('START TRANSACTION READ ONLY')
-        await connection.query(
-          `SET SESSION max_execution_time = ${Math.max(1, Math.ceil(opts.timeoutMs))}`,
-        )
+        const milliseconds = Math.max(1, Math.ceil(opts.timeoutMs))
+        try {
+          await connection.query(
+            `SET SESSION max_execution_time = ${milliseconds}`,
+          )
+        } catch (error) {
+          if (
+            (error as { errno?: unknown } | null)?.errno !==
+            UNKNOWN_SYSTEM_VARIABLE
+          ) {
+            throw error
+          }
+          // MariaDB: o mesmo prazo em segundos.
+          await connection.query(
+            `SET SESSION max_statement_time = ${milliseconds / 1000}`,
+          )
+        }
         const result = connection.stream(sql, values.map(plainSqlValue))
         const limit = opts.maxRows ?? Number.POSITIVE_INFINITY
         const rows: unknown[][] = []
