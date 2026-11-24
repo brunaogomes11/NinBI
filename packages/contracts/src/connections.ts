@@ -187,7 +187,8 @@ export const connectionCreateSchema = z.preprocess(
     z.object({
       type: z.enum(SQL_TYPES),
       ...sqlFields,
-      password: z.string().min(1, MESSAGES.passwordRequired),
+      // Bancos públicos podem aceitar o usuário sem senha.
+      password: z.string().default(''),
     }),
   ]),
 )

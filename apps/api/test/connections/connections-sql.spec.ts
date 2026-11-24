@@ -76,6 +76,18 @@ describe('conexão SQL', () => {
     expect(await t.rows()).toHaveLength(1)
   })
 
+  it('cria conexão SQL sem senha para banco público', async () => {
+    const t = await setup()
+    const admin = await t.as('ADMIN')
+    const { password: _password, ...withoutPassword } = sqlBody
+
+    const created = await admin.post('/api/connections').send(withoutPassword)
+
+    expect(created.status).toBe(201)
+    const [row] = await t.rows()
+    expect(t.crypto.decrypt(row?.passwordEncrypted ?? '')).toBe('')
+  })
+
   it('SRC-06 teste que passa salva e a conexão aparece na lista', async () => {
     const t = await setup()
     const admin = await t.as('ADMIN')
