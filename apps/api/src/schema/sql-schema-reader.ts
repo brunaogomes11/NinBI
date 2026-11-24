@@ -11,6 +11,11 @@ import type {
 /** Linhas por tabela lidas para achar o exemplo de cada coluna (SCS-04). */
 export const SAMPLE_ROWS = 100
 
+/** Conexões simultâneas na leitura dos exemplos. */
+export const SAMPLE_CONCURRENCY = 8
+/** Fração do prazo restante que os exemplos podem usar; o resto é folga para guardar. */
+const SAMPLE_BUDGET_SHARE = 0.7
+
 /**
  * O que o leitor usa do gateway SQL: só `read` (SCS-09).
  */
@@ -145,14 +150,31 @@ export class SqlSchemaReader {
       return key
     })
 
-    for (const { ref, table } of tables.values()) {
+    // Os exemplos são opcionais: leem em paralelo e só até uma parte do prazo,
+    // para o schema ser guardado mesmo num banco grande ou distante.
+    const sampleDeadline =
+      Date.now() + (options.deadline - Date.now()) * SAMPLE_BUDGET_SHARE
+    const sampleExpired = () => Date.now() >= sampleDeadline
+    const pending = [...tables.values()]
+    const sampleTable = async ({ ref, table }: CatalogTable) => {
       let sample: { keys: string[]; rows: unknown[][] }
       try {
-        sample = await query(dialect.sampleQuery(ref, SAMPLE_ROWS), SAMPLE_ROWS)
-      } catch (error) {
-        // Sem permissão de ler a tabela: ela fica sem exemplos (SCS-07); o prazo não.
-        if (error instanceof SourceTimeoutError || expired()) throw error
-        continue
+        const timeoutMs = Math.min(
+          sampleDeadline - Date.now(),
+          options.deadline - Date.now(),
+        )
+        if (timeoutMs <= 0) return
+        sample = await gateway.read(
+          cfg,
+          dialect.sampleQuery(ref, SAMPLE_ROWS),
+          [],
+          { timeoutMs, maxRows: SAMPLE_ROWS, signal: options.signal },
+        )
+      } catch {
+        // Sem permissão ou sem tempo para esta tabela: fica sem exemplos (SCS-07);
+        // só o prazo total da leitura (ou o cancelamento) interrompe tudo.
+        if (expired()) throw new SourceTimeoutError()
+        return
       }
       for (const column of table.columns) {
         const i = sample.keys.indexOf(column.name)
@@ -166,6 +188,21 @@ export class SqlSchemaReader {
         }
       }
     }
+    const worker = async () => {
+      for (
+        let entry = pending.shift();
+        entry && !sampleExpired();
+        entry = pending.shift()
+      ) {
+        await sampleTable(entry)
+      }
+    }
+    await Promise.all(
+      Array.from(
+        { length: Math.min(SAMPLE_CONCURRENCY, pending.length) },
+        worker,
+      ),
+    )
 
     return {
       kind: 'RELATIONAL',

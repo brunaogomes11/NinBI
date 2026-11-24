@@ -364,7 +364,10 @@ describe('SqlSchemaReader', () => {
     catalog(slow, POSTGRES_DIALECT, [['public', 'a', false, 'id', 'int']])
     sample(slow, POSTGRES_DIALECT, 'public', 'a', 'hang')
     const call = read(slow, POSTGRES_DIALECT, 50)
-    await expect(call).rejects.toBeInstanceOf(SourceTimeoutError)
+    // Exemplo que não chega no prazo: o schema sai sem ele, em vez de falhar.
+    await expect(call).resolves.toMatchObject({
+      tables: [{ name: 'public.a', columns: [{ name: 'id', example: null }] }],
+    })
     const timeouts = slow.calls.map((c) => c.opts?.timeoutMs ?? 0)
     expect(Math.max(...timeouts)).toBeLessThanOrEqual(50)
   })
