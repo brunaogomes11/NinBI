@@ -126,6 +126,57 @@ export class ConnectionsService {
     )
   }
 
+  /** Testa os dados informados sem gravar nada. */
+  async testNew(input: ConnectionCreate): Promise<void> {
+    await this.verify(
+      {
+        id: '',
+        name: input.name,
+        type: input.type,
+        ...addressOf(input),
+        database: input.database,
+        username: input.username,
+      },
+      input.password,
+    )
+  }
+
+  /** Testa uma conexão existente com os dados do formulário; senha vazia usa a guardada. */
+  async testExisting(id: string, input: ConnectionUpdate): Promise<void> {
+    const current = await this.find(id)
+    if (input.type !== current.type) {
+      throw new AppError(
+        422,
+        'CONNECTION_TYPE_LOCKED',
+        MESSAGES.connectionTypeLocked,
+        { type: MESSAGES.connectionTypeLocked },
+      )
+    }
+    let password = input.password || ''
+    if (!password) {
+      try {
+        password = this.crypto.decrypt(current.passwordEncrypted)
+      } catch {
+        throw new AppError(
+          422,
+          unavailableCode(current.type),
+          MESSAGES.connectionPasswordUndecryptable,
+        )
+      }
+    }
+    await this.verify(
+      {
+        id,
+        name: input.name,
+        type: current.type,
+        ...addressOf(input),
+        database: input.database,
+        username: input.username,
+      },
+      password,
+    )
+  }
+
   async create(input: ConnectionCreate): Promise<ConnectionDto> {
     const [existing] = await this.db
       .select({ id: connections.id })

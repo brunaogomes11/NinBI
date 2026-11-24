@@ -63,6 +63,17 @@ export function useCreateConnection() {
   })
 }
 
+/** Testa os dados do formulário sem gravar; `id` testa uma conexão existente (senha vazia usa a guardada). */
+export function useTestConnection(id?: string) {
+  return useMutation({
+    mutationFn: (values: ConnectionCreate | ConnectionUpdate) =>
+      apiFetch<{ ok: true }>(
+        id ? `/api/connections/${id}/test` : '/api/connections/test',
+        { method: 'POST', body: values },
+      ),
+  })
+}
+
 export function useUpdateConnection(id: string) {
   const queryClient = useQueryClient()
   return useMutation({

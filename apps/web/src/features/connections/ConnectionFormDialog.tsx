@@ -9,7 +9,7 @@ import {
   type McpConnectionCreate,
   mcpConnectionCreateSchema,
 } from '@ninbi/contracts'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { type FieldErrors, type Resolver, useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -42,9 +42,10 @@ import {
   connectionTypeLabel,
   defaultPortFor,
   useCreateConnection,
+  useTestConnection,
   useUpdateConnection,
 } from './api'
-import { useCreateMcpConnection } from './mcp-api'
+import { useCreateMcpConnection, useTestMcpConnection } from './mcp-api'
 
 interface FormValues {
   type: ConnectionType | 'MCP'
@@ -146,11 +147,14 @@ export function ConnectionFormDialog({
   onOpenChange,
   connection,
   onMcpCreated,
+  onCreated,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   connection?: ConnectionDto
   onMcpCreated?: (id: string) => void
+  /** Conexão de banco criada: a leitura do schema já começou na API. */
+  onCreated?: (id: string) => void
 }) {
   const editing = connection !== undefined
   const form = useForm<FormValues, unknown, SubmitValues>({
@@ -162,12 +166,22 @@ export function ConnectionFormDialog({
   const create = useCreateConnection()
   const createMcp = useCreateMcpConnection()
   const update = useUpdateConnection(connection?.id ?? '')
+  const testConnection = useTestConnection(connection?.id)
+  const testMcp = useTestMcpConnection()
+  const testing = testConnection.isPending || testMcp.isPending
+  const [testResult, setTestResult] = useState<{
+    ok: boolean
+    message: string
+  } | null>(null)
   const pending = create.isPending || update.isPending || createMcp.isPending
 
   // Reabrir recarrega os valores; a lista atualizada com o diálogo aberto não pode apagar o que foi digitado.
   // biome-ignore lint/correctness/useExhaustiveDependencies: depende só de abrir e de qual conexão
   useEffect(() => {
-    if (open) form.reset(defaultsFor(connection))
+    if (open) {
+      form.reset(defaultsFor(connection))
+      setTestResult(null)
+    }
   }, [open, connection?.id, form])
 
   function submit(values: SubmitValues) {
@@ -204,7 +218,39 @@ export function ConnectionFormDialog({
       )
     } else {
       // O resolvedor de criação exige a senha.
-      create.mutate(values as ConnectionCreate, callbacks)
+      create.mutate(values as ConnectionCreate, {
+        ...callbacks,
+        onSuccess: ({ id }) => {
+          onOpenChange(false)
+          onCreated?.(id)
+        },
+      })
+    }
+  }
+
+  /** Valida o formulário e testa a conexão sem gravar (a senha vazia na edição usa a guardada). */
+  async function runTest() {
+    setTestResult(null)
+    if (!(await form.trigger())) return
+    const values = form.getValues()
+    const onSuccess = () =>
+      setTestResult({ ok: true, message: 'Conexão bem-sucedida.' })
+    const onError = (error: Error) =>
+      setTestResult({ ok: false, message: error.message })
+    if (values.type === 'MCP') {
+      testMcp.mutate(
+        { name: values.name, endpoint: values.endpoint },
+        { onSuccess, onError },
+      )
+    } else {
+      const { type, ...rest } = values
+      const payload = toPayload({ ...rest, type })
+      testConnection.mutate(
+        (editing && !payload.password
+          ? { ...payload, password: undefined }
+          : payload) as ConnectionCreate,
+        { onSuccess, onError },
+      )
     }
   }
 
@@ -335,10 +381,30 @@ export function ConnectionFormDialog({
                 {form.formState.errors.root.message}
               </p>
             )}
+            {testResult && (
+              <p
+                role={testResult.ok ? 'status' : 'alert'}
+                className={
+                  testResult.ok
+                    ? 'text-sm text-emerald-600'
+                    : 'text-destructive text-sm'
+                }
+              >
+                {testResult.message}
+              </p>
+            )}
             <DialogFooter>
               <Button
+                type="button"
+                variant="outline"
+                disabled={pending || testing}
+                onClick={runTest}
+              >
+                {testing ? 'Testando…' : 'Testar conexão'}
+              </Button>
+              <Button
                 type="submit"
-                disabled={pending}
+                disabled={pending || testing}
                 className="bg-[image:var(--gradient-brand)] text-primary-foreground"
               >
                 Salvar

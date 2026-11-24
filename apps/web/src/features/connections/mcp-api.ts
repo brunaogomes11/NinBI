@@ -41,3 +41,14 @@ export function useMcpTools(id: string) {
     retry: false,
   })
 }
+
+/** Testa o endpoint MCP (lista as ferramentas) sem gravar a conexão. */
+export function useTestMcpConnection() {
+  return useMutation({
+    mutationFn: (values: { name: string; endpoint: string }) =>
+      apiFetch<{ ok: true }>('/api/mcp/connections/test', {
+        method: 'POST',
+        body: values,
+      }),
+  })
+}

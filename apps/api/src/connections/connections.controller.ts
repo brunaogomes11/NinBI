@@ -34,6 +34,29 @@ export class ConnectionsController {
   }
 
   @RequirePermission('connections.manage')
+  @Post('test')
+  @HttpCode(200)
+  async testNew(
+    @Body(new ZodValidationPipe(connectionCreateSchema))
+    body: ConnectionCreate,
+  ): Promise<{ ok: true }> {
+    await this.connections.testNew(body)
+    return { ok: true }
+  }
+
+  @RequirePermission('connections.manage')
+  @Post(':id/test')
+  @HttpCode(200)
+  async testExisting(
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(connectionUpdateSchema))
+    body: ConnectionUpdate,
+  ): Promise<{ ok: true }> {
+    await this.connections.testExisting(id, body)
+    return { ok: true }
+  }
+
+  @RequirePermission('connections.manage')
   @Post()
   @HttpCode(201)
   create(

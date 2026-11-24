@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Inject,
   Param,
   Patch,
@@ -17,6 +18,7 @@ import {
 import { CurrentUser, RequirePermission } from '../auth/decorators'
 import type { SessionUser } from '../auth/session.service'
 import { ZodValidationPipe } from '../common/zod.pipe'
+import { McpClientService } from './mcp-client.service'
 import { McpConnectionsService } from './mcp-connections.service'
 import { McpTableService } from './mcp-table.service'
 
@@ -26,6 +28,7 @@ export class McpConnectionsController {
     @Inject(McpConnectionsService)
     private readonly connections: McpConnectionsService,
     @Inject(McpTableService) private readonly table: McpTableService,
+    @Inject(McpClientService) private readonly client: McpClientService,
   ) {}
 
   @Get()
@@ -38,6 +41,17 @@ export class McpConnectionsController {
   @RequirePermission('connections.read')
   tools(@Param('id') id: string) {
     return this.table.tools(id)
+  }
+
+  @Post('test')
+  @HttpCode(200)
+  @RequirePermission('connections.manage')
+  async test(
+    @Body(new ZodValidationPipe(mcpConnectionCreateSchema))
+    input: McpConnectionCreate,
+  ) {
+    await this.client.listTools(input.endpoint)
+    return { ok: true }
   }
 
   @Post()

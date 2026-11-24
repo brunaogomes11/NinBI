@@ -239,3 +239,28 @@ describe('permissão de leitura', () => {
     expect(response.status).toBe(403)
   })
 })
+
+describe('testar conexão sem salvar', () => {
+  it('testa os dados informados sem gravar a conexão', async () => {
+    const t = await setup()
+    const admin = await t.as('ADMIN')
+
+    const ok = await admin.post('/api/connections/test').send(validBody)
+    expect(ok.status).toBe(200)
+    expect(ok.body).toEqual({ ok: true })
+    expect(await t.rows()).toHaveLength(0)
+
+    t.neo4j.whenVerify(new Neo4jGatewayError(NEO4J_ERROR))
+    const failed = await admin.post('/api/connections/test').send(validBody)
+    expect(failed.status).toBe(422)
+    expect(failed.body).toMatchObject({ message: NEO4J_ERROR })
+  })
+
+  it('só quem gerencia conexões pode testar', async () => {
+    const t = await setup()
+    const response = await (await t.as('EDITOR'))
+      .post('/api/connections/test')
+      .send(validBody)
+    expect(response.status).toBe(403)
+  })
+})

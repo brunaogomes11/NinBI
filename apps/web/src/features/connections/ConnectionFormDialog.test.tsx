@@ -21,6 +21,8 @@ function openConnections(respond?: Respond) {
   const connections: ConnectionDto[] = [makeConnection()]
   const posts: Record<string, unknown>[] = []
   const patches: Record<string, unknown>[] = []
+  const tests: Record<string, unknown>[] = []
+  const schemaRequests: string[] = []
   const view = renderApp('/configuracoes/conexoes', {
     handlers: [
       setupStatusHandler(false),
@@ -41,6 +43,20 @@ function openConnections(respond?: Respond) {
         )
         return HttpResponse.json(connections.at(-1), { status: 201 })
       }),
+      http.get('/api/connections/:id/schema', ({ params }) => {
+        schemaRequests.push(String(params.id))
+        return HttpResponse.json({
+          status: 'READING',
+          readAt: null,
+          document: null,
+        })
+      }),
+      http.post('/api/connections/test', async ({ request }) => {
+        tests.push((await request.json()) as Record<string, unknown>)
+        return respond
+          ? respond({})
+          : HttpResponse.json({ ok: true }, { status: 200 })
+      }),
       http.patch('/api/connections/:id', async ({ request }) => {
         const body = (await request.json()) as Record<string, string | null>
         patches.push(body)
@@ -51,7 +67,7 @@ function openConnections(respond?: Respond) {
       }),
     ],
   })
-  return { ...view, posts, patches, connections }
+  return { ...view, posts, patches, tests, schemaRequests, connections }
 }
 
 type View = ReturnType<typeof openConnections>
@@ -103,7 +119,7 @@ const neo4jError = (code: string, message: string) => () =>
   HttpResponse.json({ code, message }, { status: 422 })
 
 describe('ConnectionFormDialog', () => {
-  it('CONN-07 nova conexão enviada aparece na lista', async () => {
+  it('CONN-07 nova conexão enviada abre a tela do schema', async () => {
     const view = openConnections()
     await openNew(view)
 
@@ -113,10 +129,37 @@ describe('ConnectionFormDialog', () => {
     await waitFor(() =>
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
     )
-    const table = within(await screen.findByRole('table'))
-    expect(await table.findByText('Estoque')).toBeInTheDocument()
-    expect(table.getByText('estoque')).toBeInTheDocument()
+    // Criada a conexão, a tela do schema abre e a leitura já começou na API.
+    await waitFor(() => expect(view.schemaRequests).toContain('c-new'))
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(view.posts).toEqual([{ type: 'NEO4J', ...validValues }])
+  })
+
+  it('testa a conexão antes de salvar, sem gravar', async () => {
+    const view = openConnections()
+    await openNew(view)
+
+    await fill(view, validValues)
+    await view.user.click(
+      screen.getByRole('button', { name: 'Testar conexão' }),
+    )
+
+    expect(await screen.findByText('Conexão bem-sucedida.')).toBeInTheDocument()
+    expect(view.tests).toEqual([{ type: 'NEO4J', ...validValues }])
+    expect(view.posts).toEqual([])
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('mostra a mensagem do banco quando o teste falha', async () => {
+    const view = openConnections(neo4jError('NEO4J_UNAVAILABLE', UNAUTHORIZED))
+    await openNew(view)
+
+    await fill(view, validValues)
+    await view.user.click(
+      screen.getByRole('button', { name: 'Testar conexão' }),
+    )
+
+    expect(await screen.findByText(UNAUTHORIZED)).toBeInTheDocument()
   })
 
   it('CONN-08 erro do Neo4j aparece com o formulário preenchido', async () => {

@@ -1,7 +1,7 @@
 import { type ConnectionDto, can, MESSAGES } from '@ninbi/contracts'
 import { Plus } from 'lucide-react'
 import { Fragment, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -43,6 +43,7 @@ export function ConnectionsTab() {
   const canManage = !!user && can(user.role, 'connections.manage')
   const connections = useConnections()
   const mcpConnections = useMcpConnections()
+  const navigate = useNavigate()
   const [newOpen, setNewOpen] = useState(false)
   const [expandedMcp, setExpandedMcp] = useState<string | null>(null)
   const columns = canManage ? 6 : 5
@@ -68,6 +69,7 @@ export function ConnectionsTab() {
           open={newOpen}
           onOpenChange={setNewOpen}
           onMcpCreated={setExpandedMcp}
+          onCreated={(id) => navigate(`/configuracoes/conexoes/${id}`)}
         />
       )}
       {connections.isError && (
